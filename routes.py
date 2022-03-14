@@ -3,6 +3,9 @@ from flask_cors import CORS
 
 from flask import render_template
 from flask import request
+from pymycobot.mycobot import MyCobot
+
+
 
 from flask import Flask, redirect, url_for, request
 app = Flask(__name__)
@@ -11,6 +14,9 @@ CORS(app)
 @app.route('/click')
 def click():
 #    return "You clicked the button"
+
+   mc = MyCobot('/dev/ttyAMA0',1000000)
+   mc.set_color(0,255,0)
    return jsonify({'response': 'you clicked the button'})
 
 # @app.route('/login',methods = ['POST', 'GET'])

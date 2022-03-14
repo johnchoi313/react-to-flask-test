@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "9d4930356d886f5e3fa4df74a048246cbf8ecafea4eb9b50335d0b2144f8bc7b"
+            "sha256": "c24bd3b582712d3b143211b91780aefce930440d3f1a4b9cd17f698787775a3b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -109,6 +109,21 @@
             ],
             "markers": "python_version >= '3.7'",
             "version": "==2.1.0"
+        },
+        "pymycobot": {
+            "hashes": [
+                "sha256:94daf776e4a60cbfe31bde747ccf952716f0d63af3679cf9d461cd65f12f6b39",
+                "sha256:cf4b0147c33092411a6d4acb486f37eb4a21e41b1a08c2edb209f76d5aa93415"
+            ],
+            "index": "pypi",
+            "version": "==2.7.4"
+        },
+        "pyserial": {
+            "hashes": [
+                "sha256:3c77e014170dfffbd816e6ffc205e9842efb10be9f58ec16d3e8675b4925cddb",
+                "sha256:c4451db6ba391ca6ca299fb3ec7bae67a5c55dde170964c7a14ceefec02f2cf0"
+            ],
+            "version": "==3.5"
         },
         "six": {
             "hashes": [
