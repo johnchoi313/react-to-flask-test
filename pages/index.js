@@ -1,8 +1,7 @@
-import Head from "next/head";
-import Image from "next/image";
-import handler from "./api/click";
-import styles from "../styles/Home.module.css";
+
 import { useState } from "react";
+import React from "react";
+
 
 export default function Home() {
   const [apiData, setApiData] = useState("");
@@ -17,8 +16,11 @@ export default function Home() {
 
   return (
     <div>
-      <button onClick={handleFetchApiData}>Hello</button>
-      {apiData ? <div>{apiData}</div> : null}
+      <div>
+        <button onClick={handleFetchApiData}>Hello</button>
+        {apiData ? <div>{apiData}</div> : null}
+      </div>
+
     </div>
   );
 }

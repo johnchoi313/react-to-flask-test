@@ -14,3 +14,10 @@ a {
 * {
   box-sizing: border-box;
 }
+
+.canvas {
+  width:100%;
+}
+.red {
+  color: "red";
+}
