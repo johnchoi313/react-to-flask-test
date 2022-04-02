@@ -1,5 +1,5 @@
 from flask import Flask, jsonify
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 from flask import render_template
 from flask import request
@@ -11,12 +11,13 @@ from flask import Flask, redirect, url_for, request
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/click')
+@app.route('/click', methods=['GET'])
+@cross_origin()
 def click():
 #    return "You clicked the button"
 
-   mc = MyCobot('/dev/ttyAMA0',1000000)
-   mc.set_color(0,255,0)
+   # mc = MyCobot('/dev/ttyAMA0',1000000)
+   # mc.set_color(0,255,0)
    return jsonify({'response': 'you clicked the button'})
 
 # @app.route('/login',methods = ['POST', 'GET'])
@@ -29,4 +30,5 @@ def click():
 #       return render_template('login.html')
 
 if __name__ == '__main__':
-   app.run(debug = True)
+   # app.run(debug = True, host='0.0.0.0')
+   app.run(host='0.0.0.0', port=5000)

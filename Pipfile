@@ -9,6 +9,10 @@ flask-cors = "*"
 pymycobot = "*"
 
 [dev-packages]
+black = "*"
 
 [requires]
-python_version = "3.7.3"
+python_version = "3"
+
+[pipenv]
+allow_prereleases = true
