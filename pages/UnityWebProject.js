@@ -3,13 +3,18 @@ import Unity, { UnityContext } from "react-unity-webgl";
 export default function UnityWebPage() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isUnityMounted, setIsUnityMounted] = useState(false);
-
+  const [mySignal, setmySignal] = useState("empty");
+  const [customSignal, setCustomSignal] = useState("my message!");
   const unityContext = new UnityContext({
     loaderUrl: "build/webgl.loader.js",
     dataUrl: "build/webgl.data",
     frameworkUrl: "build/webgl.framework.js",
     codeUrl: "build/webgl.wasm",
 
+  });
+  unityContext.on("ReactReceiveMessage", (strMine) => { // my input in unity to react
+    console.log(strMine);
+    setmySignal(strMine)
   });
   // Built-in event invoked when the Unity canvas is ready to be interacted with.
   function handleOnUnityCanvas(canvas) {
@@ -45,8 +50,16 @@ export default function UnityWebPage() {
     };
 
   }, []);
+
+  function sendMessage(signal) { //my input on react to unity
+    unityContext.send("GameController", "changeMessage", signal);
+  }
   return <div className="wrapper">>
     <button className="red" onClick={handleOnClickUnMountUnity}>(Un)mount Unity</button>
+    <input onChange={setCustomSignal}></input>
+    <button onClick={() => { sendMessage(customSignal) }}>Send inputted</button>
+
+    <p>{mySignal}</p>
     {isUnityMounted === true && (
       <Unity className="canvas" unityContext={unityContext} />
     )}
