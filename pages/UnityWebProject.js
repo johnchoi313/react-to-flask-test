@@ -12,10 +12,12 @@ export default function UnityWebPage() {
     codeUrl: "build/webgl.wasm",
 
   });
-  unityContext.on("ReactReceiveMessage", (strMine) => { // my input in unity to react
-    console.log(strMine);
-    setmySignal(strMine)
-  });
+  useEffect(function () {
+    unityContext.on("ReactReceiveMessage", function (strMine) { // my input in unity to react
+      console.log(strMine);
+      setmySignal(strMine);
+    });
+  }, []);
   // Built-in event invoked when the Unity canvas is ready to be interacted with.
   function handleOnUnityCanvas(canvas) {
     canvas.setAttribute("role", "unityCanvas");
