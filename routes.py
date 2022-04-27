@@ -20,6 +20,20 @@ def click():
    # mc.set_color(0,255,0)
    return jsonify({'response': 'you clicked the button'})
 
+@app.route('/demo-move', methods=['POST'])
+@cross_origin()
+def demo_move():
+   if request.method == 'POST':
+      print("received api request")
+      angles = request.args.get('angles')
+      angles_list = [float(i) for i in angles.split("-")]
+      sp = 80
+      print(angles)
+      mc = MyCobot('/dev/ttyAMA0',1000000)
+      mc.send_angles(angles_list, sp)
+      return jsonify({'response': str(angles)})
+
+
 # @app.route('/login',methods = ['POST', 'GET'])
 # def login():
 #    if request.method == 'POST':
