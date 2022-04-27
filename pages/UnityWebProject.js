@@ -3,7 +3,7 @@ import Unity, { UnityContext } from "react-unity-webgl";
 export default function UnityWebPage() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isUnityMounted, setIsUnityMounted] = useState(false);
-  const [mySignal, setmySignal] = useState("empty");
+  const [mySignal, setmySignal] = useState([]);
   const [customSignal, setCustomSignal] = useState("my message!");
   const unityContext = new UnityContext({
     loaderUrl: "build/webgl.loader.js",
@@ -15,7 +15,11 @@ export default function UnityWebPage() {
   useEffect(function () {
     unityContext.on("ReactReceiveMessage", function (strMine) { // my input in unity to react
       console.log(strMine);
-      setmySignal(strMine);
+      let mystr = strMine;
+      let mystrSplit = [];
+      mystrSplit = mystr.split("-");
+      setmySignal(mystrSplit);
+      console.log(mystrSplit);
     });
   }, []);
   // Built-in event invoked when the Unity canvas is ready to be interacted with.
