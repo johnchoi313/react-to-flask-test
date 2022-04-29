@@ -26,7 +26,7 @@ def demo_move():
    if request.method == 'POST':
       print("received api request")
       angles = request.args.get('angles')
-      angles_list = [float(i) for i in angles.split("-")]
+      angles_list = [float(i) for i in angles.split(",")]
       sp = 80
       print(angles)
       mc = MyCobot('/dev/ttyAMA0',1000000)

@@ -34,7 +34,7 @@ export default function UnityWebPage() {
       console.log(strMine);
       let mystr = strMine;
       let mystrSplit = [];
-      mystrSplit = mystr.split("-");
+      mystrSplit = mystr.split(",");
       setmySignal(mystrSplit);
       console.log(mystrSplit);
       sendAnglesToApi(strMine);
