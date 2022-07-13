@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from "react";
 import Unity, { UnityContext } from "react-unity-webgl";
+import RobotArmManager from "./RobotArmManager";
 export default function UnityWebPage() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isUnityMounted, setIsUnityMounted] = useState(true);
   const [mySignal, setmySignal] = useState([]);
   const [customSignal, setCustomSignal] = useState("my message!");
+  const [currentFrame, setCurrentFrame ] = useState(0);
+  const robotArmManager1 = useState(new RobotArmManager({name:"servo1", speed:1,commands:[0,0,0,0,0],currentRotation:0}));
+  const robotArmManager2 = useState(new RobotArmManager({name:"servo2", speed:1,commands:[0,0,0,0,0],currentRotation:0}));
+  const robotArmManager3 = useState(new RobotArmManager({name:"servo3", speed:1,commands:[0,0,0,0,0],currentRotation:0}));
+  const robotArmManager4 = useState(new RobotArmManager({name:"servo4", speed:1,commands:[0,0,0,0,0],currentRotation:0}));
+  const robotArmManager5 = useState(new RobotArmManager({name:"servo5", speed:1,commands:[0,0,0,0,0],currentRotation:0}));
+  const robotArmManager6 = useState(new RobotArmManager({name:"servo6", speed:1,commands:[0,0,0,0,0],currentRotation:0}));
+
+
   const unityContext = new UnityContext({
     loaderUrl: "build/webgl.loader.js",
     dataUrl: "build/webgl.data",
@@ -27,6 +37,7 @@ export default function UnityWebPage() {
     setAnglesApiData(anglesApiDataJson["response"]);
     console.log(anglesApiDataJson["response"]);
   };
+  
 
   useEffect(function () {
     unityContext.on("ReactReceiveMessage", function (strMine) {
@@ -69,9 +80,10 @@ export default function UnityWebPage() {
       unityContext.removeAllEventListeners();
     };
   }, []);
-  function sendMessage(signal) {
+  function sendAnimationCommand() {
     //my input on react to unity
-    unityContext.send("GameController", "changeMessage", signal);
+    let signal = [robotArmManager1.sendAnimationCommand(),robotArmManager2.sendAnimationCommand(),robotArmManager3.sendAnimationCommand(),robotArmManager4.sendAnimationCommand(),robotArmManager5.sendAnimationCommand(),robotArmManager6.sendAnimationCommand()];
+    unityContext.send("GameController", "ReceiveAnimationPreview", signal);
   }
   return (
     <div className="wrapper">

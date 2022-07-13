@@ -1,0 +1,41 @@
+
+ export default class RobotArmManager {
+
+    
+     constructor({name, speed,commands,currentRotation}) {
+        this._name = name || "Nameless";
+        this._speed = speed;
+        this._commands = commands || [];
+        this._currentRotation = currentRotation;
+       // this._yearOffset = 0;
+        
+        
+     }
+     get name (){
+      return this._name;
+     }
+     set name (val){
+       this._name=val;
+     }
+     get speed (){
+      return this._speed;
+     }
+     set speed (val){
+       this._speed=val;
+     }
+     get currentRotation(){
+      return this._currentRotation;
+     }
+     set currentRotation(val){
+      this._currentRotation = val;
+     }
+     SendAnimationCommand(){
+      return '\"name\":\"'+this._name+'\",\"speed\":'+this._speed+',\"commands\":'+this._commands+',\"speed\":'+this._speed+',\"currentRotation\":'+this._currentRotation+'}'
+      
+     }
+
+     SendAnimationUpdate(newEntry){
+      this._commands[this._currentRotation] = newEntry;
+      return [this._name, this._currentRotation, this._commands[this._currentRotation]]
+     }
+    }
