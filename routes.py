@@ -5,6 +5,7 @@ from flask import render_template
 from flask import request
 from pymycobot.mycobot import MyCobot
 
+import os
 
 
 from flask import Flask, redirect, url_for, request
@@ -32,6 +33,9 @@ def demo_move():
       mc = MyCobot('/dev/ttyAMA0',1000000)
       mc.send_angles(angles_list, sp)
       return jsonify({'response': str(angles)})
+
+def reboot():
+   os.system("sudo reboot")
 
 
 # @app.route('/login',methods = ['POST', 'GET'])
