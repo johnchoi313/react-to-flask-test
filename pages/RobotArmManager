@@ -2,11 +2,16 @@
  export default class RobotArmManager {
 
     
-     constructor({name, speed,commands,currentRotation}) {
+     constructor({name, speed}) {
         this._name = name || "Nameless";
-        this._speed = speed;
-        this._commands = commands || [];
-        this._currentRotation = currentRotation;
+        this._speed = speed || 1;
+        this._commandsArm1 = commands1 || [];
+        this._commandsArm2 = commands2 || [];
+        this._commandsArm3 = commands3 || [];
+        this._commandsArm4 = commands4 || [];
+        this._commandsArm5 = commands5 || [];
+        this._commandsArm6 = commands6 || [];
+        this._frame = frame || 0;
        // this._yearOffset = 0;
         
         
@@ -23,19 +28,55 @@
      set speed (val){
        this._speed=val;
      }
-     get currentRotation(){
-      return this._currentRotation;
+     get frame(){
+      return this._frame;
      }
-     set currentRotation(val){
-      this._currentRotation = val;
+     get commandsArm1(){
+      return this._commandsArm1;
+     }
+     set commandsArm1(val){
+       this._commandsArm1=val;
+     }
+     get commandsArm2(){
+      return this._commandsArm2;
+     }
+     set commandsArm2(val){
+       this._commandsArm2=val;
+     }
+     get commandsArm3(){
+      return this._commandsArm3;
+     }
+     set commandsArm3(val){
+       this._commandsArm3=val;
+     }
+     get commandsArm4(){
+      return this._commandsArm4;
+     }
+     set commandsArm4(val){
+       this._commandsArm4=val;
+     }
+     get commandsArm5(){
+      return this._commandsArm5;
+     }
+     set commandsArm5(val){
+       this._commandsArm5=val;
+     }
+     get commandsArm6(){
+      return this._commandsArm6;
+     }
+     set commandsArm6(val){
+       this._commandsArm6=val;
+     }
+     set frame(val){
+      this._frame = val;
      }
      SendAnimationCommand(){
-      return '\"name\":\"'+this._name+'\",\"speed\":'+this._speed+',\"commands\":'+this._commands+',\"speed\":'+this._speed+',\"currentRotation\":'+this._currentRotation+'}'
+      return '\"name\":\"'+this._name+'\",\"speed\":'+this._speed+',\"commandsArm1\":'+this._commandsArm1+',\"commandsArm2\":'+this._commandsArm2+',\"commandsArm3\":'+this._commandsArm3+',\"commandsArm4\":'+this._commandsArm4+',\"commandsArm5\":'+this._commandsArm5+',\"commandsArm6\":'+this._commandsArm6+',\"speed\":'+this._speed+',\"frame\":'+this._frame+'}'
       
      }
-
-     SendAnimationUpdate(newEntry){
-      this._commands[this._currentRotation] = newEntry;
-      return [this._name, this._currentRotation, this._commands[this._currentRotation]]
+     //updates for you the particular entry of a clip
+     AnimationUpdate( particularArm,newEntry){
+      this["commandsArm"+particularArm][this._frame]=newEntry;
      }
+     
     }

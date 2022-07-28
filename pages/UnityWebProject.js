@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from "react";
 import Unity, { UnityContext } from "react-unity-webgl";
 import RobotArmManager from "./RobotArmManager";
+import 'rc-slider/assets/index.css';
+import Slider from 'rc-slider';
+
 export default function UnityWebPage() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isUnityMounted, setIsUnityMounted] = useState(true);
+  const [playAnimation, setPlayAnimation] = useState(false);
   const [mySignal, setmySignal] = useState([]);
   const [customSignal, setCustomSignal] = useState("my message!");
-  const [currentFrame, setCurrentFrame ] = useState(0);
-  const robotArmManager1 = useState(new RobotArmManager({name:"servo1", speed:1,commands:[0,0,0,0,0],currentRotation:0}));
-  const robotArmManager2 = useState(new RobotArmManager({name:"servo2", speed:1,commands:[0,0,0,0,0],currentRotation:0}));
-  const robotArmManager3 = useState(new RobotArmManager({name:"servo3", speed:1,commands:[0,0,0,0,0],currentRotation:0}));
-  const robotArmManager4 = useState(new RobotArmManager({name:"servo4", speed:1,commands:[0,0,0,0,0],currentRotation:0}));
-  const robotArmManager5 = useState(new RobotArmManager({name:"servo5", speed:1,commands:[0,0,0,0,0],currentRotation:0}));
-  const robotArmManager6 = useState(new RobotArmManager({name:"servo6", speed:1,commands:[0,0,0,0,0],currentRotation:0}));
+  const robotArmManager = useState(new RobotArmManager())
 
 
   const unityContext = new UnityContext({
@@ -38,7 +36,10 @@ export default function UnityWebPage() {
     console.log(anglesApiDataJson["response"]);
   };
   
-
+  function animationServoWhichToChange( index,  myArmAnimationValue)
+  {
+      robotArmManager.AnimationUpdate(index, myArmAnimationValue);
+  }
   useEffect(function () {
     unityContext.on("ReactReceiveMessage", function (strMine) {
       // my input in unity to react
@@ -49,6 +50,7 @@ export default function UnityWebPage() {
       setmySignal(mystrSplit);
       console.log(mystrSplit);
       sendAnglesToApi(strMine);
+      sendAnimationCommand();
     });
   }, []);
   // Built-in event invoked when the Unity canvas is ready to be interacted with.
@@ -80,11 +82,49 @@ export default function UnityWebPage() {
       unityContext.removeAllEventListeners();
     };
   }, []);
+
+  function updateFrame(dir){
+    if (robotArmManager.frame+dir<=60){
+    robotArmManager.frame += dir;
+  
+  }
+  else if (robotArmManager.frame+dir>=0) {
+    robotArmManager.frame += dir;
+
+  }
+}
+
+
   function sendAnimationCommand() {
     //my input on react to unity
-    let signal = [robotArmManager1.sendAnimationCommand(),robotArmManager2.sendAnimationCommand(),robotArmManager3.sendAnimationCommand(),robotArmManager4.sendAnimationCommand(),robotArmManager5.sendAnimationCommand(),robotArmManager6.sendAnimationCommand()];
-    unityContext.send("GameController", "ReceiveAnimationPreview", signal);
+    let signal = robotArmManager.SendAnimationCommand();
+    unityContext.send("GameController", "ReceiveAnimationFullUpdate", signal);
   }
+
+  function sendAnimationFrameToDisplay(dir){
+    updateFrame(dir);
+    unityContext.send("GameController", "ReceiveAnimationFrameToDisplay", robotArmManager.frame);
+  }
+  function sendAnimationSpeed(){
+    unityContext.send("GameController", "ReceiveAnimationSpeed", robotArmManager.speed);
+  }
+  function PlayAnimation(){
+    setPlayAnimation(true);
+    robotArmManager.frame += 1;
+    robotArmManager.frame= robotArmManager.frame%60;
+
+    unityContext.send("GameController", "ReceiveAnimationSpeed", robotArmManager.frame);
+  }
+  function StopAnimation(){
+    setPlayAnimation(false);
+    unityContext.send("GameController", "ReceiveAnimationSpeed", robotArmManager.frame);
+  }
+  useEffect(function(){
+    if (playAnimation===true){
+      PlayAnimation();
+    }
+  },[]);
+  const list1 = [1,2,3,4,5,6];
   return (
     <div className="wrapper">
       {/* > */}
@@ -100,6 +140,16 @@ export default function UnityWebPage() {
         Send inputted
       </button> */}
       <p>{mySignal}</p>
+      {list1.map((number,index)=>{
+        <>
+              <Slider min={-90} max={90} onChange={(value)=>{animationServoWhichToChange(number,value);sendAnimationCommand()}}/>
+
+        </>
+      })}
+      <button onClick={playAnimation?StopAnimation():PlayAnimation()}>{playAnimation?"Play":"Pause"}</button>
+      <button onClick={()=>{sendAnimationFrameToDisplay(1)}}>ForwardOneFrame</button>
+      <button onClick={()=>{sendAnimationFrameToDisplay(-1)}}>BackOneFrame</button>
+
       {isUnityMounted === true && (
         <Unity className="canvas" unityContext={unityContext} />
       )}
