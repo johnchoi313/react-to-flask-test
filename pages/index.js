@@ -21,7 +21,7 @@ export default function Home() {
       <div className="flex items-center">
         <Image src="/logo.png" alt="Main logo" width="80" height="80" />
         <div className="text-bots-orange font-robotomono text-3xl bold">
-          BotsIQ Cobot Challenge Demo Interface
+          BotsIQ Cobot hChallenge Demo Interface
         </div>
       </div>
       <div>
@@ -29,11 +29,12 @@ export default function Home() {
           className="my-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
           onClick={handleFetchApiData}
         >
-          Submit Movements
+          Submit fsdfsMovements
         </button>
         {apiData ? <div>{apiData}</div> : null}
       </div>
-      <UnityWebPage className="w-10" />
+      <button>ds</button>
+      <UnityWebPage  />
     </div>
   );
 }

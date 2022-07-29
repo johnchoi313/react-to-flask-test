@@ -2,16 +2,142 @@
  export default class RobotArmManager {
 
     
-     constructor({name, speed}) {
-        this._name = name || "Nameless";
-        this._speed = speed || 1;
-        this._commandsArm1 = commands1 || [];
-        this._commandsArm2 = commands2 || [];
-        this._commandsArm3 = commands3 || [];
-        this._commandsArm4 = commands4 || [];
-        this._commandsArm5 = commands5 || [];
-        this._commandsArm6 = commands6 || [];
-        this._frame = frame || 0;
+     constructor() {
+        this._name =  "Nameless";
+        this._speed =  1;
+        this._commandsArm1 =  [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+      ];
+        this._commandsArm2 =  [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+      ];
+        this._commandsArm3 =  [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+      ];
+        this._commandsArm4 = [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+      ];
+        this._commandsArm5 =  [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+      ];
+        this._commandsArm6 =  [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+      ];
+        this._frame =  0;
        // this._yearOffset = 0;
         
         
@@ -70,12 +196,39 @@
      set frame(val){
       this._frame = val;
      }
-     SendAnimationCommand(){
-      return '\"name\":\"'+this._name+'\",\"speed\":'+this._speed+',\"commandsArm1\":'+this._commandsArm1+',\"commandsArm2\":'+this._commandsArm2+',\"commandsArm3\":'+this._commandsArm3+',\"commandsArm4\":'+this._commandsArm4+',\"commandsArm5\":'+this._commandsArm5+',\"commandsArm6\":'+this._commandsArm6+',\"speed\":'+this._speed+',\"frame\":'+this._frame+'}'
+      SendAnimationCommand(){
+        console.log(this._commandsArm1);
+      return `"{\\"name\\":\\"${this._name}\\",\\"speed\\":${this.speed},\\"commandsArm1\\":[${this._commandsArm1}],\\"commandsArm2\\":[${this._commandsArm2}],\\"commandsArm3\\":[${this._commandsArm3}],\\"commandsArm4\\":[${this._commandsArm4}],\\"commandsArm5\\":[${this._commandsArm5}],\\"commandsArm6\\":[${this._commandsArm6}],\\"frame\\":${this._frame}}"`
       
      }
+     createAnimationFiles(){
+      let commandsArm=[[],[],[],[],[],[]];
+      for (var i =0; i < 60; i++){
+        commandsArm[0].push(0);
+        commandsArm[1].push(0);
+        commandsArm[2].push(0);
+        commandsArm[3].push(0);
+        commandsArm[4].push(0);
+        commandsArm[5].push(0);
+
+      }
+      this._commandsArm1=commandsArm[0];
+      this._commandsArm2=commandsArm[1];
+      this._commandsArm3=commandsArm[2];
+      this._commandsArm4=commandsArm[3];
+      this._commandsArm5=commandsArm[4];
+      this._commandsArm6=commandsArm[5];
+      console.log(this._commandsArm1);
+
+
+
+
+
+     }
      //updates for you the particular entry of a clip
-     AnimationUpdate( particularArm,newEntry){
+      AnimationUpdate( particularArm,newEntry){
+        console.log(this.commandsArm1);
+
       this["commandsArm"+particularArm][this._frame]=newEntry;
      }
      
