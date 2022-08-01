@@ -198,12 +198,12 @@
      }
       SendAnimationCommand(){
         console.log(this._commandsArm1);
-      return `"{\\"name\\":\\"${this._name}\\",\\"speed\\":${this.speed},\\"commandsArm1\\":[${this._commandsArm1}],\\"commandsArm2\\":[${this._commandsArm2}],\\"commandsArm3\\":[${this._commandsArm3}],\\"commandsArm4\\":[${this._commandsArm4}],\\"commandsArm5\\":[${this._commandsArm5}],\\"commandsArm6\\":[${this._commandsArm6}],\\"frame\\":${this._frame}}"`
+      return `{"name":"${this.name}","speed":${this.speed},"commandsArm1":[${this.commandsArm1}],"commandsArm2":[${this.commandsArm2}],"commandsArm3":[${this.commandsArm3}],"commandsArm4":[${this.commandsArm4}],"commandsArm5":[${this.commandsArm5}],"commandsArm6":[${this.commandsArm6}],"frame":${this.frame}}`
       
      }
      createAnimationFiles(){
       let commandsArm=[[],[],[],[],[],[]];
-      for (var i =0; i < 60; i++){
+      for (var i =0; i < 20; i++){
         commandsArm[0].push(0);
         commandsArm[1].push(0);
         commandsArm[2].push(0);
@@ -231,5 +231,19 @@
 
       this["commandsArm"+particularArm][this._frame]=newEntry;
      }
-     
+          //updates for you the particular entry of a clip
+           AnimationFrameReceive( particularArm){
+            
+            let myReturn = 0;
+            console.log(particularArm);
+            if (this["commandsArm"+particularArm] !==undefined){
+              myReturn = this["commandsArm"+particularArm][this._frame];
+              console.log(myReturn);
+
+              return myReturn;
+            }
+            else{
+              return 0;
+            }
+         }
     }

@@ -9,9 +9,9 @@ export default function UnityWebPage() {
   const [playAnimation, setPlayAnimation] = useState(false);
   const [mySignal, setmySignal] = useState([]);
   const [customSignal, setCustomSignal] = useState("my message!");
-  const robotArmManager = new RobotArmManager();
-
-
+  const [robotArmManager,setNewRobotArmManager] = useState(new RobotArmManager());
+  const [changedFrame, setChangedFrame]= useState(false);
+const [playing, setPlaying]= useState();
   const {unityProvider,sendMessage,isLoaded, loadingProgression} = useUnityContext({
     loaderUrl: "build/webgl.loader.js",
     dataUrl: "build/webgl.data",
@@ -35,7 +35,7 @@ export default function UnityWebPage() {
     setAnglesApiData(anglesApiDataJson["response"]);
     console.log(anglesApiDataJson["response"]);
   };
-  
+  const [theVal, setTheVal] = useState(0);
   function animationServoWhichToChange( index,  myArmAnimationValue)
   {
       robotArmManager.AnimationUpdate(index, myArmAnimationValue);
@@ -61,6 +61,7 @@ export default function UnityWebPage() {
         "log"
       );
       sendAnimationCommand();
+      setNewRobotArmManager(new RobotArmManager());
 
     }
   },[isLoaded]);
@@ -75,30 +76,34 @@ export default function UnityWebPage() {
 
 
   function updateFrame(dir){
-    if (robotArmManager.frame+dir<=20){
+    if (robotArmManager.frame+dir<20 && robotArmManager.frame+dir>=0){
     robotArmManager.frame += dir;
   
   }
-  else if (robotArmManager.frame+dir>0) {
-    robotArmManager.frame += dir;
-
-  }
+  
 }
 
 
   function sendAnimationCommand() {
     //my input on react to unity
+
     let signal = robotArmManager.SendAnimationCommand();
     console.log(signal);
+
     sendMessage("GameController", "ReceiveAnimationFullUpdate", signal);
-    //sendMessage("GameController", "ReceiveAnimationFrameToDisplay", robotArmManager.frame);
+    sendMessage("GameController", "ReceiveAnimationFrameToDisplay", robotArmManager.frame);
+
 
   }
 
   function sendAnimationFrameToDisplay(dir){
-    updateFrame(dir);
-    sendMessage("GameController", "SpawnEnemies", 100);
 
+    updateFrame(dir);
+    let signal = robotArmManager.SendAnimationCommand();
+    sendMessage("GameController", "ReceiveAnimationFullUpdate", signal);
+
+    sendMessage("GameController", "ReceiveAnimationFrameToDisplay", robotArmManager.frame);
+    setChangedFrame(true)
   }
   function sendAnimationSpeed(){
     sendMessage("GameController", "ReceiveAnimationSpeed", robotArmManager.speed);
@@ -109,22 +114,53 @@ export default function UnityWebPage() {
     sendMessage("GameController", "SpawnEnemies", 100);
 
   }
-  function PlayAnimation(){
-    setPlayAnimation(true);
-    robotArmManager.frame += 1;
-    robotArmManager.frame= robotArmManager.frame;
+  function changeDefPlayAnimation(){
+    let signal = robotArmManager.SendAnimationCommand();
 
-    sendMessage("GameController", "ReceiveAnimationSpeed", robotArmManager.frame);
+    sendMessage("GameController", "ReceiveAnimationFullUpdate", signal);
+
+    setPlayAnimation(true);
+  }
+  function PlayAnimation(){
+    console.log(playAnimation);
+    if (playAnimation===true){
+    robotArmManager.frame += 1;
+    robotArmManager.frame= robotArmManager.frame%20;
+
+    sendMessage("GameController", "PlayAnimation", robotArmManager.frame);
+    setPlaying(setTimeout(() => {
+      PlayAnimation();
+      
+  
+  
+    }, robotArmManager.speed*1000));
+    console.log(playAnimation);
+  }
+
   }
   function StopAnimation(){
+    //let signal = robotArmManager.SendAnimationCommand();
+    //console.log(signal);
+  //  sendMessage("GameController", "ReceiveAnimationFullUpdate", signal);
+
     setPlayAnimation(false);
+    console.log(playAnimation);
     sendMessage("GameController", "ReceiveAnimationSpeed", robotArmManager.frame);
   }
   useEffect(function(){
     if (playAnimation===true){
+      console.log(robotArmManager.frame);
       PlayAnimation();
+
     }
-  },[]);
+    else{
+clearTimeout(playing);
+    }
+
+  },[playAnimation]);
+  function getValue(index){
+    robotArmManager.AnimationFrameReceive(index,robotArmManager.frame)
+  }
   let list1 = [1,2,3,4,5,6];
   return (
     <>
@@ -135,25 +171,42 @@ export default function UnityWebPage() {
       </button> */}
       <input onChange={setCustomSignal}></input>
 
-      <p>{mySignal}</p>
-      {list1.map((number,index)=>{
+      <p>{mySignal}</p>{
+        playAnimation?
+        list1.map((number,index)=>{
+          return (
+          <>
+                <Slider min={-90} max={90}  value={robotArmManager.AnimationFrameReceive(number)}/>
+  
+          </>
+          )
+        })
+        :
+
+list1.map((number,index)=>{
         return (
         <>
-              <Slider min={-90} max={90} onChange={(value)=>{animationServoWhichToChange(number,value)}}/>
+              <Slider min={-90} max={90}  defaultValue={robotArmManager.AnimationFrameReceive(number)} onChange={(value)=>{animationServoWhichToChange(number,value)}}/>
 
         </>
         )
-      })}
+      })
+      }
       
-      <button onClick={sendAnimationFrameToDisplay(1)}>ForwardOneFrame</button>
-      <button onClick={sendAnimationFrameToDisplay(-1)}>BackOneFrame</button>
+      
+      <button onClick={()=>{sendAnimationFrameToDisplay(1);}}>ForwardOneFrame</button>
+      <button onClick={()=>{sendAnimationFrameToDisplay(-1);}}>BackOneFrame</button>
+      {playAnimation===false?
+      <button onClick={changeDefPlayAnimation}>Play</button>:
+      <button onClick={StopAnimation}>Stop</button>
+      }
       </div>
       <button onClick={sendAnimationCommand}>signal</button>
     <div className="wrapper">
       
 
 
-        <Unity className="canvas" unityProvider={unityProvider} />
+        <Unity className="canvas"  unityProvider={unityProvider} />
     
     </div>
     </>
