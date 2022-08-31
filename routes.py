@@ -6,6 +6,7 @@ from flask import request
 from pymycobot.mycobot import MyCobot
 
 import json
+import time
 
 
 
@@ -41,11 +42,19 @@ def send_angles_sequence():
    if request.method == 'POST':
       print("received api request")
       angles_sequence = request.args.get('angles_sequence')
-      # angles_list = [float(i) for i in angles_sequence.split(",")]
+      sequence_json = json.loads(angles_sequence)
+      angles_1 = sequence_json['commandsArm1']
+      angles_2 = sequence_json['commandsArm2']
+      angles_3 = sequence_json['commandsArm3']
+      angles_4 = sequence_json['commandsArm4']
+      angles_5 = sequence_json['commandsArm5']
+      angles_6 = sequence_json['commandsArm6']
       sp = 80
-      print(angles_sequence)
-      # mc = MyCobot('/dev/ttyAMA0',1000000)
-      # mc.send_angles(angles_list, sp)
+      mc = MyCobot('/dev/ttyAMA0',1000000)
+      for angle_1, angle_2, angle_3, angle_4, angle_5, angle_6 in zip(angles_1, angles_2, angles_3, angles_4, angles_5, angles_6):
+         angles_list = [angle_1, angle_2, angle_3, angle_4, angle_5, angle_6]
+         mc.send_angles(angles_list, sp)
+         time.sleep(1)
       return jsonify({'response': str(angles_sequence)})
 
 
