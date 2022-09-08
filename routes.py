@@ -53,8 +53,10 @@ def send_angles_sequence():
       mc = MyCobot('/dev/ttyAMA0',1000000)
       for angle_1, angle_2, angle_3, angle_4, angle_5, angle_6 in zip(angles_1, angles_2, angles_3, angles_4, angles_5, angles_6):
          angles_list = [angle_1, angle_2, angle_3, angle_4, angle_5, angle_6]
+         print(f"Sending angles: {angles_list}")
          mc.send_angles(angles_list, sp)
          time.sleep(1)
+      print("Done sending angles")
       return jsonify({'response': str(angles_sequence)})
 
 
