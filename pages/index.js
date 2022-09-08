@@ -1,8 +1,17 @@
+import Image from "next/image";
 import React from "react";
+import RobotArmManager from "./RobotArmManager";
+import UnityWebPage from "./UnityWebProject";
 import { useState } from "react";
 
 export default function Home() {
   const [apiData, setApiData] = useState("");
+  const [signal, setSignal] = useState("");
+
+  function changeMySignal(outputJsonString) {
+    setSignal(outputJsonString);
+    console.log(`This is the output string: ${outputJsonString}`);
+  }
 
   const handleFetchApiData = async () => {
     // const apiDataResponse = await fetch("http://127.0.0.1:5000/click");
@@ -14,12 +23,39 @@ export default function Home() {
     console.log(apiDataJson);
   };
 
+  const handleSendAllAnglesToApi = async () => {
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/send-angles-sequence?angles_sequence=${signal}`;
+    const apiDataResponse = await fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const apiDataJson = await apiDataResponse.json();
+    setApiData(apiDataJson["response"]);
+    console.log(apiDataJson);
+  };
+
   return (
     <div>
+      <div className="flex items-center">
+        <Image src="/logo.png" alt="Main logo" width="80" height="80" />
+        <div className="text-bots-orange font-robotomono text-3xl bold">
+          BotsIQ Cobot hChallenge Demo Interface
+        </div>
+      </div>
       <div>
-        <button onClick={handleFetchApiData}>Hello</button>
+        <button
+          className="my-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+          onClick={handleSendAllAnglesToApi}
+        >
+          Submit fsdfsMovements
+        </button>
         {apiData ? <div>{apiData}</div> : null}
       </div>
+      <button>ds</button>
+      <UnityWebPage changeMySignal={changeMySignal} />
     </div>
   );
 }

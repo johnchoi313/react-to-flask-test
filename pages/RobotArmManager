@@ -1,0 +1,249 @@
+
+ export default class RobotArmManager {
+
+    
+     constructor() {
+        this._name =  "Nameless";
+        this._speed =  1;
+        this._commandsArm1 =  [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+      ];
+        this._commandsArm2 =  [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+      ];
+        this._commandsArm3 =  [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+      ];
+        this._commandsArm4 = [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+      ];
+        this._commandsArm5 =  [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+      ];
+        this._commandsArm6 =  [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+      ];
+        this._frame =  0;
+       // this._yearOffset = 0;
+        
+        
+     }
+     get name (){
+      return this._name;
+     }
+     set name (val){
+       this._name=val;
+     }
+     get speed (){
+      return this._speed;
+     }
+     set speed (val){
+       this._speed=val;
+     }
+     get frame(){
+      return this._frame;
+     }
+     get commandsArm1(){
+      return this._commandsArm1;
+     }
+     set commandsArm1(val){
+       this._commandsArm1=val;
+     }
+     get commandsArm2(){
+      return this._commandsArm2;
+     }
+     set commandsArm2(val){
+       this._commandsArm2=val;
+     }
+     get commandsArm3(){
+      return this._commandsArm3;
+     }
+     set commandsArm3(val){
+       this._commandsArm3=val;
+     }
+     get commandsArm4(){
+      return this._commandsArm4;
+     }
+     set commandsArm4(val){
+       this._commandsArm4=val;
+     }
+     get commandsArm5(){
+      return this._commandsArm5;
+     }
+     set commandsArm5(val){
+       this._commandsArm5=val;
+     }
+     get commandsArm6(){
+      return this._commandsArm6;
+     }
+     set commandsArm6(val){
+       this._commandsArm6=val;
+     }
+     set frame(val){
+      this._frame = val;
+     }
+      SendAnimationCommand(){
+        console.log(this._commandsArm1);
+      return `{"name":"${this.name}","speed":${this.speed},"commandsArm1":[${this.commandsArm1}],"commandsArm2":[${this.commandsArm2}],"commandsArm3":[${this.commandsArm3}],"commandsArm4":[${this.commandsArm4}],"commandsArm5":[${this.commandsArm5}],"commandsArm6":[${this.commandsArm6}],"frame":${this.frame}}`
+      
+     }
+     createAnimationFiles(){
+      let commandsArm=[[],[],[],[],[],[]];
+      for (var i =0; i < 20; i++){
+        commandsArm[0].push(0);
+        commandsArm[1].push(0);
+        commandsArm[2].push(0);
+        commandsArm[3].push(0);
+        commandsArm[4].push(0);
+        commandsArm[5].push(0);
+
+      }
+      this._commandsArm1=commandsArm[0];
+      this._commandsArm2=commandsArm[1];
+      this._commandsArm3=commandsArm[2];
+      this._commandsArm4=commandsArm[3];
+      this._commandsArm5=commandsArm[4];
+      this._commandsArm6=commandsArm[5];
+      console.log(this._commandsArm1);
+
+
+
+
+
+     }
+     //updates for you the particular entry of a clip
+      AnimationUpdate( particularArm,newEntry){
+        console.log(this.commandsArm1);
+
+      this["commandsArm"+particularArm][this._frame]=newEntry;
+     }
+          //updates for you the particular entry of a clip
+           AnimationFrameReceive( particularArm){
+            
+            let myReturn = 0;
+            console.log(particularArm);
+            if (this["commandsArm"+particularArm] !==undefined){
+              myReturn = this["commandsArm"+particularArm][this._frame];
+              console.log(myReturn);
+
+              return myReturn;
+            }
+            else{
+              return 0;
+            }
+         }
+    }

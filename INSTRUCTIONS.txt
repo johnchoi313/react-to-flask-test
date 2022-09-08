@@ -1,0 +1,47 @@
+CD INTO DIRECTORY FIRST!!
+
+---
+
+0. sudo apt-get update
+
+1. sudo apt install python3.8
+
+2. sudo python3.8 -m pip install --upgrade pip
+3. sudo python3.8 -m pip install --upgrade setuptools
+4. sudo python3.8 -m pip install unroll
+5. sudo python3.8 -m pip install pymycobot
+6. sudo python3.8 -m pip install flask
+
+7. sudo apt-get remove python3-virtualenv
+8. sudo python3.8 -m pip install virtualenv
+
+9.  sudo python3.8 -m pip install pipenv==2018.11.26
+10. sudo python3.8 -m pipenv install
+
+---
+
+installing node:
+
+11. sudo apt-get update
+12. sudo apt install nodejs
+13. npm install
+
+---
+
+install raspberry pi vnc server: (not needed)
+https://www.realvnc.com/en/blog/how-to-setup-vnc-connect-raspberry-pi/
+sudo apt-get install realvnc-vnc-server
+sudo apt install tightvncserver
+
+change password:
+14. sudo vncpasswd 
+
+---
+
+14. Edit .env file: (Change to local IP address)
+
+sudo reboot now
+
+To run server (robotand webpage)
+15. (One shell) python3.8 -m pipenv run python routes.py
+16. (Another shell) npm run dev
