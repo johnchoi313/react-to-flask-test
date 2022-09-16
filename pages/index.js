@@ -60,9 +60,8 @@ export default function Home() {
           </div>
         ) : null}
       </div>
-      {/*<button className="my-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono">
-        ds (?)
-        </button>*/}
+      {/*<button className="my-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono">*/}
+      <button className="my-3 text-bots-white">ds</button>
     </div>
   );
 }

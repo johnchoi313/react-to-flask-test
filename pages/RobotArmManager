@@ -111,7 +111,7 @@ export default class RobotArmManager {
     //console.log(particularArm);
     if (this["commandsArm" + particularArm] !== undefined) {
       myReturn = this["commandsArm" + particularArm][this._frame];
-      console.log(myReturn);
+      //console.log(myReturn);
 
       return myReturn;
     } else {

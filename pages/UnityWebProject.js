@@ -28,6 +28,16 @@ export default function UnityWebPage(props) {
       frameworkUrl: "build/webgl.framework.js",
       codeUrl: "build/webgl.wasm",
     });
+  {
+    /*      
+       useUnityContext({
+      loaderUrl: "build/RobotArm_React_WebGL (9-16-2022).loader.js",
+      dataUrl: "build/RobotArm_React_WebGL (9-16-2022).data",
+      frameworkUrl: "build/RobotArm_React_WebGL (9-16-2022).framework.js",
+      codeUrl: "build/RobotArm_React_WebGL (9-16-2022).wasm",
+    });
+      */
+  }
 
   const [anglesApiData, setAnglesApiData] = useState("");
 
@@ -67,7 +77,6 @@ export default function UnityWebPage(props) {
   useEffect(
     function () {
       if (isLoaded) {
-        console.log("log");
         sendAnimationCommand();
         setNewRobotArmManager(new RobotArmManager());
       }
@@ -97,9 +106,9 @@ export default function UnityWebPage(props) {
     props.changeMySignal(signal);
     console.log(signal);
 
-    sendMessage("GameController", "ReceiveAnimationFullUpdate", signal);
+    sendMessage("PeterGameController", "ReceiveAnimationFullUpdate", signal);
     sendMessage(
-      "GameController",
+      "PeterGameController",
       "ReceiveAnimationFrameToDisplay",
       robotArmManager.frame
     );
@@ -108,10 +117,10 @@ export default function UnityWebPage(props) {
   function sendAnimationFrameToDisplay(dir) {
     updateFrame(dir);
     let signal = robotArmManager.SendAnimationCommand();
-    sendMessage("GameController", "ReceiveAnimationFullUpdate", signal);
+    sendMessage("PeterGameController", "ReceiveAnimationFullUpdate", signal);
 
     sendMessage(
-      "GameController",
+      "PeterGameController",
       "ReceiveAnimationFrameToDisplay",
       robotArmManager.frame
     );
@@ -119,19 +128,19 @@ export default function UnityWebPage(props) {
   }
   function sendAnimationSpeed() {
     sendMessage(
-      "GameController",
+      "PeterGameController",
       "ReceiveAnimationSpeed",
       robotArmManager.speed
     );
   }
   function pushSignal() {
     console.log("help");
-    sendMessage("GameController", "SpawnEnemies", 100);
+    sendMessage("PeterGameController", "SpawnEnemies", 100);
   }
   function changeDefPlayAnimation() {
     let signal = robotArmManager.SendAnimationCommand();
 
-    sendMessage("GameController", "ReceiveAnimationFullUpdate", signal);
+    sendMessage("PeterGameController", "ReceiveAnimationFullUpdate", signal);
 
     setPlayAnimation(true);
   }
@@ -141,7 +150,11 @@ export default function UnityWebPage(props) {
       robotArmManager.frame += 1;
       robotArmManager.frame = robotArmManager.frame % 20;
 
-      sendMessage("GameController", "PlayAnimation", robotArmManager.frame);
+      sendMessage(
+        "PeterGameController",
+        "PlayAnimation",
+        robotArmManager.frame
+      );
       setPlaying(
         setTimeout(() => {
           PlayAnimation();
@@ -153,12 +166,12 @@ export default function UnityWebPage(props) {
   function StopAnimation() {
     //let signal = robotArmManager.SendAnimationCommand();
     //console.log(signal);
-    //  sendMessage("GameController", "ReceiveAnimationFullUpdate", signal);
+    //  sendMessage("PeterGameController", "ReceiveAnimationFullUpdate", signal);
 
     setPlayAnimation(false);
     console.log(playAnimation);
     sendMessage(
-      "GameController",
+      "PeterGameController",
       "ReceiveAnimationSpeed",
       robotArmManager.frame
     );
@@ -180,6 +193,16 @@ export default function UnityWebPage(props) {
   function returnFrameButtonClass() {
     return;
     ("hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono flex-item");
+  }
+
+  function resetPose() {
+    console.log("resetting pose...");
+    animationServoWhichToChange(1, 0);
+    animationServoWhichToChange(2, 0);
+    animationServoWhichToChange(3, 0);
+    animationServoWhichToChange(4, 0);
+    animationServoWhichToChange(5, 0);
+    animationServoWhichToChange(6, 0);
   }
 
   let list1 = [1, 2, 3, 4, 5, 6];
@@ -240,7 +263,12 @@ export default function UnityWebPage(props) {
             </button>
           </div>
           <div className="flex-item2">
-            <button className="bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold p-6 py-2 rounded font-robotomono">
+            <button
+              className="bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold p-6 py-2 rounded font-robotomono"
+              onClick={() => {
+                resetPose();
+              }}
+            >
               Reset Pose
             </button>
           </div>
@@ -329,10 +357,10 @@ export default function UnityWebPage(props) {
                             <Slider
                               min={-90}
                               max={90}
-                              defaultValue={robotArmManager.AnimationFrameReceive(
+                              value={robotArmManager.AnimationFrameReceive(
                                 number
                               )}
-                              value={joints[index]}
+                              dvalue={joints[index]}
                               onChange={(value) => {
                                 let newArr = joints;
                                 newArr[index] = value;
@@ -462,8 +490,10 @@ export default function UnityWebPage(props) {
             <>
               <button
                 className={
-                  "font-bold " +
-                  (number == curFrame + 1 ? "bg-bots-orange" : "bg-bots-white")
+                  "font-bold rounded " +
+                  (number == robotArmManager.frame + 1
+                    ? "bg-bots-orange"
+                    : "bg-bots-white")
                 }
                 onClick={() => {
                   console.log("Implement frame button!");

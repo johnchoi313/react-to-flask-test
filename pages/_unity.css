@@ -8,7 +8,7 @@
 .unity-container {
   position: relative;
   width: 100%;
-  padding-bottom: 60%;
+  /*padding-bottom: 60%;*/
   background-color: rgb(145, 145, 145);
 }
 
@@ -42,6 +42,6 @@
   position: absolute;
   top: 0px;
   left: 0px;
-  width: 500px;
-  height: 300px;
+  width: 400px;
+  height: 400px;
 }
