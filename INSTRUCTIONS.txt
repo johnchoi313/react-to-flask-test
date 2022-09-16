@@ -1,6 +1,27 @@
 CD INTO DIRECTORY FIRST!!
 
----
+---CHANGING THE SCREEN RESOLUTION:---
+(Fix link: https://askubuntu.com/questions/1215775/arm-ubuntu-wont-let-me-change-my-resolution)
+
+1. sudo nano /boot/firmware/usercfg.txt 
+2. Plop this in:
+
+    # Place "config.txt" changes (dtparam, dtoverlay, disable_overscan, etc.) in
+    # this file. Please refer to the README file for a description of the variouszn
+
+    # configuration files on the boot partition.
+
+    [HDMI:0]
+    hdmi_group=2
+    hdmi_mode=82
+    hdmi_drive=2
+
+    [HDMI:1]
+    hdmi_group=2
+    hdmi_mode=82
+    hdmi_drive=2
+
+---INSTALLING CORRECT PYTHON---
 
 0. sudo apt-get update
 
@@ -18,15 +39,36 @@ CD INTO DIRECTORY FIRST!!
 9.  sudo python3.8 -m pip install pipenv==2018.11.26
 10. sudo python3.8 -m pipenv install
 
----
-
-installing node:
+---INSTALLING NODE:---
 
 11. sudo apt-get update
 12. sudo apt install nodejs
 13. npm install
 
----
+---EDITING IP ADDRESS:---
+
+14. Edit .env file: (Change to local IP address)
+15. sudo reboot now
+
+---SETTING UP AUTOSTART:---
+
+
+
+---INSTALLING ROBOT SERVER AND SIMULATOR:---
+
+
+
+---RUNNING SERVER(robotand webpage)---
+
+15. (One shell) python3.8 -m pipenv run python routes.py
+16. (Another shell) npm run dev
+
+
+
+
+
+
+---VNC SERVER (OPTIONAL)----
 
 install raspberry pi vnc server: (not needed)
 https://www.realvnc.com/en/blog/how-to-setup-vnc-connect-raspberry-pi/
@@ -36,12 +78,3 @@ sudo apt install tightvncserver
 change password:
 14. sudo vncpasswd 
 
----
-
-14. Edit .env file: (Change to local IP address)
-
-sudo reboot now
-
-To run server (robotand webpage)
-15. (One shell) python3.8 -m pipenv run python routes.py
-16. (Another shell) npm run dev
