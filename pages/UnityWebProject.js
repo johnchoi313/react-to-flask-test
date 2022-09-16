@@ -203,6 +203,7 @@ export default function UnityWebPage(props) {
     animationServoWhichToChange(4, 0);
     animationServoWhichToChange(5, 0);
     animationServoWhichToChange(6, 0);
+    // TODO reset slider
   }
 
   let list1 = [1, 2, 3, 4, 5, 6];
@@ -360,7 +361,6 @@ export default function UnityWebPage(props) {
                               value={robotArmManager.AnimationFrameReceive(
                                 number
                               )}
-                              dvalue={joints[index]}
                               onChange={(value) => {
                                 let newArr = joints;
                                 newArr[index] = value;
@@ -380,7 +380,9 @@ export default function UnityWebPage(props) {
                           <input
                             className="border-2 text-bots-blue rounded flex-item-15 text-sm"
                             type="number"
-                            value={joints[index]}
+                            value={robotArmManager.AnimationFrameReceive(
+                              number
+                            )}
                             readOnly={true}
                             onChange={() => {
                               let newArr = joints;
