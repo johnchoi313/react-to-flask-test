@@ -17,6 +17,7 @@ export default function Home() {
     // const apiDataResponse = await fetch("http://127.0.0.1:5000/click");
     const apiDataResponse = await fetch(
       `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/click`
+      //`http://192.168.0.103:5000/click`
     );
     const apiDataJson = await apiDataResponse.json();
     setApiData(apiDataJson["response"]);
@@ -42,20 +43,26 @@ export default function Home() {
       <div className="flex items-center">
         <Image src="/logo.png" alt="Main logo" width="80" height="80" />
         <div className="text-bots-orange font-robotomono text-3xl bold">
-          BotsIQ Cobot hChallenge Demo Interface
+          BotsIQ Cobot Challenge Demo Interface
         </div>
       </div>
       <div>
+        <UnityWebPage changeMySignal={changeMySignal} />
         <button
           className="my-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
           onClick={handleSendAllAnglesToApi}
         >
-          Submit fsdfsMovements
+          Submit Movements
         </button>
-        {apiData ? <div>{apiData}</div> : null}
+        {apiData ? (
+          <div>
+            <p className="log-text">{apiData}</p>
+          </div>
+        ) : null}
       </div>
-      <button>ds</button>
-      <UnityWebPage changeMySignal={changeMySignal} />
+      {/*<button className="my-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono">
+        ds (?)
+        </button>*/}
     </div>
   );
 }
