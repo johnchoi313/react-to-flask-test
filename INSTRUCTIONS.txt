@@ -1,10 +1,14 @@
 CD INTO DIRECTORY FIRST!!
 
----CHANGING THE SCREEN RESOLUTION:---
-(Fix link: https://askubuntu.com/questions/1215775/arm-ubuntu-wont-let-me-change-my-resolution)
+---CHANGING THE SCREEN RESOLUTION to 1920x1080 60hz:---
+  (Fix link: https://askubuntu.com/questions/1215775/arm-ubuntu-wont-let-me-change-my-resolution)
+  (See full list of modes here: https://raspberrypi.stackexchange.com/tags/config.txt/info | https://www.raspberrypi.com/documentation/computers/config_txt.html)
+  (hdmi_mode=82 [1920x1080 60hz] | hdmi_mode=69 [1280x720 60hz])
+  (config_hdmi_boost=7 (goes from 0-11, default 5))
+  (force_hotplug=1 (forces it to connect to monitor even if no monitor))
 
-1. sudo nano /boot/firmware/usercfg.txt 
-2. Plop this in:
+  1. sudo nano /boot/firmware/usercfg.txt 
+  2. Plop this in:
 
     # Place "config.txt" changes (dtparam, dtoverlay, disable_overscan, etc.) in
     # this file. Please refer to the README file for a description of the variouszn
@@ -12,69 +16,70 @@ CD INTO DIRECTORY FIRST!!
     # configuration files on the boot partition.
 
     [HDMI:0]
+    force_hotplug=1
     hdmi_group=2
     hdmi_mode=82
     hdmi_drive=2
+	config_hdmi_boost=7
 
     [HDMI:1]
     hdmi_group=2
     hdmi_mode=82
     hdmi_drive=2
+	config_hdmi_boost=7
 
 ---INSTALLING CORRECT PYTHON---
 
-0. sudo apt-get update
+  0. sudo apt-get update
 
-1. sudo apt install python3.8
+  1. sudo apt install python3.8
 
-2. sudo python3.8 -m pip install --upgrade pip
-3. sudo python3.8 -m pip install --upgrade setuptools
-4. sudo python3.8 -m pip install unroll
-5. sudo python3.8 -m pip install pymycobot
-6. sudo python3.8 -m pip install flask
+  2. sudo python3.8 -m pip install --upgrade pip
+  3. sudo python3.8 -m pip install --upgrade setuptools
+  4. sudo python3.8 -m pip install unroll
+  5. sudo python3.8 -m pip install pymycobot
+  6. sudo python3.8 -m pip install flask
 
-7. sudo apt-get remove python3-virtualenv
-8. sudo python3.8 -m pip install virtualenv
+  7. sudo apt-get remove python3-virtualenv
+  8. sudo python3.8 -m pip install virtualenv
 
-9.  sudo python3.8 -m pip install pipenv==2018.11.26
-10. sudo python3.8 -m pipenv install
+  9.  sudo python3.8 -m pip install pipenv==2018.11.26
+  10. sudo python3.8 -m pipenv install
 
 ---INSTALLING NODE:---
 
-11. sudo apt-get update
-12. sudo apt install nodejs
-13. npm install
+  11. sudo apt-get update
+  12. sudo apt install nodejs
+  13. npm install
 
 ---EDITING IP ADDRESS:---
 
-14. Edit .env file: (Change to local IP address)
-15. sudo reboot now
-
----SETTING UP AUTOSTART:---
-
-
+  14. Edit .env file: (Change to local IP address)
+  15. sudo reboot now
 
 ---INSTALLING ROBOT SERVER AND SIMULATOR:---
+
+https://github.com/johnchoi313/react-to-flask-test
 
 
 
 ---RUNNING SERVER(robotand webpage)---
 
-15. (One shell) python3.8 -m pipenv run python routes.py
-16. (Another shell) npm run dev
+  15. (One shell) python3.8 -m pipenv run python routes.py
+  16. (Another shell) npm run dev
 
-
+---SETTING UP AUTOSTART:---
 
 
 
 
 ---VNC SERVER (OPTIONAL)----
-
 install raspberry pi vnc server: (not needed)
 https://www.realvnc.com/en/blog/how-to-setup-vnc-connect-raspberry-pi/
-sudo apt-get install realvnc-vnc-server
-sudo apt install tightvncserver
 
-change password:
-14. sudo vncpasswd 
+  1. sudo apt-get install realvnc-vnc-server
+  2. sudo apt install tightvncserver
+
+  change password:
+  3. sudo vncpasswd 
 
