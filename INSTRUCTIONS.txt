@@ -69,8 +69,40 @@ https://github.com/johnchoi313/react-to-flask-test
 
 ---SETTING UP AUTOSTART:---
 
+  1. On the Desktop/ create a shell script file called main-shell-script.sh with the below contents:
 
+    #!/bin/bash
 
+    x-terminal-emulator -e npm --prefix /home/pi/Desktop/react-to-flask-test run dev
+    x-terminal-emulator -e python3 /home/pi/Desktop/react-to-flask-test/routes.py
+
+  2. Make the shell script executable by running this command from the 
+     Desktop/ directory where the shell script should be located: 
+
+    sudo chmod +x main-shell-script.sh 
+   
+   Note: you only have to do this once to make the file executable. After that it won't have to be done again.
+
+  3. You can test this shell script by running the following command from the directory where the shell script is saved:
+
+    . /main-shell-script.sh  (yes there's a space after the dot).
+
+  4. Navigate to the root directory by opening a terminal and entering cd ..  until you can't go up a directory anymore.
+  
+  5. Change directory to where the autostart script is located:
+
+    cd etc/xdg/lxsession/LXDE-pi
+
+  6. Open the autostart file by typing: 
+    
+	sudo nano autostart
+
+  7. In the autostart file, add the following command to the bottom: 
+
+    @lxterminal -e bash /home/pi/Desktop/main-shell-script.sh and then save and exit
+
+  8. You should be good to go now. 
+    To test it, enter sudo reboot from the terminal and when the computer boots up, you should see the 2 terminal windows open.
 
 ---VNC SERVER (OPTIONAL)----
 install raspberry pi vnc server: (not needed)
