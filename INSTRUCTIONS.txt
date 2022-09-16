@@ -51,6 +51,7 @@ CD INTO DIRECTORY FIRST!!
   11. sudo apt-get update
   12. sudo apt install nodejs
   13. npm install
+  14. npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
 
 ---EDITING IP ADDRESS:---
 
@@ -60,8 +61,6 @@ CD INTO DIRECTORY FIRST!!
 ---INSTALLING ROBOT SERVER AND SIMULATOR:---
 
 https://github.com/johnchoi313/react-to-flask-test
-
-
 
 ---RUNNING SERVER(robotand webpage)---
 
