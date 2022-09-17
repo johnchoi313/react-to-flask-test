@@ -55,8 +55,16 @@ CD INTO DIRECTORY FIRST!!
 
 ---EDITING IP ADDRESS:---
 
-  14. Edit .env file: (Change to local IP address)
-  15. sudo reboot now
+  0. ls -a (OPTIONAL: shows all hidden files:)
+  1. sudo nano .env
+  2. Edit .env file: (Change to local IP address)
+  3. sudo reboot now
+
+---(TROUBLESHOOT OPTIONAL) CREATE NEW FLASK VIRTUALENV:---
+
+  0. virtualenv flask
+  1. cd flask
+  2. source bin/activate
 
 ---INSTALLING ROBOT SERVER AND SIMULATOR:---
 
@@ -85,7 +93,7 @@ https://github.com/johnchoi313/react-to-flask-test
 
   3. You can test this shell script by running the following command from the directory where the shell script is saved:
 
-    . /main-shell-script.sh  (yes there's a space after the dot).
+    ./main-shell-script.sh  (yes there's a space after the dot).
 
   4. Navigate to the root directory by opening a terminal and entering cd ..  until you can't go up a directory anymore.
   
@@ -99,7 +107,7 @@ https://github.com/johnchoi313/react-to-flask-test
 
   7. In the autostart file, add the following command to the bottom: 
 
-    @lxterminal -e bash /home/pi/Desktop/main-shell-script.sh and then save and exit
+    @lxterminal -e bash /home/pi/Desktop/main-shell-script.sh
 
   8. You should be good to go now. 
     To test it, enter sudo reboot from the terminal and when the computer boots up, you should see the 2 terminal windows open.
