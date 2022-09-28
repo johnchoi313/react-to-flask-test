@@ -212,26 +212,43 @@ export default function UnityWebPage(props) {
             })}
 
         <button
+          className="m-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
           onClick={() => {
             sendAnimationFrameToDisplay(1);
           }}
         >
-          ForwardOneFrame
+          Forward One Frame
         </button>
         <button
+          className="m-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
           onClick={() => {
             sendAnimationFrameToDisplay(-1);
           }}
         >
-          BackOneFrame
+          Back One Frame
         </button>
         {playAnimation === false ? (
-          <button onClick={changeDefPlayAnimation}>Play</button>
+          <button
+            className="m-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+            onClick={changeDefPlayAnimation}
+          >
+            Play
+          </button>
         ) : (
-          <button onClick={StopAnimation}>Stop</button>
+          <button
+            className="m-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+            onClick={StopAnimation}
+          >
+            Stop
+          </button>
         )}
       </div>
-      <button onClick={sendAnimationCommand}>signal</button>
+      <button
+        className="m-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+        onClick={sendAnimationCommand}
+      >
+        signal
+      </button>
       <div className="wrapper">
         <Unity className="canvas" unityProvider={unityProvider} />
       </div>
