@@ -68,7 +68,7 @@ def get_all_animation_files():
    if request.method == 'GET':
       animation_file_path = './animation_files/'
       onlyfiles = [f for f in listdir(animation_file_path) if isfile(join(animation_file_path, f))]
-      return jsonify({'response': str(onlyfiles)})
+      return jsonify({'response': onlyfiles})
 
 @app.route('/save-as-animation-file', methods=['POST'])
 @cross_origin()
@@ -87,10 +87,25 @@ def save_as_animation_file():
       full_filepath = f"{animation_file_path}{next_filename}"
       try:
          with open(full_filepath, "w") as fp:
-            json.dump(sequence_json,fp)
+            json.dump(sequence_json,fp, indent=4)
          return jsonify({'response': str(f"Saving as {next_filename}")})
       except:
          return jsonify({'response': str("Failed to save animation file")})
+
+@app.route('/get-single-file', methods=['GET'])
+@cross_origin()
+def get_single_file():
+   if request.method == 'GET':
+      file_name = request.args.get('file')
+      animation_file_path = './animation_files/'
+      onlyfiles = [f for f in listdir(animation_file_path) if isfile(join(animation_file_path, f))]
+      full_filepath = f"{animation_file_path}{file_name}"
+      try:
+         with open(full_filepath, "r") as fp:
+            sequence = json.load(fp)
+            return jsonify({'response': str(sequence)})
+      except:
+         return jsonify({'response': str("Failed to load animation file")})
 
       
 
