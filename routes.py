@@ -37,7 +37,8 @@ def turn_on_motors():
       try:
          mc.set_fresh_mode(0)
          return jsonify({'response': "TURNED OFF MOTORS"})
-      except:
+      except Exception as e:
+         print(e)
          return jsonify({'response': "FAILED TO TURN OFF MOTORS"})
 
 
