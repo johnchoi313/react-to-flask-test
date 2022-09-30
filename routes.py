@@ -30,16 +30,16 @@ def turn_off_motors():
 
 @app.route('/turn-on-motors', methods=['POST'])
 @cross_origin()
-def turn_on_motors():
+def turn_on_motors(): # NOTE THIS FUNCTION DOES NOT YET WORK
    if request.method == 'POST':
       print("received api request")
       mc = MyCobot('/dev/ttyAMA0',1000000)
       try:
          mc.set_fresh_mode(0)
-         return jsonify({'response': "TURNED OFF MOTORS"})
+         return jsonify({'response': "TURNED ON MOTORS"})
       except Exception as e:
          print(e)
-         return jsonify({'response': "FAILED TO TURN OFF MOTORS"})
+         return jsonify({'response': "FAILED TO TURN ON MOTORS"})
 
 
 @app.route('/send-pose', methods=['POST'])
