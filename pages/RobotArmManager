@@ -108,7 +108,7 @@ export default class RobotArmManager {
   //updates for you the particular entry of a clip
   AnimationFrameReceive(particularArm) {
     let myReturn = 0;
-    //console.log(particularArm);
+    console.log(particularArm);
     if (this["commandsArm" + particularArm] !== undefined) {
       myReturn = this["commandsArm" + particularArm][this._frame];
       //console.log(myReturn);

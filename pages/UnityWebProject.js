@@ -1,3 +1,5 @@
+import TestInput from "../components/test-input.component";
+
 import "rc-slider/assets/index.css";
 
 import React, { useEffect, useState } from "react";
@@ -188,6 +190,7 @@ export default function UnityWebPage(props) {
     [playAnimation]
   );
   function getValue(index) {
+    console.log("gV");
     robotArmManager.AnimationFrameReceive(index, robotArmManager.frame);
   }
   function returnFrameButtonClass() {
@@ -211,6 +214,14 @@ export default function UnityWebPage(props) {
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
   ];
 
+  let test = 3;
+
+  const [sF, setSF] = useState("default");
+  const onSearchChange = (event) => {
+    const sFString = event.target.value.toLocaleLowerCase();
+    setSF(sFString);
+  };
+
   return (
     <>
       <div>
@@ -232,38 +243,42 @@ export default function UnityWebPage(props) {
         <br />
         */}
 
+        <TestInput />
+
+        <input placeholder={sF} onChangeHandler={onSearchChange} />
+
         {/* Upper Third */}
         <div className="flex-container-centered">
-          <div className="flex-item2">
+          <div className="flex-item">
             <span className="text-bots-light-gray font-bold text-xs">
               Speed:
             </span>
             <Slider min={0} max={10} defaultValue={1} disabled={true} />
             <span className="text-bots-white font-bold text-xs">.</span>
           </div>
-          <div className="flex-item2">
+          <div className="flex-item">
             <input
               className="text-bots-light-gray font-bold border-2 rounded text-sm w-8 p-0.5"
               placeholder={robotArmManager.speed}
             />
           </div>
 
-          <div className="flex-item2">
+          <div className="flex-item">
             <button className="bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold p-6 py-2 rounded font-robotomono">
               Toggle Drag-And-Teach Mode
             </button>
           </div>
-          <div className="flex-item2">
+          <div className="flex-item">
             <button className="bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold p-6 py-2 rounded font-robotomono">
               Send Pose
             </button>
           </div>
-          <div className="flex-item2">
+          <div className="flex-item">
             <button className="bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold p-6 py-2 rounded font-robotomono">
               Get Pose
             </button>
           </div>
-          <div className="flex-item2">
+          <div className="flex-item">
             <button
               className="bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold p-6 py-2 rounded font-robotomono"
               onClick={() => {
@@ -274,7 +289,7 @@ export default function UnityWebPage(props) {
             </button>
           </div>
           {/*
-          <div className="flex-item2">
+          <div className="flex-item">
             <button className="bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 rounded font-robotomono">
               Save Angles To Keyframe
             </button>
@@ -309,7 +324,7 @@ export default function UnityWebPage(props) {
                               defaultValue={robotArmManager.AnimationFrameReceive(
                                 number
                               )}
-                              value={joints[index]}
+                              /*value={joints[index]}*/
                               onChange={(value) => {
                                 let newArr = joints;
                                 newArr[index] = value;
@@ -327,10 +342,10 @@ export default function UnityWebPage(props) {
                             +
                           </button>
                           <input
-                            className="border-2 text-bots-blue rounded flex-item-15 text-sm"
+                            className="border-2 text-bots-blue rounded flex-item-20 text-sm"
                             type="number"
-                            value={joints[index]}
-                            readOnly={true}
+                            defaultValue={joints[index]}
+                            readOnly={false}
                             onChange={() => {
                               let newArr = joints;
                               newArr[index] = value;
@@ -356,7 +371,7 @@ export default function UnityWebPage(props) {
                               J{number}
                             </span>
                             <Slider
-                              min={-90}
+                              min={-120}
                               max={90}
                               value={robotArmManager.AnimationFrameReceive(
                                 number
@@ -378,7 +393,7 @@ export default function UnityWebPage(props) {
                             +
                           </button>
                           <input
-                            className="border-2 text-bots-blue rounded flex-item-15 text-sm"
+                            className="border-2 text-bots-blue rounded flex-item-20 text-sm"
                             type="number"
                             value={robotArmManager.AnimationFrameReceive(
                               number
@@ -420,7 +435,7 @@ export default function UnityWebPage(props) {
                   +
                 </button>
                 <input
-                  className="border-2 text-bots-blue rounded flex-item-15 text-sm"
+                  className="border-2 text-bots-blue rounded flex-item-20 text-sm"
                   type="number"
                   placeholder="0"
                 />
