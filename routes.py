@@ -16,18 +16,9 @@ from flask import Flask, redirect, url_for, request
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/click', methods=['GET'])
+@app.route('/send-pose', methods=['POST'])
 @cross_origin()
-def click():
-#    return "You clicked the button"
-
-   # mc = MyCobot('/dev/ttyAMA0',1000000)
-   # mc.set_color(0,255,0)
-   return jsonify({'response': 'you clicked the button'})
-
-@app.route('/demo-move', methods=['POST'])
-@cross_origin()
-def demo_move():
+def send_pose():
    if request.method == 'POST':
       print("received api request")
       angles = request.args.get('angles')
@@ -37,6 +28,15 @@ def demo_move():
       mc = MyCobot('/dev/ttyAMA0',1000000)
       mc.send_angles(angles_list, sp)
       return jsonify({'response': str(angles)})
+
+@app.route('/get-pose', methods=['GET'])
+@cross_origin()
+def get_pose(): 
+   if request.method == 'GET':
+      print("received api request")
+      mc = MyCobot('/dev/ttyAMA0',1000000)
+      angles_list = mc.get_angles()
+      return jsonify({'response': angles_list})
 
 @app.route('/send-angles-sequence', methods=['POST'])
 @cross_origin()
@@ -107,7 +107,7 @@ def get_single_file():
       except:
          return jsonify({'response': str("Failed to load animation file")})
 
-      
+#release_all_servos      
 
 
 # @app.route('/login',methods = ['POST', 'GET'])
