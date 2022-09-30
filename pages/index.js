@@ -20,6 +20,7 @@ export default function Home() {
     // const apiDataResponse = await fetch("http://127.0.0.1:5000/click");
     const apiDataResponse = await fetch(
       `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/click`
+      //`http://192.168.0.103:5000/click`
     );
     const apiDataJson = await apiDataResponse.json();
     setApiData(apiDataJson["response"]);
@@ -159,8 +160,8 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <button>ds</button>
-      <UnityWebPage changeMySignal={changeMySignal} />
+      {/*<button className="my-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono">*/}
+      <button className="my-3 text-bots-white">ds</button>
     </div>
   );
 }
