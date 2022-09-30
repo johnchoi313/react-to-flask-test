@@ -33,3 +33,12 @@ yarn-error.log*
 
 # vercel
 .vercel
+*.orig
+pages/UnityWebProject_BACKUP_1067.js
+pages/UnityWebProject_BACKUP_1152.js
+pages/UnityWebProject_BASE_1067.js
+pages/UnityWebProject_BASE_1152.js
+pages/UnityWebProject_LOCAL_1067.js
+pages/UnityWebProject_LOCAL_1152.js
+pages/UnityWebProject_REMOTE_1067.js
+pages/UnityWebProject_REMOTE_1152.js
