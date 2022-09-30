@@ -16,6 +16,31 @@ from flask import Flask, redirect, url_for, request
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/turn-off-motors', methods=['POST'])
+@cross_origin()
+def turn_off_motors():
+   if request.method == 'POST':
+      print("received api request")
+      mc = MyCobot('/dev/ttyAMA0',1000000)
+      try:
+         mc.release_all_servos()
+         return jsonify({'response': "TURNED OFF MOTORS"})
+      except:
+         return jsonify({'response': "FAILED TO TURN OFF MOTORS"})
+
+@app.route('/turn-on-motors', methods=['POST'])
+@cross_origin()
+def turn_on_motors():
+   if request.method == 'POST':
+      print("received api request")
+      mc = MyCobot('/dev/ttyAMA0',1000000)
+      try:
+         mc.set_fresh_mode(0)
+         return jsonify({'response': "TURNED OFF MOTORS"})
+      except:
+         return jsonify({'response': "FAILED TO TURN OFF MOTORS"})
+
+
 @app.route('/send-pose', methods=['POST'])
 @cross_origin()
 def send_pose():
