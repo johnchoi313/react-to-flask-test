@@ -106,7 +106,7 @@ export default function UnityWebPage(props) {
 
     let signal = robotArmManager.SendAnimationCommand();
     props.changeMySignal(signal);
-    console.log(signal);
+    //console.log(signal);
 
     sendMessage("PeterGameController", "ReceiveAnimationFullUpdate", signal);
     sendMessage(
@@ -209,6 +209,135 @@ export default function UnityWebPage(props) {
     // TODO reset slider
   }
 
+
+  const [apiData, setApiData] = useState("");
+  const [signal, setSignal] = useState("");
+  const [apiFileData, setApiFileData] = useState("");
+  const [apiSavedFileData, setApiSavedFileData] = useState("");
+  const [apiSingleFileData, setApiSingleFileData] = useState("");
+  
+  function changeMySignal(outputJsonString) {
+    setSignal("CHECK2-"+outputJsonString);
+    console.log(`This is the output string: ${outputJsonString}`);
+  }
+  function makeActiveSignal(item) {
+    console.log(`Will play ${item} file`);
+  }
+
+  const handleSendClick = async () => {
+    console.log("sending click...");
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/click`;
+    const apiDataResponse = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const apiDataJson = await apiDataResponse.json();
+    setApiData(apiDataJson["response"]);
+    console.log(apiDataJson);
+  };
+  
+  const handleSendAllAnglesToApi = async () => {
+    let signal = robotArmManager.SendAnimationCommand();
+    props.changeMySignal(signal);
+
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/send-angles-sequence?angles_sequence=${signal}`;
+    const apiDataResponse = await fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const apiDataJson = await apiDataResponse.json();
+    setApiFileData(apiDataJson["response"]);
+    console.log(apiDataJson);
+  };
+
+  const handleGetAllAnimationFiles = async () => {
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-all-animation-files`;
+    const apiFileDataResponse = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const apiFileDataJson = await apiFileDataResponse.json();
+    setApiFileData(apiFileDataJson["response"]);
+    console.log(apiFileDataJson);
+  };
+  
+  const handleSaveAsAnimationFile = async () => {
+    let signal = robotArmManager.SendAnimationCommand();
+    props.changeMySignal(signal); 
+    
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/save-as-animation-file?angles_sequence=${signal}`;
+    const apiSavedFileDataResponse = await fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const apiSavedFileDataJson = await apiSavedFileDataResponse.json();
+    setApiSavedFileData(apiSavedFileDataJson["response"]);
+    console.log(apiSavedFileDataJson);
+  };
+
+  const handleTurnMotorsOff = async () => {
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/turn-off-motors`;
+    const apiDataResponse = await fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const apiDataJson = await apiDataResponse.json();
+    setApiData(apiDataJson["response"]);
+    console.log(apiDataJson);
+  }
+
+  const handleSendPose = async () => {
+    // TODO written by Olivia - check in that this is all good
+    let signal = [0,1,2,3,4,5].map((armIndex) => {
+      return robotArmManager.AnimationFrameReceive(armIndex);
+    }).join(",");
+    props.changeMySignal(signal); 
+
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/send-pose?angles=${signal}`;
+    const apiDataResponse = await fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const apiDataJson = await apiDataResponse.json();
+    setApiData(apiDataJson["response"]);
+    console.log(apiDataJson);
+  }
+
+  async function handlGetSingleFile(item) { // TODO connect this to a button
+    console.log("Need to make the main file");
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-single-file?file=${item}`;
+    const apiSingleFileDataResponse = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const apiSingleFileDataJson = await apiSingleFileDataResponse.json();
+    setApiSingleFileData(apiSingleFileDataJson["response"]);
+    setSignal(apiSingleFileData);
+    console.log(signal);
+  }
+
+
   let list1 = [1, 2, 3, 4, 5, 6];
   let framelist = [
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -216,15 +345,15 @@ export default function UnityWebPage(props) {
 
   let test = 3;
 
-  const [sF, setSF] = useState("default");
-  const onSearchChange = (event) => {
-    const sFString = event.target.value.toLocaleLowerCase();
-    setSF(sFString);
-  };
 
   return (
     <>
       <div>
+        
+    {<p className="text-xs font-robotomono">SIG: {signal}</p>}
+    {<p className="text-xs font-robotomono">API DATA: {apiData}</p>}
+    {<p className="text-xs font-robotomono">API FILE DATA: {apiFileData}</p>}
+
         {/* <button className="red" onClick={handleOnClickUnMountUnity}>
         (Un)mount Unity
         </button> */}
@@ -243,68 +372,82 @@ export default function UnityWebPage(props) {
         <br />
         */}
 
+          <button
+            className="text-xs bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+            onClick={handleSendClick}>
+              Send Click
+          </button>
+          <button
+            className="text-xs bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+            onClick={handleSendAllAnglesToApi}>
+              Submit Movements
+          </button>
+          <button
+            className="text-xs bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+            onClick={handleGetAllAnimationFiles}>
+            Get All Animation Files
+          </button>
+          <button
+              className="text-xs bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+              onClick={handleSaveAsAnimationFile}
+            >
+              Save As Animation File
+            </button>
+
         <TestInput />
 
-        <input placeholder={sF} onChangeHandler={onSearchChange} />
+<hr />
 
         {/* Upper Third */}
         <div className="flex-container-centered">
           <div className="flex-item">
-            <span className="text-bots-light-gray font-bold text-xs">
+            <p className="text-bots-light-gray font-bold text-xs my-2">
               Speed:
-            </span>
+            </p>
             <Slider min={0} max={10} defaultValue={1} disabled={true} />
-            <span className="text-bots-white font-bold text-xs">.</span>
           </div>
-          <div className="flex-item">
             <input
-              className="text-bots-light-gray font-bold border-2 rounded text-sm w-8 p-0.5"
+              className="flex-item text-bots-light-gray font-bold border-2 rounded text-sm p-1 m-4"
               placeholder={robotArmManager.speed}
             />
-          </div>
 
-          <div className="flex-item">
-            <button className="bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold p-6 py-2 rounded font-robotomono">
-              Toggle Drag-And-Teach Mode
+            <button 
+              className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono"
+              onClick={handleTurnMotorsOff}>
+                Toggle Drag & Teach Mode
             </button>
-          </div>
-          <div className="flex-item">
-            <button className="bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold p-6 py-2 rounded font-robotomono">
-              Send Pose
+            <button 
+              className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono"
+              onClick={handleSendPose}>
+                Send Pose To Cobot
             </button>
-          </div>
-          <div className="flex-item">
-            <button className="bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold p-6 py-2 rounded font-robotomono">
-              Get Pose
+            <button className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono">
+              Get Pose From Cobot
             </button>
-          </div>
-          <div className="flex-item">
             <button
-              className="bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold p-6 py-2 rounded font-robotomono"
+              className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono"
               onClick={() => {
                 resetPose();
               }}
             >
-              Reset Pose
+              Reset Sliders
             </button>
-          </div>
-          {/*
-          <div className="flex-item">
-            <button className="bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 rounded font-robotomono">
-              Save Angles To Keyframe
+            <button
+              className="flex-item bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono"
+              onClick={() => {
+                console.log("implement!");
+              }}
+            >
+              Load Anim. File
             </button>
-          </div>
-      */}
         </div>
 
         {/* Middle Third */}
         <div className="flex-container">
-          <div className="flex-item-60">
-            <div className="wrapper">
+            <div className="flex-item-50 wrapper">
               <Unity className="canvas" unityProvider={unityProvider} />
             </div>
-          </div>
-          <div className="flex-item">
+          <div className="flex-item-50">
             {playAnimation
               ? list1.map((number, index) => {
                   return (
@@ -441,61 +584,80 @@ export default function UnityWebPage(props) {
                 />
               </div>
             </div>
-            <button
-              className="bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-              onClick={() => {
-                console.log("Implement save animation!");
-              }}
-            >
-              🖫
-            </button>
-            <button
-              className="bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-              onClick={() => {
-                sendAnimationFrameToDisplay(-1);
-              }}
-            >
-              ◀◀
-            </button>
-            {playAnimation === false ? (
+
+
+            <div className="flex-container-centered">
+                
+                <button
+                  className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                  onClick={() => {
+                    sendAnimationFrameToDisplay(-1);
+                  }}
+                >
+                  <p>◀◀</p>
+                  <p className="text-xs">Prev Frame</p>
+                </button>
+
+                {playAnimation === false ? (
+                  <button
+                    className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                    onClick={changeDefPlayAnimation}
+                  >
+                  <p>▶</p>
+                  <p className="text-xs">Play Animation</p>
+                  </button>
+                ) : (
+                  <button
+                    className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                    onClick={StopAnimation}
+                  >
+                  <p> </p>
+                  <p className="text-xs">Stop Animation</p>
+                  </button>
+                )}
+
+                <button
+                  className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                  onClick={() => {
+                    sendAnimationFrameToDisplay(1);
+                  }}
+                >
+                  <p>▶▶</p>
+                  <p className="text-xs">Next Frame</p>
+                </button>
+
+            </div>
+
+            <div className="flex-container">
               <button
-                className="bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-                onClick={changeDefPlayAnimation}
+                className="flex-item bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                onClick={() => {
+                  console.log("Implement save keyframe!");
+                }}
               >
-                ▶
+                  <p>⯁</p>
+                  <p className="text-xs">Toggle Keyframe</p>
               </button>
-            ) : (
               <button
-                className="bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-                onClick={StopAnimation}
+                className="flex-item bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                onClick={() => {
+                  console.log("Implement save animation!");
+                  handleSaveAsAnimationFile();
+                }}
               >
-                Stop
+              <p>🖫</p>
+              <p className="text-xs">Save File</p>
               </button>
-            )}
-            <button
-              className="bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-              onClick={() => {
-                sendAnimationFrameToDisplay(1);
-              }}
-            >
-              ▶▶
-            </button>
-            <button
-              className="bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-              onClick={() => {
-                console.log("Implement save keyframe!");
-              }}
-            >
-              ⯁
-            </button>
-            <button
-              className="bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-              onClick={() => {
-                console.log("Implement delete animation!");
-              }}
-            >
-              🗑
-            </button>
+              <button
+                className="flex-item bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                onClick={() => {
+                  console.log("Implement delete animation!");
+                }}
+              >
+              <p>🗑</p>
+              <p className="text-xs">Delete File</p>
+              </button>
+            </div>
           </div>
         </div>
       </div>

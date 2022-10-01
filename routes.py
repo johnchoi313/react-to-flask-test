@@ -16,6 +16,15 @@ from flask import Flask, redirect, url_for, request
 app = Flask(__name__)
 CORS(app)
 
+from flask import Flask, redirect, url_for, request
+app = Flask(__name__)
+CORS(app)
+
+@app.route('/click', methods=['GET'])
+@cross_origin()
+def click():
+   return jsonify({'response': 'you clicked the button'})
+
 @app.route('/turn-off-motors', methods=['POST'])
 @cross_origin()
 def turn_off_motors():

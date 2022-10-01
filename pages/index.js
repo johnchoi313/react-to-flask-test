@@ -15,12 +15,12 @@ export default function Home() {
     setSignal(outputJsonString);
     console.log(`This is the output string: ${outputJsonString}`);
   }
+  /*
 
   const handleFetchApiData = async () => {
     // const apiDataResponse = await fetch("http://127.0.0.1:5000/click");
     const apiDataResponse = await fetch(
       `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/click`
-      //`http://192.168.0.103:5000/click`
     );
     const apiDataJson = await apiDataResponse.json();
     setApiData(apiDataJson["response"]);
@@ -88,32 +88,35 @@ export default function Home() {
   function makeActiveSignal(item) {
     console.log(`Will play ${item} file`);
   }
+  */
 
   return (
     <div>
-      <div className="flex items-center">
-        <Image src="/logo.png" alt="Main logo" width="80" height="80" />
-        <div className="text-bots-orange font-robotomono text-3xl bold">
-          BotsIQ Cobot Challenge Interface
+        {/*
+          <button
+            className="text-xs bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+            onClick={handleSendAllAnglesToApi}>
+              DONE: Submit Movements
+          </button>
         </div>
-      </div>
-      <div className="flex">
+       
         <div className="block">
           <button
-            className="my-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-            onClick={handleSendAllAnglesToApi}
-          >
-            Submit Movements
+            className="text-xs bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+            onClick={handleGetAllAnimationFiles}>
+              DONE: Get All Animation Files
           </button>
-          {apiData ? <div>{apiData}</div> : null}
-        </div>
-        <div className="block">
+
+          
           <button
-            className="m-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-            onClick={handleGetAllAnimationFiles}
-          >
-            Get All Animation Files
-          </button>
+              className="text-xs bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+              onClick={handleSaveAsAnimationFile}
+            >
+              Save As Animation File
+            </button>
+            */}
+
+          {/*
           {apiFileData ? (
             <ul>
               {apiFileData.map((item) => {
@@ -132,36 +135,56 @@ export default function Home() {
               })}
             </ul>
           ) : null}
+
         </div>
         <div className="flex">
           <div className="block">
-            <button
-              className="m-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-              onClick={handleSaveAsAnimationFile}
-            >
-              Save As Animation File
-            </button>
-            {apiSavedFileData ? <div>{apiSavedFileData}</div> : null}
           </div>
           <div>
             <label
               for="first_name"
-              class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+              className="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
             >
               First name
             </label>
             <input
               type="text"
               id="first_name"
-              class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
               defaultValue="Hello"
               required
             />
           </div>
+          
+      <hr />
+          */}
+
+      <div>
+      <div className="flex items-center">
+        <Image src="/logo.png" alt="Main logo" width="80" height="80" />
+        <div className="text-bots-orange font-robotomono text-3xl bold">
+          BotsIQ Cobot Challenge Demo Interface
         </div>
+      </div>
+      <div>
+        <UnityWebPage changeMySignal={changeMySignal} />
+        {/*
+        <button
+          className="my-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+          onClick={handleSendAllAnglesToApi}
+        >
+          Submit Movements
+        </button>*/}
+        {apiData ? (
+          <div>
+            <p className="log-text">{apiData}</p>
+          </div>
+        ) : null}
       </div>
       {/*<button className="my-3 bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono">*/}
       <button className="my-3 text-bots-white">ds</button>
+    </div>
+
     </div>
   );
 }
