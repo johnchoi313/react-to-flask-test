@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 
-export default function TestInput(props) {
+export default function TestInput() {
 
   const [sF, setSF] = useState("default");
-  const onSearchChange = (event) => {
+  
+  const handleSearchChange = (event) => {
     console.log("!!");
     const sFString = event.target.value.toLocaleLowerCase();
     setSF(sFString);
@@ -12,7 +13,7 @@ export default function TestInput(props) {
   return (
     <div>
       <span>Test Input Component: </span>
-      <input placeholder={sF} onChangeHandler={onSearchChange} />
+      <input placeholder={sF} onChangeHandler={handleSearchChange} />
     </div>
   )
 }

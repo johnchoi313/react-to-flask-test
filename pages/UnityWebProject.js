@@ -1,6 +1,7 @@
 import TestInput from "../components/test-input.component";
 
 import "rc-slider/assets/index.css";
+import TextField from "@material-ui/core/TextField";
 
 import React, { useEffect, useState } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
@@ -21,8 +22,15 @@ export default function UnityWebPage(props) {
   const [joints, setJoints] = useState([0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
   const [curFrame, setCurFrame] = useState(0);
 
+  const [maxFrames, setMaxFrames] = useState(12);
   const [changedFrame, setChangedFrame] = useState(false);
   const [playing, setPlaying] = useState();
+
+  function updateMaxFrames(newMaxFrames) {
+    setMaxFrames(newMaxFrames);
+    framelist = [...Array(maxFrames).keys()];
+  }
+
   const { unityProvider, sendMessage, isLoaded, loadingProgression } =
     useUnityContext({
       loaderUrl: "build/webgl.loader.js",
@@ -95,9 +103,9 @@ export default function UnityWebPage(props) {
   }
 
   function updateFrame(dir) {
-    if (robotArmManager.frame + dir < 20 && robotArmManager.frame + dir >= 0) {
+    if (robotArmManager.frame + dir < maxFrames && robotArmManager.frame + dir >= 0) { // TODO LIV maxFrames
       robotArmManager.frame += dir;
-      setCurFrame(robotArmManager.frame);
+      setCurFrame(robotArmManager.frame); // TODO LIV - would like to add hooks to robotArmManager so we don't need this redundancy just to trigger changes that rely on state
     }
   }
 
@@ -215,6 +223,32 @@ export default function UnityWebPage(props) {
   const [apiFileData, setApiFileData] = useState("");
   const [apiSavedFileData, setApiSavedFileData] = useState("");
   const [apiSingleFileData, setApiSingleFileData] = useState("");
+
+  const [loadAnimationMenuVisible, setLoadAnimationMenuVisible] = useState(false);
+  const [deleteAnimationMenuVisible, setDeleteAnimationMenuVisible] = useState(false);
+  
+  const toggleLoadAnimationMenuVisible = async() => {
+    setDeleteAnimationMenuVisible(false);
+    if (!loadAnimationMenuVisible) {
+      await handleGetAllAnimationFiles();
+      setLoadAnimationMenuVisible(true);       
+    }
+    else {
+      setLoadAnimationMenuVisible(false);
+    }
+  }
+  const toggleDeleteAnimationMenuVisible = async() => {
+    console.log("checkpoint 1");
+    setLoadAnimationMenuVisible(false);
+    if (!deleteAnimationMenuVisible) {
+      await handleGetAllAnimationFiles();
+      console.log("checkpoint 2");
+      setDeleteAnimationMenuVisible(true);       
+    }
+    else {
+      setDeleteAnimationMenuVisible(false);
+    }
+  }
   
   function changeMySignal(outputJsonString) {
     setSignal("CHECK2-"+outputJsonString);
@@ -266,8 +300,9 @@ export default function UnityWebPage(props) {
       },
     });
     const apiFileDataJson = await apiFileDataResponse.json();
-    setApiFileData(apiFileDataJson["response"]);
+    setApiFileData(apiFileDataJson["response"].sort());
     console.log(apiFileDataJson);
+    return true;
   };
   
   const handleSaveAsAnimationFile = async () => {
@@ -284,6 +319,7 @@ export default function UnityWebPage(props) {
     });
     const apiSavedFileDataJson = await apiSavedFileDataResponse.json();
     setApiSavedFileData(apiSavedFileDataJson["response"]);
+    handleGetAllAnimationFiles(); // reload the list of available files
     console.log(apiSavedFileDataJson);
   };
 
@@ -321,7 +357,7 @@ export default function UnityWebPage(props) {
     console.log(apiDataJson);
   }
 
-  async function handlGetSingleFile(item) { // TODO connect this to a button
+  async function handleGetSingleFile(item) { // TODO connect this to a button
     console.log("Need to make the main file");
     const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-single-file?file=${item}`;
     const apiSingleFileDataResponse = await fetch(url, {
@@ -337,14 +373,29 @@ export default function UnityWebPage(props) {
     console.log(signal);
   }
 
-
   let list1 = [1, 2, 3, 4, 5, 6];
-  let framelist = [
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-  ];
+  let framelist = [...Array(maxFrames).keys()]; // TODO LIV this shouldn't have to be set from updateMaxFrames
 
-  let test = 3;
 
+
+  const [sF, setSF] = useState("default");
+  
+  const handleSearchChange = (event) => {
+    console.log("!!");
+    const sFString = event.target.value;
+    setSF(sFString);
+  };
+  function handleSubmit(event) {
+    console.log("!");
+    alert('A name was submitted: ');
+    console.log(event);
+    console.log(event.target);
+    console.log(event.target.value);
+    event.preventDefault();
+  }
+
+  let testInputRef = React.createRef();
+  //console.log(testInputRef);
 
   return (
     <>
@@ -354,49 +405,37 @@ export default function UnityWebPage(props) {
     {<p className="text-xs font-robotomono">API DATA: {apiData}</p>}
     {<p className="text-xs font-robotomono">API FILE DATA: {apiFileData}</p>}
 
-        {/* <button className="red" onClick={handleOnClickUnMountUnity}>
-        (Un)mount Unity
-        </button> */}
+    {/*
+          <button onClick={handleSendClick}>Send Click</button>
+          <button onClick={handleSendAllAnglesToApi}>Submit Movements</button>
+          <button onClick={handleGetAllAnimationFiles}>Get All Animation Files</button>
+          <button onClick={handleSaveAsAnimationFile}>Save As Animation File</button>
+    */}
+          {/*
+        <TextField id="outlined-basic" label="Outlined" variant="outlined" /> */}
 
-        {/* Olivia, Yasser, and John Choi are all not sure what this does so it's getting commented out: 
-        <button
-          className="bg-bots-orange hover:bg-bots-orange text-bots-gray font-bold px-4 rounded font-robotomono"
-          onClick={sendAnimationCommand}
-        >
-          signal
-        </button>
-        <input className="bg-bots-yellow" onChange={setCustomSignal}></input>
-        <span>signal: [{mySignal}]</span>
-        <br />
-        <br />
-        <br />
-        */}
+  <br />
+  
 
-          <button
-            className="text-xs bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-            onClick={handleSendClick}>
-              Send Click
-          </button>
-          <button
-            className="text-xs bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-            onClick={handleSendAllAnglesToApi}>
-              Submit Movements
-          </button>
-          <button
-            className="text-xs bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-            onClick={handleGetAllAnimationFiles}>
-            Get All Animation Files
-          </button>
-          <button
-              className="text-xs bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-              onClick={handleSaveAsAnimationFile}
-            >
-              Save As Animation File
-            </button>
+  <div>
+    
+  <form onSubmit={handleSubmit}>
+      <span>Test Input Component: </span>
+      <input 
+        value={sF}
+        onChange={(e) => {handleSearchChange(e)}} 
+        />
+        <input type="submit" value="Submit" />
 
-        <TestInput />
+      <button onClick={() => {setSF("ok!!")}}>ok!!</button>
+  </form>
 
-<hr />
+  </div>
+
+
+  <br />
+
+  <hr />
 
         {/* Upper Third */}
         <div className="flex-container-centered">
@@ -416,13 +455,13 @@ export default function UnityWebPage(props) {
               onClick={handleTurnMotorsOff}>
                 Toggle Drag & Teach Mode
             </button>
+            <button className="flex-item bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono">
+              Get Pose From Cobot
+            </button>
             <button 
               className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono"
               onClick={handleSendPose}>
                 Send Pose To Cobot
-            </button>
-            <button className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono">
-              Get Pose From Cobot
             </button>
             <button
               className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono"
@@ -431,14 +470,6 @@ export default function UnityWebPage(props) {
               }}
             >
               Reset Sliders
-            </button>
-            <button
-              className="flex-item bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono"
-              onClick={() => {
-                console.log("implement!");
-              }}
-            >
-              Load Anim. File
             </button>
         </div>
 
@@ -589,7 +620,7 @@ export default function UnityWebPage(props) {
             <div className="flex-container-centered">
                 
                 <button
-                  className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                  className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
                   onClick={() => {
                     sendAnimationFrameToDisplay(-1);
                   }}
@@ -600,7 +631,7 @@ export default function UnityWebPage(props) {
 
                 {playAnimation === false ? (
                   <button
-                    className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                    className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
                     onClick={changeDefPlayAnimation}
                   >
                   <p>▶</p>
@@ -608,7 +639,7 @@ export default function UnityWebPage(props) {
                   </button>
                 ) : (
                   <button
-                    className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                    className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
                     onClick={StopAnimation}
                   >
                   <p> </p>
@@ -617,7 +648,7 @@ export default function UnityWebPage(props) {
                 )}
 
                 <button
-                  className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                  className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
                   onClick={() => {
                     sendAnimationFrameToDisplay(1);
                   }}
@@ -630,7 +661,7 @@ export default function UnityWebPage(props) {
 
             <div className="flex-container">
               <button
-                className="flex-item bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                className="flex-item-third bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
                 onClick={() => {
                   console.log("Implement save keyframe!");
                 }}
@@ -639,24 +670,23 @@ export default function UnityWebPage(props) {
                   <p className="text-xs">Toggle Keyframe</p>
               </button>
               <button
-                className="flex-item bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-                onClick={() => {
-                  console.log("Implement save animation!");
-                  handleSaveAsAnimationFile();
-                }}
+                className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+                onClick={handleSendAllAnglesToApi}
               >
-              <p>🖫</p>
-              <p className="text-xs">Save File</p>
+              <p>[icon]</p>
+              <p className="text-xs">Send Current Animation To Cobot</p>
               </button>
+              {/*
               <button
                 className="flex-item bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
                 onClick={() => {
-                  console.log("Implement delete animation!");
+                  console.log("empty button");
                 }}
               >
-              <p>🗑</p>
-              <p className="text-xs">Delete File</p>
+              <p>[icon]</p>
+              <p className="text-xs">Empty</p>
               </button>
+              */}
             </div>
           </div>
         </div>
@@ -685,6 +715,52 @@ export default function UnityWebPage(props) {
           );
         })}
       </div>
+
+      <div className="flex-container-centered">
+
+        <button
+          className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+          onClick={handleSaveAsAnimationFile}>
+            <p><span className="text-xl">🖫 </span>Save Animation File</p>
+        </button>
+
+        <button
+          className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+          onClick={toggleLoadAnimationMenuVisible}>
+            <p><span className="text-2xl">{loadAnimationMenuVisible ? "^" : "▼"}</span> Load Animation Files</p>
+        </button>
+
+        <button
+          className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+          onClick={toggleDeleteAnimationMenuVisible}>
+            <p><span className="text-2xl">{deleteAnimationMenuVisible ? "^" : "▼" }</span> Delete Animation Files</p>
+        </button>
+      </div>
+
+      <div className="flex-container">
+        {
+          (loadAnimationMenuVisible) ? apiFileData.map((fileName) => {
+            return <button 
+                    className="flex-item bg-bots-yellow hover:bg-bots-orange" 
+                    key={fileName}
+                    onClick={() => {handleGetSingleFile(fileName)}}>
+                      {fileName}
+                    </button>}) 
+          : null
+        }
+        
+        {
+          (deleteAnimationMenuVisible) ? apiFileData.map((fileName) => {
+            return <button 
+                    className="flex-item bg-bots-yellow hover:bg-bots-orange" 
+                    key={fileName}
+                    onClick={() => {console.log("Delete: " + fileName)}}>
+                      {fileName}
+                    </button>}) 
+          : null
+        }
+      </div>
+
     </>
   );
 }

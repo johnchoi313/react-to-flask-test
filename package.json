@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@material-ui/core": "^4.12.4",
+    "@material-ui/lab": "^4.0.0-alpha.61",
     "next": "12.1.0",
     "next-connect": "^0.12.2",
     "rc-slider": "^10.0.1",
