@@ -77,9 +77,9 @@ export default class RobotArmManager {
   set frame(val) {
     this._frame = val;
   }
-  SendAnimationCommand() {
+  SendAnimationCommand(keyFrameIndicesToSave) {
     //console.log(this._commandsArm1);
-    return `{"name":"${this.name}","speed":${this.speed},"commandsArm1":[${this.commandsArm1}],"commandsArm2":[${this.commandsArm2}],"commandsArm3":[${this.commandsArm3}],"commandsArm4":[${this.commandsArm4}],"commandsArm5":[${this.commandsArm5}],"commandsArm6":[${this.commandsArm6}],"frame":${this.frame}}`;
+    return `{"name":"${this.name}","speed":${this.speed},"commandsArm1":[${this.commandsArm1}],"commandsArm2":[${this.commandsArm2}],"commandsArm3":[${this.commandsArm3}],"commandsArm4":[${this.commandsArm4}],"commandsArm5":[${this.commandsArm5}],"commandsArm6":[${this.commandsArm6}],"frame":${this.frame}},"keyFrameIndices":[${keyFrameIndicesToSave}]`;
   }
   createAnimationFiles() {
     let commandsArm = [[], [], [], [], [], []];

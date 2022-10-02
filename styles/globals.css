@@ -48,6 +48,28 @@ button {
   font-size: 11px;
 }
 
+.speedInput {
+  width: 1em;
+}
+.bb{
+  border: 1px solid orange;
+}
+.mt-4 {
+  margin-top: 4px;
+}
+.mt-2 {
+  margin-top: 2px;
+}
+.mt-8 {
+  margin-top: 8px;
+}
+.mt-10 {
+  margin-top: 10px;
+}
+
+input {
+  border: 1px solid gray;
+}
 .flex-container {
   display: flex;
   flex-flow: row;

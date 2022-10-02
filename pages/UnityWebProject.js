@@ -23,31 +23,42 @@ export default function UnityWebPage(props) {
   const [curFrame, setCurFrame] = useState(0);
 
   const [maxFrames, setMaxFrames] = useState(12);
+  //const [frameList, setFrameList] = useState([...Array(maxFrames).keys()].map((e)=>{return e+1}));
+  const [frameList, setFrameList] = useState([...Array(12).keys()].map((e)=>{return e+1}));
   const [changedFrame, setChangedFrame] = useState(false);
   const [playing, setPlaying] = useState();
+  const [keyFrameIndices, setKeyFrameIndices] = useState([1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0]); // consider 0 vs 1-indexed!!!!!!
 
   function updateMaxFrames(newMaxFrames) {
     setMaxFrames(newMaxFrames);
-    framelist = [...Array(maxFrames).keys()];
+    console.log(newMaxFrames);
+    
+    if (newMaxFrames >= 1 && newMaxFrames <= 20) // TODO don't hardcode absolute max 
+    {
+      console.log("ok");
+      //framelist = [...Array(maxFrames).keys()].map((e)=>{return e+1});
+      setFrameList([...Array(maxFrames).keys()].map((e)=>{return e+1}));
+    }
   }
+  //let framelist = [1];//...Array(maxFrames).keys()].map((e)=>{return e+1});
 
   const { unityProvider, sendMessage, isLoaded, loadingProgression } =
-    useUnityContext({
+    /* useUnityContext({
       loaderUrl: "build/webgl.loader.js",
       dataUrl: "build/webgl.data",
       frameworkUrl: "build/webgl.framework.js",
-      codeUrl: "build/webgl.wasm",
+      codeUrl: "build/webgl.wasm"
+    }); */
+  
+          
+  useUnityContext({
+      loaderUrl: "build/RobotArm_React_WebGL (10-3-2022).loader.js",
+      dataUrl: "build/RobotArm_React_WebGL (10-3-2022).data",
+      frameworkUrl: "build/RobotArm_React_WebGL (10-3-2022).framework.js",
+      codeUrl: "build/RobotArm_React_WebGL (10-3-2022).wasm",
     });
-  {
-    /*      
-       useUnityContext({
-      loaderUrl: "build/RobotArm_React_WebGL (9-16-2022).loader.js",
-      dataUrl: "build/RobotArm_React_WebGL (9-16-2022).data",
-      frameworkUrl: "build/RobotArm_React_WebGL (9-16-2022).framework.js",
-      codeUrl: "build/RobotArm_React_WebGL (9-16-2022).wasm",
-    });
-      */
-  }
+      
+  
 
   const [anglesApiData, setAnglesApiData] = useState("");
 
@@ -65,6 +76,26 @@ export default function UnityWebPage(props) {
     setAnglesApiData(anglesApiDataJson["response"]);
     console.log(anglesApiDataJson["response"]);
   };
+
+  const getAnglesFromApi = async (strMine) => {
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-pose`;
+    console.log(url);
+    const anglesApiDataResponse = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+    const anglesApiDataJson = await anglesApiDataResponse.json();
+    setAnglesApiData(anglesApiDataJson["response"]);
+    //console.log(anglesApiDataJson["response"]);
+    for (let i = 0; i < anglesApiDataJson["response"].length; i++) {
+      animationServoWhichToChange(i+1, anglesApiDataJson["response"][i]);
+    }
+  };
+
+
   const [theVal, setTheVal] = useState(0);
   function animationServoWhichToChange(index, myArmAnimationValue) {
     robotArmManager.AnimationUpdate(index, myArmAnimationValue);
@@ -106,6 +137,11 @@ export default function UnityWebPage(props) {
     if (robotArmManager.frame + dir < maxFrames && robotArmManager.frame + dir >= 0) { // TODO LIV maxFrames
       robotArmManager.frame += dir;
       setCurFrame(robotArmManager.frame); // TODO LIV - would like to add hooks to robotArmManager so we don't need this redundancy just to trigger changes that rely on state
+    }
+  }
+  function setFrame(val) {
+    if (val < maxFrames && val >= 0) { 
+      robotArmManager.frame = val;
     }
   }
 
@@ -158,7 +194,8 @@ export default function UnityWebPage(props) {
     //console.log(playAnimation);
     if (playAnimation === true) {
       robotArmManager.frame += 1;
-      robotArmManager.frame = robotArmManager.frame % 20;
+      robotArmManager.frame = robotArmManager.frame % maxFrames; // TODO LIV
+      setCurFrame(robotArmManager.frame);
 
       sendMessage(
         "PeterGameController",
@@ -214,7 +251,6 @@ export default function UnityWebPage(props) {
     animationServoWhichToChange(4, 0);
     animationServoWhichToChange(5, 0);
     animationServoWhichToChange(6, 0);
-    // TODO reset slider
   }
 
 
@@ -337,6 +373,12 @@ export default function UnityWebPage(props) {
     console.log(apiDataJson);
   }
 
+  const handleToggleKeyframe = () => {
+    let newArr = [...keyFrameIndices];
+    newArr[curFrame] = +!newArr[curFrame];
+    setKeyFrameIndices(newArr);
+  }
+
   const handleSendPose = async () => {
     // TODO written by Olivia - check in that this is all good
     let signal = [0,1,2,3,4,5].map((armIndex) => {
@@ -373,17 +415,16 @@ export default function UnityWebPage(props) {
     console.log(signal);
   }
 
-  let list1 = [1, 2, 3, 4, 5, 6];
-  let framelist = [...Array(maxFrames).keys()]; // TODO LIV this shouldn't have to be set from updateMaxFrames
-
+  //let list1 = [1, 2, 3, 4, 5, 6];
+  let list1 = [6,5,4,3,2,1];
 
 
   const [sF, setSF] = useState("default");
   
   const handleSearchChange = (event) => {
-    console.log("!!");
     const sFString = event.target.value;
     setSF(sFString);
+    console.log(sF);
   };
   function handleSubmit(event) {
     console.log("!");
@@ -392,10 +433,11 @@ export default function UnityWebPage(props) {
     console.log(event.target);
     console.log(event.target.value);
     event.preventDefault();
+    console.log(sF);
   }
 
   let testInputRef = React.createRef();
-  //console.log(testInputRef);
+  
 
   return (
     <>
@@ -404,21 +446,10 @@ export default function UnityWebPage(props) {
     {<p className="text-xs font-robotomono">SIG: {signal}</p>}
     {<p className="text-xs font-robotomono">API DATA: {apiData}</p>}
     {<p className="text-xs font-robotomono">API FILE DATA: {apiFileData}</p>}
+    {<p className="text-xs font-robotomono">KF INDICES: {keyFrameIndices.join(", ")}</p>}
+
 
     {/*
-          <button onClick={handleSendClick}>Send Click</button>
-          <button onClick={handleSendAllAnglesToApi}>Submit Movements</button>
-          <button onClick={handleGetAllAnimationFiles}>Get All Animation Files</button>
-          <button onClick={handleSaveAsAnimationFile}>Save As Animation File</button>
-    */}
-          {/*
-        <TextField id="outlined-basic" label="Outlined" variant="outlined" /> */}
-
-  <br />
-  
-
-  <div>
-    
   <form onSubmit={handleSubmit}>
       <span>Test Input Component: </span>
       <input 
@@ -430,32 +461,34 @@ export default function UnityWebPage(props) {
       <button onClick={() => {setSF("ok!!")}}>ok!!</button>
   </form>
 
-  </div>
 
-
-  <br />
 
   <hr />
+  */}
+        
 
-        {/* Upper Third */}
+<div className="UPPER================================================================================================">
+
         <div className="flex-container-centered">
           <div className="flex-item">
-            <p className="text-bots-light-gray font-bold text-xs my-2">
+            <span className="text-bots-light-gray font-bold text-xs">
               Speed:
-            </p>
-            <Slider min={0} max={10} defaultValue={1} disabled={true} />
-          </div>
+            </span>
             <input
-              className="flex-item text-bots-light-gray font-bold border-2 rounded text-sm p-1 m-4"
+              className="min-w-[50px] w-[7em] text-bots-light-gray font-bold border-2 rounded text-sm px-1 m-1"
               placeholder={robotArmManager.speed}
             />
+            <Slider className="max-w-[140px]" min={0} max={10} defaultValue={1} disabled={true} />
+            </div>
 
             <button 
               className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono"
               onClick={handleTurnMotorsOff}>
                 Toggle Drag & Teach Mode
             </button>
-            <button className="flex-item bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono">
+            <button 
+              className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold px-2 py-2 rounded font-robotomono"
+              onClick={getAnglesFromApi}>
               Get Pose From Cobot
             </button>
             <button 
@@ -472,295 +505,316 @@ export default function UnityWebPage(props) {
               Reset Sliders
             </button>
         </div>
+</div>
+            
+<div className="MIDDLE================================================================================================">
+           
+  <div className="flex-container">
+      
+    <div className="flex-item-50 wrapper">
+      <Unity className="canvas" unityProvider={unityProvider} />
+    </div>
+   {/* 
+    <div>
+      <img src="https://placeimg.com/400/400/nature" />
+    </div> */}
+    
+                 
+    <div className="flex-item-60">
 
-        {/* Middle Third */}
-        <div className="flex-container">
-            <div className="flex-item-50 wrapper">
-              <Unity className="canvas" unityProvider={unityProvider} />
-            </div>
-          <div className="flex-item-50">
-            {playAnimation
-              ? list1.map((number, index) => {
-                  return (
-                    <>
-                      <div>
-                        <div className="flex-container-centered">
-                          <button className="bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold px-2 rounded font-robotomono">
-                            -
-                          </button>
-                          <div className="flex-item-90">
-                            <span className="text-bots-gray font-bold text-xs">
-                              J{number}
-                            </span>
-                            <Slider
-                              min={-90}
-                              max={90}
-                              defaultValue={robotArmManager.AnimationFrameReceive(
-                                number
-                              )}
-                              /*value={joints[index]}*/
-                              onChange={(value) => {
-                                let newArr = joints;
-                                newArr[index] = value;
-                                setJoints(newArr);
-                                animationServoWhichToChange(number, value);
-                              }}
-                            />
-                          </div>
-                          <button
-                            className="bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold px-2 rounded font-robotomono"
-                            onClick={() => {
-                              console.log(number + " plus!");
-                            }}
-                          >
-                            +
-                          </button>
-                          <input
-                            className="border-2 text-bots-blue rounded flex-item-20 text-sm"
-                            type="number"
-                            defaultValue={joints[index]}
-                            readOnly={false}
-                            onChange={() => {
-                              let newArr = joints;
-                              newArr[index] = value;
-                              setJoints(newArr);
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  );
-                })
-              : list1.map((number, index) => {
-                  return (
-                    <>
-                      {/* todo make a slider component!! */}
-                      <div>
-                        <div className="flex-container-centered">
-                          <button className="bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold px-2 rounded font-robotomono">
-                            -
-                          </button>
-                          <div className="flex-item-90">
-                            <span className="text-bots-gray font-bold text-xs">
-                              J{number}
-                            </span>
-                            <Slider
-                              min={-120}
-                              max={90}
-                              value={robotArmManager.AnimationFrameReceive(
-                                number
-                              )}
-                              onChange={(value) => {
-                                let newArr = joints;
-                                newArr[index] = value;
-                                setJoints(newArr);
-                                animationServoWhichToChange(number, value);
-                              }}
-                            />
-                          </div>
-                          <button
-                            className="bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold px-2 rounded font-robotomono"
-                            onClick={() => {
-                              console.log(number + " plus!");
-                            }}
-                          >
-                            +
-                          </button>
-                          <input
-                            className="border-2 text-bots-blue rounded flex-item-20 text-sm"
-                            type="number"
-                            value={robotArmManager.AnimationFrameReceive(
-                              number
-                            )}
-                            readOnly={true}
-                            onChange={() => {
-                              let newArr = joints;
-                              newArr[index] = value;
-                              setJoints(newArr);
-                            }}
-                          />
-                        </div>
-                      </div>
-                    </>
-                  );
-                })}
-
-            <div>
-              <div className="flex-container-centered">
-                <button className="bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold px-2 rounded font-robotomono">
-                  -
-                </button>
-                <div className="flex-item-90">
-                  <span className="text-bots-gray font-bold text-xs">
-                    Gripper
-                  </span>
-                  <Slider
-                    min={0}
-                    max={2}
-                    defaultValue={1}
-                    disabled={true}
-                    onChange={(value) => {
-                      //animationServoWhichToChange(number, value);
-                      console.log("Implement gripper!");
-                    }}
-                  />
-                </div>
-                <button className="bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold px-2 rounded font-robotomono">
-                  +
-                </button>
-                <input
-                  className="border-2 text-bots-blue rounded flex-item-20 text-sm"
-                  type="number"
-                  placeholder="0"
-                />
-              </div>
-            </div>
-
-
-            <div className="flex-container-centered">
-                
-                <button
-                  className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-                  onClick={() => {
-                    sendAnimationFrameToDisplay(-1);
-                  }}
-                >
-                  <p>◀◀</p>
-                  <p className="text-xs">Prev Frame</p>
-                </button>
-
-                {playAnimation === false ? (
-                  <button
-                    className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-                    onClick={changeDefPlayAnimation}
-                  >
-                  <p>▶</p>
-                  <p className="text-xs">Play Animation</p>
-                  </button>
-                ) : (
-                  <button
-                    className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-                    onClick={StopAnimation}
-                  >
-                  <p> </p>
-                  <p className="text-xs">Stop Animation</p>
-                  </button>
-                )}
-
-                <button
-                  className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-                  onClick={() => {
-                    sendAnimationFrameToDisplay(1);
-                  }}
-                >
-                  <p>▶▶</p>
-                  <p className="text-xs">Next Frame</p>
-                </button>
-
-            </div>
-
-            <div className="flex-container">
-              <button
-                className="flex-item-third bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-                onClick={() => {
-                  console.log("Implement save keyframe!");
-                }}
-              >
-                  <p>⯁</p>
-                  <p className="text-xs">Toggle Keyframe</p>
-              </button>
-              <button
-                className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-                onClick={handleSendAllAnglesToApi}
-              >
-              <p>[icon]</p>
-              <p className="text-xs">Send Current Animation To Cobot</p>
-              </button>
-              {/*
-              <button
-                className="flex-item bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-                onClick={() => {
-                  console.log("empty button");
-                }}
-              >
-              <p>[icon]</p>
-              <p className="text-xs">Empty</p>
-              </button>
-              */}
-            </div>
+    <div>
+        <div className="flex-container-centered">
+            <span className="text-bots-gray font-bold text-xs px-2 mt-8">
+              Gripper
+            </span>
+          <button className="bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold px-2 rounded font-robotomono">
+            -
+          </button>
+          <div className="flex-item-90 mt-4">
+            <Slider
+              min={0}
+              max={2}
+              defaultValue={1}
+              disabled={true}
+              onChange={(value) => {
+                //animationServoWhichToChange(number, value);
+                console.log("Implement gripper!");
+              }}
+            />
           </div>
+          <button className="bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold px-2 rounded font-robotomono">
+            +
+          </button>
+          <input
+            className="border-2 text-bots-gray rounded flex-item-20 text-sm"
+            type="number"
+            placeholder="0"
+          />
         </div>
       </div>
 
-      {/* Lower Third */}
-      <div className="flex-container">
-        {framelist.map((number, index) => {
-          return (
-            <>
-              <button
-                className={
-                  "font-bold rounded " +
-                  (number == robotArmManager.frame + 1
-                    ? "bg-bots-orange"
-                    : "bg-bots-white")
-                }
-                onClick={() => {
-                  console.log("Implement frame button!");
-                }}
-              >
-                <p>⬦</p>
-                <p>{number}</p>
-              </button>
-            </>
-          );
-        })}
-      </div>
+
+      {playAnimation
+        ? list1.map((number, index) => {
+            return (
+              <>
+                <div>
+                  <div className="flex-container-centered">
+                      <span className="text-bots-gray font-bold text-xs px-2 mt-10">
+                        J{number}
+                      </span>
+                    <button 
+                      className="bg-bots-light-gray text-bots-gray font-bold px-2 rounded font-robotomono"
+                      disabled={true}>
+                      -
+                    </button>
+                    <div className="flex-item-90">
+                      <Slider
+                        disabled={true}
+                        min={-90}
+                        max={90}
+                        value={robotArmManager.AnimationFrameReceive(
+                          number
+                        )}
+                      />
+                    </div>
+                    <button
+                      className="bg-bots-light-gray text-bots-gray font-bold px-2 rounded font-robotomono">
+                      +
+                    </button>
+                    <input
+                      className="border-2 text-bots-gray rounded flex-item-20 text-sm"
+                      type="number"
+                      value={robotArmManager.AnimationFrameReceive(
+                        number
+                      )}
+                      disabled={true}
+                    />
+                  </div>
+                </div>
+              </>
+            );
+          })
+        : list1.map((number, index) => {
+            return (
+              <>
+                <div>
+                  <div className="flex-container-centered">
+                      <span className="text-bots-gray font-bold text-xs px-2 mt-10">
+                        J{number}
+                      </span>
+                    <button 
+                      className="bg-bots-yellow hover:bg-bots-orange text-bots-gray font-bold px-2 rounded font-robotomono"
+                      onClick={() => {
+                        let newArr = [...joints];
+                        newArr[index] -= 5;
+                        setJoints(newArr);
+                        animationServoWhichToChange(number, newArr[index]);}}>
+                      -
+                    </button>
+                    <div className="flex-item-90 mt-4">
+                      <Slider
+                        min={-120}
+                        max={90}
+                        value={robotArmManager.AnimationFrameReceive(
+                          number
+                        )}
+                        onChange={(value) => {
+                          let newArr = [...joints];
+                          newArr[index] = value;
+                          setJoints(newArr);
+                          animationServoWhichToChange(number, value);
+                        }}
+                      />
+                    </div>
+                    <button
+                      className="bg-bots-orange hover:bg-bots-orange text-bots-gray font-bold px-2 rounded font-robotomono"
+                      onClick={() => {
+                        let newArr = [...joints];
+                        newArr[index] += 5;
+                        setJoints(newArr);
+                        animationServoWhichToChange(number, newArr[index]);}}>
+                      +
+                    </button>
+                    <input
+                      className="border-2 text-bots-gray rounded flex-item-20 text-sm"
+                      type="number"
+                      value={robotArmManager.AnimationFrameReceive(
+                        number
+                      )}
+                      onChange={(e) => {
+                        let newArr = [...joints];
+                        newArr[index] = e.target.value;
+                        setJoints(newArr)
+                        animationServoWhichToChange(number, newArr[index]);
+                      }}
+                    />
+                  </div>
+                </div>
+              </>
+            );
+          })}
+
 
       <div className="flex-container-centered">
+          
+          <button
+            className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+            onClick={() => {
+              sendAnimationFrameToDisplay(-1);
+            }}
+          >
+            <p>◀◀</p>
+            <p className="text-xs">Prev Frame</p>
+          </button>
 
-        <button
-          className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-          onClick={handleSaveAsAnimationFile}>
-            <p><span className="text-xl">🖫 </span>Save Animation File</p>
-        </button>
+          {playAnimation === false ? (
+            <button
+              className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+              onClick={changeDefPlayAnimation}
+            >
+            <p>▶</p>
+            <p className="text-xs">Play Animation</p>
+            </button>
+          ) : (
+            <button
+              className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+              onClick={StopAnimation}
+            >
+            <p>❚❚</p>
+            <p className="text-xs">Pause Animation</p>
+            </button>
+          )}
 
-        <button
-          className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-          onClick={toggleLoadAnimationMenuVisible}>
-            <p><span className="text-2xl">{loadAnimationMenuVisible ? "^" : "▼"}</span> Load Animation Files</p>
-        </button>
+          <button
+            className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+            onClick={() => {
+              sendAnimationFrameToDisplay(1);
+            }}
+          >
+            <p>▶▶</p>
+            <p className="text-xs">Next Frame</p>
+          </button>
 
-        <button
-          className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-          onClick={toggleDeleteAnimationMenuVisible}>
-            <p><span className="text-2xl">{deleteAnimationMenuVisible ? "^" : "▼" }</span> Delete Animation Files</p>
-        </button>
       </div>
 
       <div className="flex-container">
-        {
-          (loadAnimationMenuVisible) ? apiFileData.map((fileName) => {
-            return <button 
-                    className="flex-item bg-bots-yellow hover:bg-bots-orange" 
-                    key={fileName}
-                    onClick={() => {handleGetSingleFile(fileName)}}>
-                      {fileName}
-                    </button>}) 
-          : null
-        }
-        
-        {
-          (deleteAnimationMenuVisible) ? apiFileData.map((fileName) => {
-            return <button 
-                    className="flex-item bg-bots-yellow hover:bg-bots-orange" 
-                    key={fileName}
-                    onClick={() => {console.log("Delete: " + fileName)}}>
-                      {fileName}
-                    </button>}) 
-          : null
-        }
+        <button
+          className="flex-item-third bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+          onClick={handleToggleKeyframe}
+        >
+            <p>⯁</p>
+            <p className="text-xs">Toggle Keyframe</p>
+        </button>
+        <button
+          className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+          onClick={handleSendAllAnglesToApi}
+        >
+        <p>⇨</p>
+        <p className="text-xs">Send Current Animation To Cobot</p>
+        </button>
       </div>
+    </div>
+        
+  </div>
+              
+</div>
 
-    </>
-  );
-}
+
+
+
+<div className="LOWER THIRD =================================================================================================">
+
+  <div>
+    <span className="text-bots-gray font-bold text-xs">Current Frame: </span>
+    <input
+      className="w-[4em] text-bots-light-gray border-bots-gray font-bold border-2 rounded text-sm px-2 m-1"
+      placeholder={robotArmManager.speed}
+      value={curFrame+1}
+    />
+    <span className="text-bots-gray font-bold text-xs"> Max Frames: </span>
+    <input 
+      className="w-[4em] text-bots-light-gray border-bots-gray font-bold border-2 rounded text-sm px-2 m-1"
+      value={maxFrames}
+      type="number"
+      min="1"
+      max="20"
+      onChange={(e) => {
+        let val = parseInt(e.target.value);
+        setMaxFrames(val);
+        if (!isNaN(val) && 0 <= val && val <= 20) {
+          setMaxFrames(val);
+          setFrameList([...Array(val).keys()].map((e)=>{return e+1}));
+        }
+        }} 
+    />
+  </div>
+
+
+  <div className="flex-container">
+    {frameList.map((number, index) => {
+      return (
+        <>
+          <button
+            className={
+              "font-bold rounded " +
+              (number == curFrame + 1
+                ? "bg-bots-orange"
+                : "bg-bots-white")
+            }
+            onClick={() => {
+              console.log("Implement frame button!");
+            }}
+          >
+            <p>{keyFrameIndices[number-1] == 1 ? "⯁" : "⬦"}</p>
+            <p>{number}</p>
+          </button>
+        </>
+      );
+    })}
+  </div>
+
+  <div className="flex-container-centered">
+    <button
+      className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+      onClick={handleSaveAsAnimationFile}>
+        <p><span className="text-xl">🖫 </span>Save Animation File</p>
+    </button>
+    <button
+      className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+      onClick={toggleLoadAnimationMenuVisible}>
+        <p><span className="text-2xl">{loadAnimationMenuVisible ? "^" : "▼"}</span> Load Animation Files</p>
+    </button>
+    <button
+      className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+      onClick={toggleDeleteAnimationMenuVisible}>
+        <p><span className="text-2xl">{deleteAnimationMenuVisible ? "^" : "▼" }</span> Delete Animation Files</p>
+    </button>
+  </div>
+
+  <div className="flex-container">
+    {
+      (loadAnimationMenuVisible) ? apiFileData.map((fileName) => {
+        return <button 
+                className="flex-item bg-bots-yellow hover:bg-bots-orange" 
+                key={fileName}
+                onClick={() => {handleGetSingleFile(fileName)}}>
+                  {fileName}
+                </button>}) 
+      : null
+    }
+    {
+      (deleteAnimationMenuVisible) ? apiFileData.map((fileName) => {
+        return <button 
+                className="flex-item bg-bots-yellow hover:bg-bots-orange" 
+                key={fileName}
+                onClick={() => {console.log("Delete: " + fileName)}}>
+                  {fileName}
+                </button>}) 
+      : null
+    }
+  </div>
+      
+</div>
+
+</div></>);}

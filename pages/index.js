@@ -162,7 +162,7 @@ export default function Home() {
       <div>
       <div className="flex items-center">
         <Image src="/logo.png" alt="Main logo" width="80" height="80" />
-        <div className="text-bots-orange font-robotomono text-3xl bold">
+        <div className="text-bots-orange font-robotomono text-4xl bold">
           BotsIQ Cobot Challenge Demo Interface
         </div>
       </div>
