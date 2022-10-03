@@ -29,6 +29,9 @@ export default function UnityWebPage(props) {
   const [playing, setPlaying] = useState();
   const [keyFrameIndices, setKeyFrameIndices] = useState([1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0]); // consider 0 vs 1-indexed!!!!!!
 
+  const [loadedFile, setLoadedFile] = useState([""]);
+  const [deletedFileNames, setDeletedFileNames] = useState(["reserved_1.json"]);
+
   function updateMaxFrames(newMaxFrames) {
     setMaxFrames(newMaxFrames);
     console.log(newMaxFrames);
@@ -336,14 +339,26 @@ export default function UnityWebPage(props) {
       },
     });
     const apiFileDataJson = await apiFileDataResponse.json();
-    setApiFileData(apiFileDataJson["response"].sort());
+    setApiFileData(apiFileDataJson["response"].sort().filter((fn) => {return !deletedFileNames.includes(fn)}));
     console.log(apiFileDataJson);
     return true;
   };
+  const handleSoftDeleteAnimationFile = (fileName) => {
+    let newDeletedFileNames = [...deletedFileNames, fileName];
+    setDeletedFileNames(newDeletedFileNames);
+    let newApiFileData = apiFileData.slice(apiFileData.indexOf(fileName), 1);
+    setApiFileData(newApiFileData);
+    //handleGetAllAnimationFiles();
+    toggleDeleteAnimationMenuVisible(false);
+  }
   
   const handleSaveAsAnimationFile = async () => {
-    let signal = robotArmManager.SendAnimationCommand();
+    //let signal = robotArmManager.SendAnimationCommand();
+    let signal = robotArmManager.MakeFileToSave_Signal(keyFrameIndices);
     props.changeMySignal(signal); 
+
+    console.log(signal);
+    
     
     const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/save-as-animation-file?angles_sequence=${signal}`;
     const apiSavedFileDataResponse = await fetch(url, {
@@ -357,6 +372,7 @@ export default function UnityWebPage(props) {
     setApiSavedFileData(apiSavedFileDataJson["response"]);
     handleGetAllAnimationFiles(); // reload the list of available files
     console.log(apiSavedFileDataJson);
+    
   };
 
   const handleTurnMotorsOff = async () => {
@@ -399,8 +415,9 @@ export default function UnityWebPage(props) {
     console.log(apiDataJson);
   }
 
-  async function handleGetSingleFile(item) { // TODO connect this to a button
-    console.log("Need to make the main file");
+  async function handleGetSingleFile(item) { 
+    console.log("Handle Get Single File: " + item);
+    setLoadedFile(item);
     const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-single-file?file=${item}`;
     const apiSingleFileDataResponse = await fetch(url, {
       method: "GET",
@@ -411,8 +428,26 @@ export default function UnityWebPage(props) {
     });
     const apiSingleFileDataJson = await apiSingleFileDataResponse.json();
     setApiSingleFileData(apiSingleFileDataJson["response"]);
-    setSignal(apiSingleFileData);
-    console.log(signal);
+    //setSignal(apiSingleFileData);
+    //console.log(signal);
+    const jsonString = apiSingleFileDataJson["response"].replace(/'/g,'"'); // need to turn ' to " to be parsable
+    const jsonData = JSON.parse(jsonString);
+    console.log(jsonData["commandsArm1"]);
+
+    // then go ahead and apply the data
+    robotArmManager._commandsArm1 = [...jsonData["commandsArm1"]];
+    robotArmManager._commandsArm2 = [...jsonData["commandsArm2"]];
+    robotArmManager._commandsArm3 = [...jsonData["commandsArm3"]];
+    robotArmManager._commandsArm4 = [...jsonData["commandsArm4"]];
+    robotArmManager._commandsArm5 = [...jsonData["commandsArm5"]];
+    robotArmManager._commandsArm6 = [...jsonData["commandsArm6"]];
+    animationServoWhichToChange(1, jsonData["commandsArm1"][curFrame]);
+    animationServoWhichToChange(2, jsonData["commandsArm2"][curFrame]);
+    animationServoWhichToChange(3, jsonData["commandsArm3"][curFrame]);
+    animationServoWhichToChange(4, jsonData["commandsArm4"][curFrame]);
+    animationServoWhichToChange(5, jsonData["commandsArm5"][curFrame]);
+    animationServoWhichToChange(6, jsonData["commandsArm6"][curFrame]);
+    setKeyFrameIndices([...jsonData["keyFrameIndices"]]);
   }
 
   //let list1 = [1, 2, 3, 4, 5, 6];
@@ -437,14 +472,20 @@ export default function UnityWebPage(props) {
   }
 
   let testInputRef = React.createRef();
+
+  function handleInterpolate() {
+    console.log("interpolate...");
+    console.log("/interpolate!");
+  }
   
 
   return (
     <>
       <div>
-        
+        {/* 
     {<p className="text-xs font-robotomono">SIG: {signal}</p>}
-    {<p className="text-xs font-robotomono">API DATA: {apiData}</p>}
+    {<p className="text-xs font-robotomono">API DATA: {apiData}</p>} */}
+    {<p className="text-xs font-robotomono">API SF DATA: {apiSingleFileData}</p>}
     {<p className="text-xs font-robotomono">API FILE DATA: {apiFileData}</p>}
     {<p className="text-xs font-robotomono">KF INDICES: {keyFrameIndices.join(", ")}</p>}
 
@@ -475,7 +516,7 @@ export default function UnityWebPage(props) {
               Speed:
             </span>
             <input
-              className="min-w-[50px] w-[7em] text-bots-light-gray font-bold border-2 rounded text-sm px-1 m-1"
+              className="min-w-[50px] w-[7em] text-bots-light-gray border-bots-light-gray font-bold border-2 rounded text-sm px-1 m-1"
               placeholder={robotArmManager.speed}
             />
             <Slider className="max-w-[140px]" min={0} max={10} defaultValue={1} disabled={true} />
@@ -700,18 +741,24 @@ export default function UnityWebPage(props) {
 
       <div className="flex-container">
         <button
-          className="flex-item-third bg-bots-light-gray hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+          className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
           onClick={handleToggleKeyframe}
         >
             <p>⯁</p>
             <p className="text-xs">Toggle Keyframe</p>
         </button>
         <button
+          className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+          onClick={handleInterpolate}
+        >
+          <p className="text-xl my-[-2px]">⊶</p>
+          <p className="text-xs">Interpolate Frames</p>
+        </button>
+        <button
           className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
           onClick={handleSendAllAnglesToApi}
         >
-        <p>⇨</p>
-        <p className="text-xs">Send Current Animation To Cobot</p>
+          <p className="text-xs">Send Current Animation To Cobot</p>
         </button>
       </div>
     </div>
@@ -726,15 +773,30 @@ export default function UnityWebPage(props) {
 <div className="LOWER THIRD =================================================================================================">
 
   <div>
-    <span className="text-bots-gray font-bold text-xs">Current Frame: </span>
+    <span className="text-bots-light-gray font-bold text-xs">File:</span>
     <input
-      className="w-[4em] text-bots-light-gray border-bots-gray font-bold border-2 rounded text-sm px-2 m-1"
-      placeholder={robotArmManager.speed}
-      value={curFrame+1}
+      className="w-[10em] text-bots-light-gray border-bots-light-gray font-bold border-2 rounded text-sm px-2 mx-4 m-1"
+      value={loadedFile}
+      readOnly={true}
     />
-    <span className="text-bots-gray font-bold text-xs"> Max Frames: </span>
+    <span className="text-bots-light-gray font-bold text-xs"> Current Frame:</span>
+    <input
+      className="w-[4em] text-bots-light-gray border-bots-light-gray font-bold border-2 rounded text-sm px-2 mx-4 m-1"
+      value={curFrame+1}
+      type="number"
+      min="1"
+      max={maxFrames}
+      readOnly={true}
+      onChange={(e) => {
+        let val = parseInt(e.target.val);
+        if (!isNaN(val) && 0 <= val && val < maxFrames) {
+          setCurFrame(val)
+        }
+      }}
+    />
+    <span className="text-bots-gray font-bold text-xs"> Max Frames:</span>
     <input 
-      className="w-[4em] text-bots-light-gray border-bots-gray font-bold border-2 rounded text-sm px-2 m-1"
+      className="w-[4em] text-bots-gray border-bots-gray font-bold border-2 rounded text-sm px-2 mx-4 m-1"
       value={maxFrames}
       type="number"
       min="1"
@@ -763,7 +825,7 @@ export default function UnityWebPage(props) {
                 : "bg-bots-white")
             }
             onClick={() => {
-              console.log("Implement frame button!");
+              setCurFrame(number-1);
             }}
           >
             <p>{keyFrameIndices[number-1] == 1 ? "⯁" : "⬦"}</p>
@@ -808,7 +870,10 @@ export default function UnityWebPage(props) {
         return <button 
                 className="flex-item bg-bots-yellow hover:bg-bots-orange" 
                 key={fileName}
-                onClick={() => {console.log("Delete: " + fileName)}}>
+                onClick={() => {
+                  console.log("Delete: " + fileName);
+                  handleSoftDeleteAnimationFile(fileName);
+                }}>
                   {fileName}
                 </button>}) 
       : null
