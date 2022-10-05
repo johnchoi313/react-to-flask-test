@@ -2,6 +2,16 @@ Set Sleep to NEVER
 
 CD INTO DIRECTORY FIRST!!
 
+
+---NEVER SLEEP:---
+  
+  0. Screensaver -> Disable Screensaver
+  1. Power -> Display -> Never (all)
+
+---IF FORGET ADMIN PASSWORD:---
+  
+  0. sudo raspi-config
+  
 ---CHANGING THE SCREEN RESOLUTION to 1920x1080 60hz:---
   (Fix link: https://askubuntu.com/questions/1215775/arm-ubuntu-wont-let-me-change-my-resolution)
   (See full list of modes here: https://raspberrypi.stackexchange.com/tags/config.txt/info | https://www.raspberrypi.com/documentation/computers/config_txt.html)
@@ -41,6 +51,8 @@ CD INTO DIRECTORY FIRST!!
   4. sudo python3.8 -m pip install unroll
   5. sudo python3.8 -m pip install pymycobot
   6. sudo python3.8 -m pip install flask
+  6.a apt-get install python3-flask (if fail)
+  6.b sudo apt install python-flask (if fail)
 
   7. sudo apt-get remove python3-virtualenv
   8. sudo python3.8 -m pip install virtualenv
@@ -50,7 +62,6 @@ CD INTO DIRECTORY FIRST!!
 
 ---INSTALLING NODE:---
 
-  11. sudo apt-get update
   12. sudo apt install nodejs
   13. npm install
   14. npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
@@ -65,8 +76,7 @@ CD INTO DIRECTORY FIRST!!
 ---(TROUBLESHOOT OPTIONAL) CREATE NEW FLASK VIRTUALENV:---
 
   0. virtualenv flask
-  1. cd flask
-  2. source bin/activate
+  1. source flask/bin/activate
 
 ---INSTALLING ROBOT SERVER AND SIMULATOR:---
 
@@ -74,8 +84,8 @@ https://github.com/johnchoi313/react-to-flask-test
 
 ---RUNNING SERVER(robotand webpage)---
 
-  15. (One shell) python3.8 -m pipenv run python routes.py
-  16. (Another shell) npm run dev
+  15. (One shell) sudo python3.8 -m pipenv run python routes.py
+  16. (Another shell) sudo npm run dev
 
 ---SETTING UP AUTOSTART:---
 
@@ -85,7 +95,8 @@ https://github.com/johnchoi313/react-to-flask-test
   (JUST USE FUCKING RC.LOCAL: https://www.simplified.guide/linux/automatically-run-program-on-startup#automatically-run-program-on-linux-startup-via-rclocal)
   sudo nano /etc/rc.local
   sudo chmod a+x /etc/rc.local
-  
+  sudo chmod +x autostart_all.sh
+
   (JUST USE THE FUCKING STARTUP APPLICATIONS)
 
   also: sudo update-rc.d autostart_initd.sh defaults
