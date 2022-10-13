@@ -31,6 +31,7 @@ export default function UnityWebPage(props) {
 
   const [loadedFile, setLoadedFile] = useState([""]);
   const [deletedFileNames, setDeletedFileNames] = useState(["reserved_1.json"]);
+  const [currentFileName, setCurrentFileName] = useState(["new_file"]);
 
   function updateMaxFrames(newMaxFrames) {
     setMaxFrames(newMaxFrames);
@@ -475,6 +476,7 @@ export default function UnityWebPage(props) {
 
   function handleInterpolate() {
     console.log("interpolate...");
+    
     console.log("/interpolate!");
   }
   
@@ -772,14 +774,8 @@ export default function UnityWebPage(props) {
 
 <div className="LOWER THIRD =================================================================================================">
 
-  <div>
-    <span className="text-bots-light-gray font-bold text-xs">File:</span>
-    <input
-      className="w-[10em] text-bots-light-gray border-bots-light-gray font-bold border-2 rounded text-sm px-2 mx-4 m-1"
-      value={loadedFile}
-      readOnly={true}
-    />
-    <span className="text-bots-light-gray font-bold text-xs"> Current Frame:</span>
+<div>
+<span className="text-bots-light-gray font-bold text-xs"> Current Frame:</span>
     <input
       className="w-[4em] text-bots-light-gray border-bots-light-gray font-bold border-2 rounded text-sm px-2 mx-4 m-1"
       value={curFrame+1}
@@ -810,8 +806,7 @@ export default function UnityWebPage(props) {
         }
         }} 
     />
-  </div>
-
+</div>
 
   <div className="flex-container">
     {frameList.map((number, index) => {
@@ -836,21 +831,45 @@ export default function UnityWebPage(props) {
     })}
   </div>
 
+
   <div className="flex-container-centered">
+    <input
+      className="w-[7em] text-bots-gray font-bold border-2 rounded text-sm px-2"
+      value={currentFileName}
+      onChange={(e) => {
+        setCurrentFileName(e.target.value);
+      }}
+    />
+    <input
+    className="w-[4em] text-bots-light-gray border-bots-light-gray font-bold border-2 rounded text-sm px-2"
+    value=".json"
+    disabled={true}
+  />
+
     <button
       className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
       onClick={handleSaveAsAnimationFile}>
-        <p><span className="text-xl">🖫 </span>Save Animation File</p>
+        <p><span className="text-xl">🖫 </span>Save Animation As</p>
     </button>
+
+    <select>
+      <option value="fruit">Fruit</option>
+      <option value="vegetable">Vegetable</option>
+      <option value="meat">Meat</option>
+    </select>
+
+ 
+
     <button
       className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
       onClick={toggleLoadAnimationMenuVisible}>
         <p><span className="text-2xl">{loadAnimationMenuVisible ? "^" : "▼"}</span> Load Animation Files</p>
     </button>
+
     <button
       className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
       onClick={toggleDeleteAnimationMenuVisible}>
-        <p><span className="text-2xl">{deleteAnimationMenuVisible ? "^" : "▼" }</span> Delete Animation Files</p>
+        <p><span className="text-2xl">{deleteAnimationMenuVisible ? "^" : "▼" }</span> Delete Animation File</p>
     </button>
   </div>
 
