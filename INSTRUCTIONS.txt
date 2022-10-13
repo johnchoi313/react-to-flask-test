@@ -1,5 +1,17 @@
+Set Sleep to NEVER
+
 CD INTO DIRECTORY FIRST!!
 
+
+---NEVER SLEEP:---
+  
+  0. Screensaver -> Disable Screensaver
+  1. Power -> Display -> Never (all)
+
+---IF FORGET ADMIN PASSWORD:---
+  
+  0. sudo raspi-config
+  
 ---CHANGING THE SCREEN RESOLUTION to 1920x1080 60hz:---
   (Fix link: https://askubuntu.com/questions/1215775/arm-ubuntu-wont-let-me-change-my-resolution)
   (See full list of modes here: https://raspberrypi.stackexchange.com/tags/config.txt/info | https://www.raspberrypi.com/documentation/computers/config_txt.html)
@@ -39,6 +51,8 @@ CD INTO DIRECTORY FIRST!!
   4. sudo python3.8 -m pip install unroll
   5. sudo python3.8 -m pip install pymycobot
   6. sudo python3.8 -m pip install flask
+  6.a apt-get install python3-flask (if fail)
+  6.b sudo apt install python-flask (if fail)
 
   7. sudo apt-get remove python3-virtualenv
   8. sudo python3.8 -m pip install virtualenv
@@ -48,7 +62,6 @@ CD INTO DIRECTORY FIRST!!
 
 ---INSTALLING NODE:---
 
-  11. sudo apt-get update
   12. sudo apt install nodejs
   13. npm install
   14. npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
@@ -63,8 +76,7 @@ CD INTO DIRECTORY FIRST!!
 ---(TROUBLESHOOT OPTIONAL) CREATE NEW FLASK VIRTUALENV:---
 
   0. virtualenv flask
-  1. cd flask
-  2. source bin/activate
+  1. source flask/bin/activate
 
 ---INSTALLING ROBOT SERVER AND SIMULATOR:---
 
@@ -72,24 +84,49 @@ https://github.com/johnchoi313/react-to-flask-test
 
 ---RUNNING SERVER(robotand webpage)---
 
-  15. (One shell) python3.8 -m pipenv run python routes.py
-  16. (Another shell) npm run dev
+  15. (One shell) sudo python3.8 -m pipenv run python routes.py
+  16. (Another shell) sudo npm run dev
 
 ---SETTING UP AUTOSTART:---
+
+  (use init.d method! ACTUALLY, INITD methodd SUCKS.)
+  (use systemd method, BECAUSE IT ACTUALLY F*CKING WORKS (actually, no it doesn't:): https://tecadmin.net/run-shell-script-as-systemd-service/)
+
+  (JUST USE FUCKING RC.LOCAL: https://www.simplified.guide/linux/automatically-run-program-on-startup#automatically-run-program-on-linux-startup-via-rclocal)
+  sudo nano /etc/rc.local
+  sudo chmod a+x /etc/rc.local
+  sudo chmod +x autostart_all.sh
+
+  (JUST USE THE FUCKING STARTUP APPLICATIONS)
+
+  also: sudo update-rc.d autostart_initd.sh defaults
 
   1. On the Desktop/ create a shell script file called main-shell-script.sh with the below contents:
 
     #!/bin/bash
 
-    x-terminal-emulator -e npm --prefix /home/pi/Desktop/react-to-flask-test run dev
-    x-terminal-emulator -e python3 /home/pi/Desktop/react-to-flask-test/routes.py
+    x-terminal-emulator -e npm --prefix /home/ubuntu/Desktop/react-to-flask-test run dev &
+    x-terminal-emulator -e python3 /home/ubuntu/Desktop/react-to-flask-test/routes.py &
+
+  1.a: if "main-shell-script.sh" a;ready exists, put it in /etc/init.d:
+  (NOTE: autostart initd script MUST NOT HAVE .sh at end)
+  
+   sudo cp main-shell-script /etc/init.d/main-shell-script
 
   2. Make the shell script executable by running this command from the 
      Desktop/ directory where the shell script should be located: 
 
-    sudo chmod +x main-shell-script.sh 
+   cd /etc/init.d
+
+   sudo chmod +x main-shell-script.sh 
+   sudo chown root:root main-shell-script.sh
    
-   Note: you only have to do this once to make the file executable. After that it won't have to be done again.
+   sudo update-rc.d autostart_initd.sh defaults
+   sudo update-rc.d autostart_initd.sh enable
+
+   ls /etc/rc*.d
+
+    Note: you only have to do this once to make the file executable. After that it won't have to be done again.
 
   3. You can test this shell script by running the following command from the directory where the shell script is saved:
 
@@ -111,6 +148,22 @@ https://github.com/johnchoi313/react-to-flask-test
 
   8. You should be good to go now. 
     To test it, enter sudo reboot from the terminal and when the computer boots up, you should see the 2 terminal windows open.
+
+---IF WIFI STOPS WORKING FOR NO REASON: (FU LINUX)---
+https://medium.com/@TSwarper/device-not-managed-problem-in-ubuntu-afa28c255ec9
+
+sudo nano /etc/NetworkManager/NetworkManager.conf
+
+change this:
+  [ifupdown]
+  managed=true
+to this:
+  [ifupdown]
+  managed=false
+  
+delete this:
+  [keyfile]
+  unmanaged-devices=interface-name:wlp2s0b1  
 
 ---VNC SERVER (OPTIONAL)----
 install raspberry pi vnc server: (not needed)
