@@ -46,6 +46,7 @@ export default function UnityWebPage(props) {
   }
   //let framelist = [1];//...Array(maxFrames).keys()].map((e)=>{return e+1});
 
+
   const { unityProvider, sendMessage, isLoaded, loadingProgression } =
     /* useUnityContext({
       loaderUrl: "build/webgl.loader.js",
@@ -476,6 +477,23 @@ export default function UnityWebPage(props) {
 
   function handleInterpolate() {
     console.log("interpolate...");
+    // TODO probably a better way to calculate this
+    var newFrames
+    var lastKeyFrame = 0;
+    var nextKeyFrame = -1;
+    for (var i = 0; i < maxFrames; i++) {
+      if (keyFrameIndices[i] == 0) { // if this is a tween frame
+        nextKeyFrame = maxFrames.indexOf(1, i);
+        if (nextKeyFrame == -1) { // no following KFs, let this mimic the val of the last KF
+          
+        }
+        else {
+        }
+      }
+      else {
+        lastKeyFrame = i;
+      }
+    }
     
     console.log("/interpolate!");
   }
@@ -787,6 +805,7 @@ export default function UnityWebPage(props) {
         let val = parseInt(e.target.val);
         if (!isNaN(val) && 0 <= val && val < maxFrames) {
           setCurFrame(val)
+          handleInterpolate();
         }
       }}
     />
@@ -821,6 +840,7 @@ export default function UnityWebPage(props) {
             }
             onClick={() => {
               setCurFrame(number-1);
+              handleInterpolate();
             }}
           >
             <p>{keyFrameIndices[number-1] == 1 ? "⯁" : "⬦"}</p>
