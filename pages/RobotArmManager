@@ -3,6 +3,26 @@ export default class RobotArmManager {
     this._name = "Nameless";
     this._speed = 1;
     this._commandsArm1 = [
+      0, 0, 10, 0, -1, 0
+    ];
+    this._commandsArm2 = [
+      0, 0, 10, 0, -1, 0
+    ];
+    this._commandsArm3 = [
+      0, 0, 10, 0, -1, 0
+    ];
+    this._commandsArm4 = [
+      0, 0, 10, 0, -1, 0
+    ];
+    this._commandsArm5 = [
+      0, 0, 10, 0, -1, 0
+    ];
+    this._commandsArm6 = [
+      0, 0, 10, 0, -1, 0
+    ];
+    /*
+
+    this._commandsArm1 = [
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
     this._commandsArm2 = [
@@ -20,6 +40,8 @@ export default class RobotArmManager {
     this._commandsArm6 = [
       0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
+
+    */
     this._frame = 0;
     // this._yearOffset = 0;
   }
@@ -110,6 +132,35 @@ export default class RobotArmManager {
 
     this["commandsArm" + particularArm][this._frame] = newEntry;
   }
+
+  DoInterpolation(keyframes) {
+    console.log("[1] " + this._commandsArm1.join(", "));
+    console.log("[2] " + this._commandsArm2.join(", "));
+    console.log("[3] " + this._commandsArm3.join(", "));
+    console.log("[4] " + this._commandsArm4.join(", "));
+    console.log("[5] " + this._commandsArm5.join(", "));
+    console.log("[6] " + this._commandsArm6.join(", "));
+  }
+
+  SetPoseForFrame(poseValues, frameNumber) { // TODO LIV maybe not
+    this._commandsArm1[frameNumber] = poseValues[1];
+    this._commandsArm2[frameNumber] = poseValues[2];
+    this._commandsArm3[frameNumber] = poseValues[3];
+    this._commandsArm4[frameNumber] = poseValues[4];
+    this._commandsArm5[frameNumber] = poseValues[5];
+    this._commandsArm6[frameNumber] = poseValues[6];
+  }
+  GetPoseForFrame(frameNumber) { // TODO LIV maybe not
+    return [
+      this["commandsArm" + 1][frameNumber],
+      this["commandsArm" + 2][frameNumber],
+      this["commandsArm" + 3][frameNumber],
+      this["commandsArm" + 4][frameNumber],
+      this["commandsArm" + 5][frameNumber],
+      this["commandsArm" + 6][frameNumber]
+    ];
+  }
+
   //updates for you the particular entry of a clip
   AnimationFrameReceive(particularArm) {
     let myReturn = 0;

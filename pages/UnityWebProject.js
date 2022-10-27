@@ -22,12 +22,12 @@ export default function UnityWebPage(props) {
   const [joints, setJoints] = useState([0.0, 0.0, 0.0, 0.0, 0.0, 0.0]);
   const [curFrame, setCurFrame] = useState(0);
 
-  const [maxFrames, setMaxFrames] = useState(12);
+  const [maxFrames, setMaxFrames] = useState(6);
   //const [frameList, setFrameList] = useState([...Array(maxFrames).keys()].map((e)=>{return e+1}));
-  const [frameList, setFrameList] = useState([...Array(12).keys()].map((e)=>{return e+1}));
+  const [frameList, setFrameList] = useState([...Array(6).keys()].map((e)=>{return e+1})); // TODO magic number bc using maxFrames doesn't work--don't want this to be a long term solution
   const [changedFrame, setChangedFrame] = useState(false);
   const [playing, setPlaying] = useState();
-  const [keyFrameIndices, setKeyFrameIndices] = useState([1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0]); // consider 0 vs 1-indexed!!!!!!
+  const [keyFrameIndices, setKeyFrameIndices] = useState([0,0,1,0,1,0]); // consider 0 vs 1-indexed!!!!!!
 
   const [loadedFile, setLoadedFile] = useState([""]);
   const [deletedFileNames, setDeletedFileNames] = useState(["reserved_1.json"]);
@@ -258,7 +258,6 @@ export default function UnityWebPage(props) {
     animationServoWhichToChange(6, 0);
   }
 
-
   const [apiData, setApiData] = useState("");
   const [signal, setSignal] = useState("");
   const [apiFileData, setApiFileData] = useState("");
@@ -475,29 +474,232 @@ export default function UnityWebPage(props) {
 
   let testInputRef = React.createRef();
 
-  function handleInterpolate() {
+  function handleInterpolate2() {
     console.log("interpolate...");
-    // TODO probably a better way to calculate this
-    var newFrames
-    var lastKeyFrame = 0;
-    var nextKeyFrame = -1;
-    for (var i = 0; i < maxFrames; i++) {
-      if (keyFrameIndices[i] == 0) { // if this is a tween frame
-        nextKeyFrame = maxFrames.indexOf(1, i);
-        if (nextKeyFrame == -1) { // no following KFs, let this mimic the val of the last KF
-          
+    var lastKeyFrame = keyFrameIndices.indexOf(1, 0);
+    if (lastKeyFrame != -1) {
+      var nextKeyFrame = keyFrameIndices.indexOf(1, i);
+    }
+    while (True) {
+      const lastPose = robotArmManager.GetPoseForFrame(lastKeyFrame);
+      const nextPose = robotArmManager.GetPoseForFrame(nextKeyFrame);
+      var interpolatedValues = new Array(lastPose.length).fill(0);
+      for (var j = 0; j < interpolatedValues.length; j++) {
+        interpolatedValues[j] += lastPose[j] * (rightInterval/interval);
+        interpolatedValues[j] += nextPose[j] * (rightInterval/interval);
+      }
+
+
+    }
+    console.log("interpolated!");
+  }
+
+  function handleInterpolate1() {
+    console.log("interpolate...");
+    
+    // check how many keyframes we even have
+    const sum = keyFrameIndices.reduce((partialSum, a) => partialSum + a, 0);
+    if (sum == 0) {
+      // no key frames
+      return;
+    }
+    else if (sum == 1) {
+      // only 1 key frame
+    }
+    else {
+      // at least 2 key frames
+      var lastKeyFrame = -1;
+      var nextKeyFrame = keyFrameIndices.indexOf(1, 0);
+      for (var frameIdx = 0; frameIdx < maxFrames; frameIdx++) {
+        if (keyFrameIndices[frameIdx] == 1) {
+          // this is a key frame
+          lastKeyFrame = nextKeyFrame;
+          nextKeyFrame = frameIdx;
         }
         else {
+          // this is a tween frame
+          if (lastKeyFrame == -1) {
+            // we're in the beginning, before the first key frame
+            robotArmManager.SetPoseForFrame(robotArmManager.GetPoseForFrame(nextKeyFrame), frameIdx);
+          }
+          else if (nextKeyFrame == -1) {
+            // we're at the end, after the last key frame
+            robotArmManager.SetPoseForFrame(robotArmManager.GetPoseForFrame(lastKeyFrame), frameIdx);
+          }
+          else {
+
+          }
         }
       }
-      else {
-        lastKeyFrame = i;
-      }
     }
-    
+
     console.log("/interpolate!");
   }
+  function handleInterpolate() {
+    console.log("interpolate...");
+    var newArm1 = [...robotArmManager.commandsArm1];
+
+    var keyFrameIndicesAsIntegers = [];
+    
+    for (var frameIdx = 0; frameIdx < keyFrameIndices.length; frameIdx++) {
+      if (keyFrameIndices[frameIdx] == 1) {
+        keyFrameIndicesAsIntegers.push(frameIdx);
+      }
+    }
+
+    if (keyFrameIndicesAsIntegers.length == 0) {
+      // we don't have any key frames
+      return;
+    }
+    
+    var L = -1;
+    var rCounter = 0;
+    var R = keyFrameIndicesAsIntegers[rCounter];
+    for (var frameIdx = 0; frameIdx < keyFrameIndices.length; frameIdx++) {
+      if (keyFrameIndices[frameIdx]) {
+        // this is a keyframe
+        L = frameIdx;
+        rCounter++;
+        if (rCounter < keyFrameIndicesAsIntegers.length) {
+          R = keyFrameIndicesAsIntegers[rCounter];
+        }
+        else {
+          R = -1;
+        }
+        newArm1[curFrame] = robotArmManager.commandsArm1[curFrame];
+      }
+      else if (L == -1) {
+        // we're at the beginning
+        newArm1[frameIdx] = robotArmManager.commandsArm1[R];
+      }
+      else if (R == -1) {
+        // we're at the end
+        newArm1[frameIdx] = robotArmManager.commandsArm1[L];
+      }
+      else {
+        // we're between two keyframes
+        newArm1[frameIdx] = (robotArmManager.commandsArm1[L] + robotArmManager.commandsArm1[R]) / 2;
+
+      }
+    }
+
   
+    robotArmManager.commandsArm1 = newArm1;
+    console.log(robotArmManager.commandsArm1);
+
+      
+    setJoints([robotArmManager.commandsArm1[curFrame], 0,0,0,0,0]);
+    animationServoWhichToChange(1, robotArmManager.commandsArm1[curFrame]);
+
+
+    console.log("interpolated!");
+  }
+
+  function printCommandArmData() {
+    console.log("[1] " + robotArmManager._commandsArm1.join(", "));
+    console.log("[2] " + robotArmManager._commandsArm2.join(", "));
+    console.log("[3] " + robotArmManager._commandsArm3.join(", "));
+    console.log("[4] " + robotArmManager._commandsArm4.join(", "));
+    console.log("[5] " + robotArmManager._commandsArm5.join(", "));
+    console.log("[6] " + robotArmManager._commandsArm6.join(", "));
+    console.log("[ ] " + keyFrameIndices.map(x => x == 1 ? "⯁" : ".").join("  "));
+  }
+
+  function newInterpolate() {
+    console.log("================================================");
+    printCommandArmData();
+
+    var data = [
+      [...robotArmManager._commandsArm1],
+      [...robotArmManager._commandsArm2],
+      [...robotArmManager._commandsArm3],
+      [...robotArmManager._commandsArm4],
+      [...robotArmManager._commandsArm5],
+      [...robotArmManager._commandsArm6]
+    ];
+
+    var frame = 0;
+    var lastKeyframe = -1;
+    var nextKeyframe = -1;
+    while (frame < robotArmManager._commandsArm1.length) {
+      nextKeyframe = keyFrameIndices.indexOf(1, frame);
+      if (nextKeyframe == -1 && lastKeyframe == -1) {
+        // There are no keyframes at all. No interpolation to do, break out.
+        console.log("no keyframes");
+        break;
+      }
+      else if (frame == nextKeyframe) {
+        // At a keyframe. Do no interpolation, but update pointer to last keyframe.
+        lastKeyframe = frame;
+        console.log("at a keyframe");
+      }
+      else if (lastKeyframe == -1) {
+        // In the beginning. Set value to upcoming keyframe.
+        console.log("in the beginning");
+        setByOneKeyframe(data, frame, nextKeyframe);
+      }
+      else if (nextKeyframe == -1) {
+        // At the end. Set value to last keyframe.
+        console.log("at the end");
+        setByOneKeyframe(data, frame, lastKeyframe);
+      }
+      else {
+        // In between two keyframes. Set value to an interpolation of the two.
+        console.log("in between");
+        setByTwoKeyframes(data, frame, lastKeyframe, nextKeyframe);
+      }
+      frame++;
+    }
+    /*
+    robotArmManager._commandsArm1 = [...data[0]];
+    robotArmManager._commandsArm2 = [...data[1]];
+    robotArmManager._commandsArm3 = [...data[2]];
+    robotArmManager._commandsArm4 = [...data[3]];
+    robotArmManager._commandsArm5 = [...data[4]];
+    robotArmManager._commandsArm6 = [...data[5]];
+    */
+    robotArmManager.commandsArm1 = [...data[0]];
+    robotArmManager.commandsArm2 = [...data[1]];
+    robotArmManager.commandsArm3 = [...data[2]];
+    robotArmManager.commandsArm4 = [...data[3]];
+    robotArmManager.commandsArm5 = [...data[4]];
+    robotArmManager.commandsArm6 = [...data[5]];
+
+    const newJoints = [...joints];
+    for (var i = 0; i < 6; i++) {
+      //animationServoWhichToChange(i+1, data[i][curFrame]);
+      newJoints[i] = data[i][curFrame];
+    }
+    setJoints(newJoints);
+    sendAnimationCommand();
+
+    printCommandArmData();
+  }
+
+
+
+
+  function setByOneKeyframe(data, frameToSet, frameToCopy) {
+    for (var arm = 0; arm < data.length; arm++) {
+      data[arm][frameToSet] = data[arm][frameToCopy];
+    }
+  }
+  function setByTwoKeyframes(data, frameToSet, frameA, frameB) {
+    if (frameA == frameB) {
+      console.log("Error: interpolating between keyframe and itself");
+    }
+
+    var interval = frameB - frameA;
+    var leftInterval = frameToSet - frameA;
+    var rightInterval = frameB - frameToSet;
+    console.log(1.0*rightInterval/interval);
+    for (var arm = 0; arm < data.length; arm++) {
+      data[arm][frameToSet] = data[arm][frameA]*(1.0*rightInterval/interval) + data[arm][frameB]*(1.0*leftInterval/interval);
+  }
+}
+
+
+
 
   return (
     <>
@@ -673,6 +875,9 @@ export default function UnityWebPage(props) {
                         animationServoWhichToChange(number, newArr[index]);}}>
                       -
                     </button>
+
+
+
                     <div className="flex-item-90 mt-4">
                       <Slider
                         min={-120}
@@ -681,12 +886,24 @@ export default function UnityWebPage(props) {
                           number
                         )}
                         onChange={(value) => {
+                          console.log("!");
                           let newArr = [...joints];
                           newArr[index] = value;
                           setJoints(newArr);
+
+
                           animationServoWhichToChange(number, value);
+
+
+                          var newArmArray = [...robotArmManager["commandsArm" + (number)]];
+                          newArmArray[curFrame] = value;
+                          robotArmManager["commandsArm" + (number)] = newArmArray;
+                          console.log(robotArmManager["commandsArm" + (number)]);
                         }}
                       />
+
+
+
                     </div>
                     <button
                       className="bg-bots-orange hover:bg-bots-orange text-bots-gray font-bold px-2 rounded font-robotomono"
@@ -768,13 +985,6 @@ export default function UnityWebPage(props) {
             <p className="text-xs">Toggle Keyframe</p>
         </button>
         <button
-          className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-          onClick={handleInterpolate}
-        >
-          <p className="text-xl my-[-2px]">⊶</p>
-          <p className="text-xs">Interpolate Frames</p>
-        </button>
-        <button
           className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
           onClick={handleSendAllAnglesToApi}
         >
@@ -805,7 +1015,8 @@ export default function UnityWebPage(props) {
         let val = parseInt(e.target.val);
         if (!isNaN(val) && 0 <= val && val < maxFrames) {
           setCurFrame(val)
-          handleInterpolate();
+          robotArmManager.frame = number-1;
+          // handleInterpolate(); TODO interpolate
         }
       }}
     />
@@ -840,7 +1051,8 @@ export default function UnityWebPage(props) {
             }
             onClick={() => {
               setCurFrame(number-1);
-              handleInterpolate();
+              robotArmManager.frame = number-1;
+              // handleInterpolate(); TODO interpolate
             }}
           >
             <p>{keyFrameIndices[number-1] == 1 ? "⯁" : "⬦"}</p>
@@ -920,5 +1132,12 @@ export default function UnityWebPage(props) {
   </div>
       
 </div>
+<button 
+                className="flex-item bg-bots-yellow hover:bg-bots-orange" 
+                onClick={() => {newInterpolate()}}>
+                  interpolate
+                </button>
 
-</div></>);}
+</div></>
+
+);}
