@@ -10,6 +10,22 @@ import RobotArmManager from "./RobotArmManager";
 import Slider from "rc-slider";
 import { loadGetInitialProps } from "next/dist/shared/lib/utils";
 
+// [x] files as dropdowns
+// [x] interpolate called automatically
+//     - when clicking timeline to new frame or otherwise navigating to a new frame 
+//      (playing animation, if we have a frame advance button) 
+//      also probably when growing/shrinking the frame list
+// [x] delete file: create alert/confirmation, then trigger soft delete
+//      maybe for now I could just show a button? idk how react works w/ alerts atm
+// [ ] need to make a way to zero out file values (new poses, an empty keyframe list, etc)
+// [ ] bug fixes below
+// [ ] css tweaks (as below and also in general)
+//
+// Thursday Morning:
+// TODO!!! sliders don't update when expanding timeline/maxFrames and navigating to one of the newly created frames
+// TODO - clicking through the timeline should set the animation/webGL to the pose at that frame
+// TODO - how to make a border for select/dropdown
+
 export default function UnityWebPage(props) {
   const [isUnityMounted, setIsUnityMounted] = useState(true);
   const [playAnimation, setPlayAnimation] = useState(false);
@@ -125,6 +141,7 @@ export default function UnityWebPage(props) {
       if (isLoaded) {
         sendAnimationCommand();
         setNewRobotArmManager(new RobotArmManager());
+        handleGetAllAnimationFiles();
       }
     },
     [isLoaded]
@@ -196,6 +213,8 @@ export default function UnityWebPage(props) {
     setPlayAnimation(true);
   }
   function PlayAnimation() {
+    newInterpolate();
+
     //console.log(playAnimation);
     if (playAnimation === true) {
       robotArmManager.frame += 1;
@@ -260,7 +279,7 @@ export default function UnityWebPage(props) {
 
   const [apiData, setApiData] = useState("");
   const [signal, setSignal] = useState("");
-  const [apiFileData, setApiFileData] = useState("");
+  const [apiFileData, setApiFileData] = useState([]);
   const [apiSavedFileData, setApiSavedFileData] = useState("");
   const [apiSingleFileData, setApiSingleFileData] = useState("");
 
@@ -331,6 +350,10 @@ export default function UnityWebPage(props) {
   };
 
   const handleGetAllAnimationFiles = async () => {
+    setApiFileData(["File 1", "File 2", "File 3"]);
+    return true;
+
+    /*
     const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-all-animation-files`;
     const apiFileDataResponse = await fetch(url, {
       method: "GET",
@@ -340,10 +363,25 @@ export default function UnityWebPage(props) {
       },
     });
     const apiFileDataJson = await apiFileDataResponse.json();
-    setApiFileData(apiFileDataJson["response"].sort().filter((fn) => {return !deletedFileNames.includes(fn)}));
+    setApiFileData(apiFileDataJson["response"].sort());
     console.log(apiFileDataJson);
     return true;
+    */
   };
+
+  function askToConfirmDelete() {
+    if (confirm("Do you really want to delete '" + currentFileName + ".json'?" )) {
+      console.log("Delete!");
+      handleSoftDeleteAnimationFile(currentFileName);
+      setCurrentFileName("new_file");
+    }
+    else {
+      console.log("jk lol");
+    }
+    // TODO how to zero out all poses/keyframes
+    // should probs have these in initialization fns, huh,,,,
+  }
+
   const handleSoftDeleteAnimationFile = (fileName) => {
     let newDeletedFileNames = [...deletedFileNames, fileName];
     setDeletedFileNames(newDeletedFileNames);
@@ -394,6 +432,7 @@ export default function UnityWebPage(props) {
     let newArr = [...keyFrameIndices];
     newArr[curFrame] = +!newArr[curFrame];
     setKeyFrameIndices(newArr);
+    newInterpolate();
   }
 
   const handleSendPose = async () => {
@@ -474,126 +513,6 @@ export default function UnityWebPage(props) {
 
   let testInputRef = React.createRef();
 
-  function handleInterpolate2() {
-    console.log("interpolate...");
-    var lastKeyFrame = keyFrameIndices.indexOf(1, 0);
-    if (lastKeyFrame != -1) {
-      var nextKeyFrame = keyFrameIndices.indexOf(1, i);
-    }
-    while (True) {
-      const lastPose = robotArmManager.GetPoseForFrame(lastKeyFrame);
-      const nextPose = robotArmManager.GetPoseForFrame(nextKeyFrame);
-      var interpolatedValues = new Array(lastPose.length).fill(0);
-      for (var j = 0; j < interpolatedValues.length; j++) {
-        interpolatedValues[j] += lastPose[j] * (rightInterval/interval);
-        interpolatedValues[j] += nextPose[j] * (rightInterval/interval);
-      }
-
-
-    }
-    console.log("interpolated!");
-  }
-
-  function handleInterpolate1() {
-    console.log("interpolate...");
-    
-    // check how many keyframes we even have
-    const sum = keyFrameIndices.reduce((partialSum, a) => partialSum + a, 0);
-    if (sum == 0) {
-      // no key frames
-      return;
-    }
-    else if (sum == 1) {
-      // only 1 key frame
-    }
-    else {
-      // at least 2 key frames
-      var lastKeyFrame = -1;
-      var nextKeyFrame = keyFrameIndices.indexOf(1, 0);
-      for (var frameIdx = 0; frameIdx < maxFrames; frameIdx++) {
-        if (keyFrameIndices[frameIdx] == 1) {
-          // this is a key frame
-          lastKeyFrame = nextKeyFrame;
-          nextKeyFrame = frameIdx;
-        }
-        else {
-          // this is a tween frame
-          if (lastKeyFrame == -1) {
-            // we're in the beginning, before the first key frame
-            robotArmManager.SetPoseForFrame(robotArmManager.GetPoseForFrame(nextKeyFrame), frameIdx);
-          }
-          else if (nextKeyFrame == -1) {
-            // we're at the end, after the last key frame
-            robotArmManager.SetPoseForFrame(robotArmManager.GetPoseForFrame(lastKeyFrame), frameIdx);
-          }
-          else {
-
-          }
-        }
-      }
-    }
-
-    console.log("/interpolate!");
-  }
-  function handleInterpolate() {
-    console.log("interpolate...");
-    var newArm1 = [...robotArmManager.commandsArm1];
-
-    var keyFrameIndicesAsIntegers = [];
-    
-    for (var frameIdx = 0; frameIdx < keyFrameIndices.length; frameIdx++) {
-      if (keyFrameIndices[frameIdx] == 1) {
-        keyFrameIndicesAsIntegers.push(frameIdx);
-      }
-    }
-
-    if (keyFrameIndicesAsIntegers.length == 0) {
-      // we don't have any key frames
-      return;
-    }
-    
-    var L = -1;
-    var rCounter = 0;
-    var R = keyFrameIndicesAsIntegers[rCounter];
-    for (var frameIdx = 0; frameIdx < keyFrameIndices.length; frameIdx++) {
-      if (keyFrameIndices[frameIdx]) {
-        // this is a keyframe
-        L = frameIdx;
-        rCounter++;
-        if (rCounter < keyFrameIndicesAsIntegers.length) {
-          R = keyFrameIndicesAsIntegers[rCounter];
-        }
-        else {
-          R = -1;
-        }
-        newArm1[curFrame] = robotArmManager.commandsArm1[curFrame];
-      }
-      else if (L == -1) {
-        // we're at the beginning
-        newArm1[frameIdx] = robotArmManager.commandsArm1[R];
-      }
-      else if (R == -1) {
-        // we're at the end
-        newArm1[frameIdx] = robotArmManager.commandsArm1[L];
-      }
-      else {
-        // we're between two keyframes
-        newArm1[frameIdx] = (robotArmManager.commandsArm1[L] + robotArmManager.commandsArm1[R]) / 2;
-
-      }
-    }
-
-  
-    robotArmManager.commandsArm1 = newArm1;
-    console.log(robotArmManager.commandsArm1);
-
-      
-    setJoints([robotArmManager.commandsArm1[curFrame], 0,0,0,0,0]);
-    animationServoWhichToChange(1, robotArmManager.commandsArm1[curFrame]);
-
-
-    console.log("interpolated!");
-  }
 
   function printCommandArmData() {
     console.log("[1] " + robotArmManager._commandsArm1.join(", "));
@@ -939,6 +858,7 @@ export default function UnityWebPage(props) {
           <button
             className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
             onClick={() => {
+              newInterpolate();
               sendAnimationFrameToDisplay(-1);
             }}
           >
@@ -967,6 +887,7 @@ export default function UnityWebPage(props) {
           <button
             className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
             onClick={() => {
+              newInterpolate();
               sendAnimationFrameToDisplay(1);
             }}
           >
@@ -1016,7 +937,7 @@ export default function UnityWebPage(props) {
         if (!isNaN(val) && 0 <= val && val < maxFrames) {
           setCurFrame(val)
           robotArmManager.frame = number-1;
-          // handleInterpolate(); TODO interpolate
+          newInterpolate();
         }
       }}
     />
@@ -1034,6 +955,7 @@ export default function UnityWebPage(props) {
           setMaxFrames(val);
           setFrameList([...Array(val).keys()].map((e)=>{return e+1}));
         }
+        newInterpolate();
         }} 
     />
 </div>
@@ -1052,7 +974,7 @@ export default function UnityWebPage(props) {
             onClick={() => {
               setCurFrame(number-1);
               robotArmManager.frame = number-1;
-              // handleInterpolate(); TODO interpolate
+              newInterpolate();
             }}
           >
             <p>{keyFrameIndices[number-1] == 1 ? "⯁" : "⬦"}</p>
@@ -1064,9 +986,9 @@ export default function UnityWebPage(props) {
   </div>
 
 
-  <div className="flex-container-centered">
+  <div className="flex-container">
     <input
-      className="w-[7em] text-bots-gray font-bold border-2 rounded text-sm px-2"
+      className="text-bots-gray flex-item font-bold border-2 rounded text-sm px-2"
       value={currentFileName}
       onChange={(e) => {
         setCurrentFileName(e.target.value);
@@ -1079,59 +1001,46 @@ export default function UnityWebPage(props) {
   />
 
     <button
-      className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+      className="flex-item-50 bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
       onClick={handleSaveAsAnimationFile}>
-        <p><span className="text-xl">🖫 </span>Save Animation As</p>
+        <p><span className="text-xl"></span>Save Animation File</p>
     </button>
+</div>
 
-    <select>
-      <option value="fruit">Fruit</option>
-      <option value="vegetable">Vegetable</option>
-      <option value="meat">Meat</option>
+<div className="flex-container">
+
+<button 
+      className="flex-item-50 bg-bots-white text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+
+      >Load Animation File:</button>
+
+    <select className="flex-item bg-bots-subtle mx-2">
+    {apiFileData.map((fileName, index) => {
+      return (
+        <option value={fileName}>{fileName}</option>
+      )
+    })}
     </select>
-
  
-
-    <button
+    {/*<button
       className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
       onClick={toggleLoadAnimationMenuVisible}>
         <p><span className="text-2xl">{loadAnimationMenuVisible ? "^" : "▼"}</span> Load Animation Files</p>
-    </button>
+  </button>*/}
 
     <button
-      className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-      onClick={toggleDeleteAnimationMenuVisible}>
-        <p><span className="text-2xl">{deleteAnimationMenuVisible ? "^" : "▼" }</span> Delete Animation File</p>
+      className="flex-item-50 bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+      onClick={askToConfirmDelete}>
+        <p>Delete Animation File</p>
     </button>
   </div>
 
-  <div className="flex-container">
-    {
-      (loadAnimationMenuVisible) ? apiFileData.map((fileName) => {
-        return <button 
-                className="flex-item bg-bots-yellow hover:bg-bots-orange" 
-                key={fileName}
-                onClick={() => {handleGetSingleFile(fileName)}}>
-                  {fileName}
-                </button>}) 
-      : null
-    }
-    {
-      (deleteAnimationMenuVisible) ? apiFileData.map((fileName) => {
-        return <button 
-                className="flex-item bg-bots-yellow hover:bg-bots-orange" 
-                key={fileName}
-                onClick={() => {
-                  console.log("Delete: " + fileName);
-                  handleSoftDeleteAnimationFile(fileName);
-                }}>
-                  {fileName}
-                </button>}) 
-      : null
-    }
-  </div>
       
 </div>
+<br />
+<br />
+<br />
+<br />
 <button 
                 className="flex-item bg-bots-yellow hover:bg-bots-orange" 
                 onClick={() => {newInterpolate()}}>

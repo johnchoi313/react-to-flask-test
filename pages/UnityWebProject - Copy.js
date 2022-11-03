@@ -10,6 +10,7 @@ import RobotArmManager from "./RobotArmManager";
 import Slider from "rc-slider";
 import { loadGetInitialProps } from "next/dist/shared/lib/utils";
 
+
 export default function UnityWebPage(props) {
   const [isUnityMounted, setIsUnityMounted] = useState(true);
   const [playAnimation, setPlayAnimation] = useState(false);

@@ -20,6 +20,7 @@ module.exports = {
       "bots-blue": "#1FB6FF",
       "bots-light-blue": "#6FD6FF",
       "bots-white": "#FFFFFF",
+      "bots-subtle": "#F0FAFF"
     },
   },
   plugins: [

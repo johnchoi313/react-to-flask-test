@@ -105,6 +105,10 @@ input {
   padding: 5px;
   width: 20%;
 }
+.flex-item-30 {
+  padding: 5px;
+  width: 30%;
+}
 .flex-item-third {
   padding: 5px;
   width: 50%;
