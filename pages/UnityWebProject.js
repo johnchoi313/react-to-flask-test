@@ -16,15 +16,15 @@ import { loadGetInitialProps } from "next/dist/shared/lib/utils";
 //      (playing animation, if we have a frame advance button) 
 //      also probably when growing/shrinking the frame list
 // [x] delete file: create alert/confirmation, then trigger soft delete
-//      maybe for now I could just show a button? idk how react works w/ alerts atm
-// [ ] need to make a way to zero out file values (new poses, an empty keyframe list, etc)
-// [ ] bug fixes below
-// [ ] css tweaks (as below and also in general)
+// [?] need to make a way to zero out file values (new poses, an empty keyframe list, etc)
+//       wait, what did this mean?
+// [x] make the load file/delete file buttons actually connect to fns!!
 //
 // Thursday Morning:
-// TODO!!! sliders don't update when expanding timeline/maxFrames and navigating to one of the newly created frames
-// TODO - clicking through the timeline should set the animation/webGL to the pose at that frame
-// TODO - how to make a border for select/dropdown
+// [x] TODO!!! sliders don't update when expanding timeline/maxFrames and navigating to one of the newly created frames
+// [x] TODO - clicking through the timeline should set the animation/webGL to the pose at that frame
+// [L] TODO - how to make a border for select/dropdown
+// take a closer look at handleSoftDeletion
 
 export default function UnityWebPage(props) {
   const [isUnityMounted, setIsUnityMounted] = useState(true);
@@ -45,7 +45,7 @@ export default function UnityWebPage(props) {
   const [playing, setPlaying] = useState();
   const [keyFrameIndices, setKeyFrameIndices] = useState([0,0,1,0,1,0]); // consider 0 vs 1-indexed!!!!!!
 
-  const [loadedFile, setLoadedFile] = useState([""]);
+  const [loadedFile, setLoadedFile] = useState(["File 1"]);
   const [deletedFileNames, setDeletedFileNames] = useState(["reserved_1.json"]);
   const [currentFileName, setCurrentFileName] = useState(["new_file"]);
 
@@ -350,10 +350,9 @@ export default function UnityWebPage(props) {
   };
 
   const handleGetAllAnimationFiles = async () => {
-    setApiFileData(["File 1", "File 2", "File 3"]);
-    return true;
+    //setApiFileData(["File 1", "File 2", "File 3"]); //while no robot access, dummy data
+    //return true;
 
-    /*
     const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-all-animation-files`;
     const apiFileDataResponse = await fetch(url, {
       method: "GET",
@@ -366,7 +365,7 @@ export default function UnityWebPage(props) {
     setApiFileData(apiFileDataJson["response"].sort());
     console.log(apiFileDataJson);
     return true;
-    */
+    
   };
 
   function askToConfirmDelete() {
@@ -374,21 +373,21 @@ export default function UnityWebPage(props) {
       console.log("Delete!");
       handleSoftDeleteAnimationFile(currentFileName);
       setCurrentFileName("new_file");
+      // TODO LIV this is where it would be nice to zero everything out
     }
     else {
       console.log("jk lol");
     }
-    // TODO how to zero out all poses/keyframes
-    // should probs have these in initialization fns, huh,,,,
   }
 
-  const handleSoftDeleteAnimationFile = (fileName) => {
+  const handleSoftDeleteAnimationFile = (fileName) => { // TODO LIV check Friday morning!
     let newDeletedFileNames = [...deletedFileNames, fileName];
     setDeletedFileNames(newDeletedFileNames);
     let newApiFileData = apiFileData.slice(apiFileData.indexOf(fileName), 1);
     setApiFileData(newApiFileData);
     //handleGetAllAnimationFiles();
     toggleDeleteAnimationMenuVisible(false);
+    // TODO LIV this seems fishy
   }
   
   const handleSaveAsAnimationFile = async () => {
@@ -428,15 +427,8 @@ export default function UnityWebPage(props) {
     console.log(apiDataJson);
   }
 
-  const handleToggleKeyframe = () => {
-    let newArr = [...keyFrameIndices];
-    newArr[curFrame] = +!newArr[curFrame];
-    setKeyFrameIndices(newArr);
-    newInterpolate();
-  }
 
   const handleSendPose = async () => {
-    // TODO written by Olivia - check in that this is all good
     let signal = [0,1,2,3,4,5].map((armIndex) => {
       return robotArmManager.AnimationFrameReceive(armIndex);
     }).join(",");
@@ -456,8 +448,9 @@ export default function UnityWebPage(props) {
   }
 
   async function handleGetSingleFile(item) { 
-    console.log("Handle Get Single File: " + item);
+    console.log("Handle Get Single File: " + item); // TODO LIV check Friday morning!
     setLoadedFile(item);
+    setCurrentFileName(item);
     const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-single-file?file=${item}`;
     const apiSingleFileDataResponse = await fetch(url, {
       method: "GET",
@@ -472,7 +465,7 @@ export default function UnityWebPage(props) {
     //console.log(signal);
     const jsonString = apiSingleFileDataJson["response"].replace(/'/g,'"'); // need to turn ' to " to be parsable
     const jsonData = JSON.parse(jsonString);
-    console.log(jsonData["commandsArm1"]);
+    //console.log(jsonData["commandsArm1"]);
 
     // then go ahead and apply the data
     robotArmManager._commandsArm1 = [...jsonData["commandsArm1"]];
@@ -544,27 +537,27 @@ export default function UnityWebPage(props) {
       nextKeyframe = keyFrameIndices.indexOf(1, frame);
       if (nextKeyframe == -1 && lastKeyframe == -1) {
         // There are no keyframes at all. No interpolation to do, break out.
-        console.log("no keyframes");
+        //console.log("no keyframes");
         break;
       }
       else if (frame == nextKeyframe) {
         // At a keyframe. Do no interpolation, but update pointer to last keyframe.
         lastKeyframe = frame;
-        console.log("at a keyframe");
+        //console.log("at a keyframe");
       }
       else if (lastKeyframe == -1) {
         // In the beginning. Set value to upcoming keyframe.
-        console.log("in the beginning");
+        //console.log("in the beginning");
         setByOneKeyframe(data, frame, nextKeyframe);
       }
       else if (nextKeyframe == -1) {
         // At the end. Set value to last keyframe.
-        console.log("at the end");
+        //console.log("at the end");
         setByOneKeyframe(data, frame, lastKeyframe);
       }
       else {
         // In between two keyframes. Set value to an interpolation of the two.
-        console.log("in between");
+        //console.log("in between");
         setByTwoKeyframes(data, frame, lastKeyframe, nextKeyframe);
       }
       frame++;
@@ -595,8 +588,34 @@ export default function UnityWebPage(props) {
     printCommandArmData();
   }
 
+  const handleToggleKeyframe = () => {
+    let newArr = [...keyFrameIndices];
+    newArr[curFrame] = +!newArr[curFrame];
+    setKeyFrameIndices(newArr);
+  }
 
+  useEffect(() => { // need this bc otherwise we were running the interpolation before updating which frames we should
+    // even be interpolating between. in the future, might be a handy way to do all the interpolation - maybe there's 
+    // no need for the other times we call it? nah, if we change the sliders...either way, worth exploring TODO
+    newInterpolate();
+ }, [keyFrameIndices]);
+/*
+ useEffect(() =>
+ {
+   console.log("Loaded file: " + loadedFile);
+ }, [loadedFile])
 
+ useEffect(() =>
+ {
+   console.log("Current file: " + currentFileName);
+ }, [currentFileName])
+*/
+
+ function handleNewFileToLoad(e) {
+  console.log("loading: " + e.target.value);
+  setCurrentFileName(e.target.value);
+  handleGetSingleFile(e.target.value);
+ }
 
   function setByOneKeyframe(data, frameToSet, frameToCopy) {
     for (var arm = 0; arm < data.length; arm++) {
@@ -625,11 +644,11 @@ export default function UnityWebPage(props) {
       <div>
         {/* 
     {<p className="text-xs font-robotomono">SIG: {signal}</p>}
-    {<p className="text-xs font-robotomono">API DATA: {apiData}</p>} */}
+    {<p className="text-xs font-robotomono">API DATA: {apiData}</p>} 
     {<p className="text-xs font-robotomono">API SF DATA: {apiSingleFileData}</p>}
     {<p className="text-xs font-robotomono">API FILE DATA: {apiFileData}</p>}
     {<p className="text-xs font-robotomono">KF INDICES: {keyFrameIndices.join(", ")}</p>}
-
+*/}
 
     {/*
   <form onSubmit={handleSubmit}>
@@ -801,23 +820,20 @@ export default function UnityWebPage(props) {
                       <Slider
                         min={-120}
                         max={90}
+                        id={"slider_"+number}
                         value={robotArmManager.AnimationFrameReceive(
                           number
                         )}
                         onChange={(value) => {
-                          console.log("!");
+                          //console.log("!");
                           let newArr = [...joints];
                           newArr[index] = value;
                           setJoints(newArr);
-
-
                           animationServoWhichToChange(number, value);
-
-
                           var newArmArray = [...robotArmManager["commandsArm" + (number)]];
                           newArmArray[curFrame] = value;
                           robotArmManager["commandsArm" + (number)] = newArmArray;
-                          console.log(robotArmManager["commandsArm" + (number)]);
+                          //console.log(robotArmManager["commandsArm" + (number)]);
                         }}
                       />
 
@@ -900,7 +916,16 @@ export default function UnityWebPage(props) {
       <div className="flex-container">
         <button
           className="flex-item bg-bots-light-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-          onClick={handleToggleKeyframe}
+          onClick={() => {
+            console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+            console.log("----> calling handleToggleKeyframe()");
+            console.log(">>> (b) arm[3] = " + robotArmManager.AnimationFrameReceive(3));
+            handleToggleKeyframe(); //LIV TODO
+            console.log(">>> (a) arm[3] = " + robotArmManager.AnimationFrameReceive(3));
+
+ 
+          }}
         >
             <p>⯁</p>
             <p className="text-xs">Toggle Keyframe</p>
@@ -1001,12 +1026,18 @@ export default function UnityWebPage(props) {
   />
 
     <button
-      className="flex-item-50 bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+      className="flex-item-80 bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
       onClick={handleSaveAsAnimationFile}>
         <p><span className="text-xl"></span>Save Animation File</p>
     </button>
-</div>
 
+<button
+      className="flex-item-80 bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
+      onClick={askToConfirmDelete}>
+        <p>Delete Animation File</p>
+    </button>
+    
+    </div>
 <div className="flex-container">
 
 <button 
@@ -1014,7 +1045,11 @@ export default function UnityWebPage(props) {
 
       >Load Animation File:</button>
 
-    <select className="flex-item bg-bots-subtle mx-2">
+    <select 
+      className="flex-item bg-bots-subtle mx-2"
+      value={loadedFile}
+      onChange={handleNewFileToLoad}
+    >
     {apiFileData.map((fileName, index) => {
       return (
         <option value={fileName}>{fileName}</option>
@@ -1028,11 +1063,6 @@ export default function UnityWebPage(props) {
         <p><span className="text-2xl">{loadAnimationMenuVisible ? "^" : "▼"}</span> Load Animation Files</p>
   </button>*/}
 
-    <button
-      className="flex-item-50 bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-      onClick={askToConfirmDelete}>
-        <p>Delete Animation File</p>
-    </button>
   </div>
 
       

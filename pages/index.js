@@ -13,7 +13,7 @@ export default function Home() {
 
   function changeMySignal(outputJsonString) {
     setSignal(outputJsonString);
-    console.log(`This is the output string: ${outputJsonString}`);
+    //console.log(`This is the output string: ${outputJsonString}`);
   }
   /*
 
