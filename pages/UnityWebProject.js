@@ -45,9 +45,9 @@ export default function UnityWebPage(props) {
   const [playing, setPlaying] = useState();
   const [keyFrameIndices, setKeyFrameIndices] = useState([0,0,1,0,1,0]); // consider 0 vs 1-indexed!!!!!!
 
-  const [loadedFile, setLoadedFile] = useState(["File 1"]);
+  const [loadedFile, setLoadedFile] = useState([""]);
   const [deletedFileNames, setDeletedFileNames] = useState(["reserved_1.json"]);
-  const [currentFileName, setCurrentFileName] = useState(["new_file"]);
+  const [currentFileName, setCurrentFileName] = useState(["new_file.json"]);
 
   function updateMaxFrames(newMaxFrames) {
     setMaxFrames(newMaxFrames);
@@ -345,8 +345,8 @@ export default function UnityWebPage(props) {
       },
     });
     const apiDataJson = await apiDataResponse.json();
-    setApiFileData(apiDataJson["response"]);
-    console.log(apiDataJson);
+    //setApiFileData(apiDataJson["response"]);
+    //console.log(apiDataJson);
   };
 
   const handleGetAllAnimationFiles = async () => {
@@ -372,7 +372,7 @@ export default function UnityWebPage(props) {
     if (confirm("Do you really want to delete '" + currentFileName + ".json'?" )) {
       console.log("Delete!");
       handleSoftDeleteAnimationFile(currentFileName);
-      setCurrentFileName("new_file");
+      //setCurrentFileName("new_file");
       // TODO LIV this is where it would be nice to zero everything out
     }
     else {
@@ -383,10 +383,20 @@ export default function UnityWebPage(props) {
   const handleSoftDeleteAnimationFile = (fileName) => { // TODO LIV check Friday morning!
     let newDeletedFileNames = [...deletedFileNames, fileName];
     setDeletedFileNames(newDeletedFileNames);
-    let newApiFileData = apiFileData.slice(apiFileData.indexOf(fileName), 1);
+    //let newApiFileData = apiFileData.slice(apiFileData.indexOf(fileName), 1);
+    let newApiFileData = [];
+    for (var i = 0; i < apiFileData.length; i++) {
+      if (newDeletedFileNames.indexOf(apiFileData[i]) == -1) {
+        newApiFileData.push(apiFileData[i]);
+      }
+    }
     setApiFileData(newApiFileData);
+    console.log(newApiFileData);
+    if (newApiFileData.length > 0) {
+      handleGetSingleFile(newApiFileData[0]);
+    }
     //handleGetAllAnimationFiles();
-    toggleDeleteAnimationMenuVisible(false);
+    //toggleDeleteAnimationMenuVisible(false);
     // TODO LIV this seems fishy
   }
   
@@ -1042,7 +1052,6 @@ export default function UnityWebPage(props) {
 
 <button 
       className="flex-item-50 bg-bots-white text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
-
       >Load Animation File:</button>
 
     <select 
@@ -1052,7 +1061,7 @@ export default function UnityWebPage(props) {
     >
     {apiFileData.map((fileName, index) => {
       return (
-        <option value={fileName}>{fileName}</option>
+        <option key={fileName} value={fileName}>{fileName}</option>
       )
     })}
     </select>
@@ -1067,6 +1076,7 @@ export default function UnityWebPage(props) {
 
       
 </div>
+{/*
 <br />
 <br />
 <br />
@@ -1076,7 +1086,7 @@ export default function UnityWebPage(props) {
                 onClick={() => {newInterpolate()}}>
                   interpolate
                 </button>
-
+*/}
 </div></>
 
 );}
