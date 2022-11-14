@@ -141,7 +141,6 @@ def send_angles_sequence():
         print("Done sending angles")
         return jsonify({"response": str(angles_sequence)})
 
-
 #------------------------------------------#
 #-----------SAVING/LOADING API-------------#
 #------------------------------------------#
