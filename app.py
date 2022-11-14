@@ -1,9 +1,8 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 
-
 def create_app():
-    """Application-factory pattern"""
+    # Application-factory pattern
     app = Flask(__name__)
     CORS(app)
 

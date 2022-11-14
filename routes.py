@@ -51,14 +51,11 @@ def click():
     return jsonify({"response": "you clicked the button"})
 '''
 
+#[DESCRIPTION] This endpoint unlocks/turns off the motors so that drag and teach mode can be used. Allows moving the robot manually by hand.
+#[OUTPUT]      json: A success or failure message.
 @app.route("/turn-off-motors", methods=["POST"])
 @cross_origin()
 def turn_off_motors():
-    """
-    This endpoint unlocks/turns off the motors so that drag and teach mode can be used. Allows moving the robot manually by hand.
-
-    Returns: json: A success or failure message.
-    """
     if request.method == "POST":
         print("received api request")
         try:
@@ -68,14 +65,11 @@ def turn_off_motors():
         except:
             return jsonify({"response": "FAILED TO TURN OFF MOTORS"})
 
+#[DESCRIPTION] This endpoint is supposed to lock the motors and end the ability to move the robot manually by hand. Currently this is not working as expected.
+#[OUTPUT]      json: A success or failure message.
 @app.route("/turn-on-motors", methods=["POST"])
 @cross_origin()
 def turn_on_motors():  # NOTE THIS FUNCTION DOES NOT YET WORK
-    """
-    This endpoint is supposed to lock the motors and end the ability to move the robot manually by hand. Currently this is not working as expected.
-    
-    Returns: json: A success or failure message.
-    """
     if request.method == "POST":
         print("received api request")
         try:
@@ -86,14 +80,12 @@ def turn_on_motors():  # NOTE THIS FUNCTION DOES NOT YET WORK
             print(e)
             return jsonify({"response": "FAILED TO TURN ON MOTORS"})
 
+#[DESCRIPTION] This endpoint allows the front end to send a single string of angles also known as a pose. The robot will be given the command to immediately jump to that position.
+#[OUTPUT]      json: A string of the list of angles that the robot moved to.
 @app.route("/send-pose", methods=["POST"])
 @cross_origin()
 def send_pose():
-    """
-    This endpoint allows the front end to send a single string of angles also known as a pose. The robot will be given the command to immediately jump to that position.
-
-    Returns: json: A string of the list of angles that the robot moved to.
-    """
+    
     if request.method == "POST":
         print("received api request")
         angles = request.args.get("angles")
@@ -105,27 +97,23 @@ def send_pose():
         mc.send_angles(angles_list, sp)
         return jsonify({"response": str(angles)})
 
+#[DESCRIPTION] Pings the robot to get a list of angles of its current position and sends that data in a response.
+#[OUTPUT] json: A list of the robot's current angles
 @app.route("/get-pose", methods=["GET"])
 @cross_origin()
 def get_pose():
-    """
-    Pings the robot to get a list of angles of its current position and sends that data in a response.
-
-    Returns: json: A list of the robot's current angles
-    """
     if request.method == "GET":
         print("received api request")
         angles_list = mc.get_angles()
         return jsonify({"response": angles_list})
 
+
+#[DESCRIPTION] Instructs the robot to move through a sequence of 20 angles while waiting 1 second in between each movement.
+#[OUTPUT] json: A string of the full 20 step sequence of angles that the robot was instructed to move through.
 @app.route("/send-angles-sequence", methods=["POST"])
 @cross_origin()
 def send_angles_sequence():
-    """
-    Instructs the robot to move through a sequence of 20 angles while waiting 1 second in between each movement.
 
-    Returns: json: A string of the full 20 step sequence of angles that the robot was instructed to move through.
-    """
     if request.method == "POST":
         print("received api request")
         angles_sequence = request.args.get("angles_sequence")
@@ -158,14 +146,11 @@ def send_angles_sequence():
 #-----------SAVING/LOADING API-------------#
 #------------------------------------------#
 
+#[DESCRIPTION] Checks the directory where animation files are stored and returns a list of existing filenames in a response.
+#[OUTPUT]      Returns: json: A list of filenames found in the directory where animation files are saved.
 @app.route("/get-all-animation-files", methods=["GET"])
 @cross_origin()
 def get_all_animation_files():
-    """
-    Checks the directory where animation files are stored and returns a list of existing filenames in a response.
-
-    Returns: json: A list of filenames found in the directory where animation files are saved.
-    """
     if request.method == "GET":
         animation_file_path = "./animation_files/"
         onlyfiles = [
@@ -176,19 +161,18 @@ def get_all_animation_files():
         return jsonify({"response": onlyfiles})
 
 
+
+
+# [DESCRIPTION] Saves a provided sequence of angles as an animation file in the
+#               animation_files directory as a .json file. If no filename is provided, one
+#               will be automatically created. If a filename is provided, that filename
+#               will be used to either create a new file (if one with that name doesn't
+#               already exist), or overwrite the file with the existing name.
+# [OUTPUT] json: A success or failure message.
 @app.route("/save-as-animation-file", methods=["POST"])
 @cross_origin()
 def save_as_animation_file():
-    """
-    Saves a provided sequence of angles as an animation file in the
-    animation_files directory as a .json file. If no filename is provided, one
-    will be automatically created. If a filename is provided, that filename
-    will be used to either create a new file (if one with that name doesn't
-    already exist), or overwrite the file with the existing name.
-
-    Returns:
-        json: A success or failure message.
-    """
+    
     if request.method == "POST":
         angles_sequence = request.args.get("angles_sequence")
         sequence_json = json.loads(angles_sequence)
@@ -226,16 +210,11 @@ def save_as_animation_file():
             return jsonify({"response": str("Failed to save animation file")})
 
 
+# [DESCRIPTION] Deletes a provided filename from the animation_files directory. If provided filename does not exist, returns a response with that information.
+# [OUTPUT]      json: A success or failure message.
 @app.route("/delete-animation-file", methods=["POST"])
 @cross_origin()
 def delete_animation_file():
-    """
-    Deletes a provided filename from the animation_files directory. If provided
-    filename does not exist, returns a response with that information.
-
-    Returns:
-        json: A success or failure message.
-    """
     if request.method == "POST":
         file_name = request.args.get("file")
         animation_file_path = "./animation_files/"
@@ -249,18 +228,12 @@ def delete_animation_file():
             )
         pass
 
-
+#[DESCRIPTION] For a specified filename, returns the contents of the file in a response.
+#              The contents of the file would typically be a full animation sequence.
+#[OUTPUT] json: A string of all the angles of a sequence stored in an animation file.
 @app.route("/get-single-file", methods=["GET"])
 @cross_origin()
 def get_single_file():
-    """
-    For a specified filename, returns the contents of the file in a response.
-    The contents of the file would typically be a full animation sequence.
-
-    Returns:
-        json: A string of all the angles of a sequence stored in an animation
-          file.
-    """
     if request.method == "GET":
         file_name = request.args.get("file")
         animation_file_path = "./animation_files/"
@@ -277,8 +250,6 @@ def get_single_file():
         except:
             return jsonify({"response": str("Failed to load animation file")})
 
-
-
 # release_all_servos
 
 # @app.route('/login',methods = ['POST', 'GET'])
@@ -289,8 +260,6 @@ def get_single_file():
 #    else:
 #       user = request.args.get('name')
 #       return render_template('login.html')
-
-
 
 #------------------------------------------#
 #-------RUNNING THE MAIN APPLICATION-------#
