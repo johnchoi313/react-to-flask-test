@@ -46,7 +46,7 @@ export default function UnityWebPage(props) {
   const [keyFrameIndices, setKeyFrameIndices] = useState([0,0,1,0,1,0]); // consider 0 vs 1-indexed!!!!!!
 
   const [loadedFile, setLoadedFile] = useState([""]);
-  const [deletedFileNames, setDeletedFileNames] = useState(["reserved_1.json"]);
+  const [deletedFileNames, setDeletedFileNames] = useState(["empty_file.json"]);
   const [currentFileName, setCurrentFileName] = useState(["new_file.json"]);
 
   function updateMaxFrames(newMaxFrames) {
