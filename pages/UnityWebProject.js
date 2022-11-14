@@ -43,7 +43,7 @@ export default function UnityWebPage(props) {
   const [frameList, setFrameList] = useState([...Array(6).keys()].map((e)=>{return e+1})); // TODO magic number bc using maxFrames doesn't work--don't want this to be a long term solution
   const [changedFrame, setChangedFrame] = useState(false);
   const [playing, setPlaying] = useState();
-  const [keyFrameIndices, setKeyFrameIndices] = useState([0,0,1,0,1,0]); // consider 0 vs 1-indexed!!!!!!
+  const [keyFrameIndices, setKeyFrameIndices] = useState([1,0,0,0,0,0]); // consider 0 vs 1-indexed!!!!!!
 
   const [loadedFile, setLoadedFile] = useState([""]);
   const [deletedFileNames, setDeletedFileNames] = useState(["empty_file.json"]);
@@ -73,10 +73,10 @@ export default function UnityWebPage(props) {
   
           
   useUnityContext({
-      loaderUrl: "build/RobotArm_React_WebGL (10-3-2022).loader.js",
-      dataUrl: "build/RobotArm_React_WebGL (10-3-2022).data",
-      frameworkUrl: "build/RobotArm_React_WebGL (10-3-2022).framework.js",
-      codeUrl: "build/RobotArm_React_WebGL (10-3-2022).wasm",
+      loaderUrl: "build/RobotArm_React_WebGL (11-14-2022).loader.js",
+      dataUrl: "build/RobotArm_React_WebGL (11-14-2022).data",
+      frameworkUrl: "build/RobotArm_React_WebGL (11-14-2022).framework.js",
+      codeUrl: "build/RobotArm_React_WebGL (11-14-2022).wasm",
     });
       
   const [anglesApiData, setAnglesApiData] = useState("");
