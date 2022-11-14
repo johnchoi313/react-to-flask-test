@@ -66,6 +66,20 @@ CD INTO DIRECTORY FIRST!!
   13. npm install
   14. npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
 
+---OPTIONAL: Network Not Managed or NPM ENETUNREACH Error---
+  https://askubuntu.com/questions/71159/network-manager-says-device-not-managed
+
+  0. sudo nano /etc/NetworkManager/NetworkManager.conf
+  1. change the line managed=false to managed=true
+  2. sudo service network-manager restart
+
+  OPTIONAL (if run or install npm fails: https://www.codegrepper.com/search.php?answer_removed=1&q=%20sh:%201:%20next:%20Permission%20denied%20npm%20ERR!%20code%20126)
+  0. npm cache clean --force
+  1. Delete package-lock.json
+  2. Delete node_modules
+  3. sudo apt remove nodejs
+  4. Run steps 12-14 again
+
 ---EDITING IP ADDRESS:---
 
   0. ls -a (OPTIONAL: shows all hidden files:)

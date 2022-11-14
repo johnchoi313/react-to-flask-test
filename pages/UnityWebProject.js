@@ -433,8 +433,9 @@ export default function UnityWebPage(props) {
 
 
   const handleSendPose = async () => {
-    let signal = [0,1,2,3,4,5].map((armIndex) => {
-      return robotArmManager.AnimationFrameReceive(armIndex);
+    //let signal = [0,1,2,3,4,5].map((armIndex) => {
+    let signal = [1,2,3,4,5,6].map((armIndex) => { //DUMB OFF-BY-ONE BAD NAMING
+        return robotArmManager.AnimationFrameReceive(armIndex);
     }).join(",");
     props.changeMySignal(signal); 
 
@@ -487,8 +488,8 @@ export default function UnityWebPage(props) {
     setKeyFrameIndices([...jsonData["keyFrameIndices"]]);
   }
 
-  //let list1 = [1, 2, 3, 4, 5, 6];
-  let list1 = [6,5,4,3,2,1];
+  let list1 = [1, 2, 3, 4, 5, 6];
+  //let list1 = [6,5,4,3,2,1];
 
 
   const [sF, setSF] = useState("default");
@@ -630,7 +631,6 @@ export default function UnityWebPage(props) {
     if (frameA == frameB) {
       console.log("Error: interpolating between keyframe and itself");
     }
-
     var interval = frameB - frameA;
     var leftInterval = frameToSet - frameA;
     var rightInterval = frameB - frameToSet;
@@ -639,9 +639,6 @@ export default function UnityWebPage(props) {
       data[arm][frameToSet] = data[arm][frameA]*(1.0*rightInterval/interval) + data[arm][frameB]*(1.0*leftInterval/interval);
   }
 }
-
-
-
 
   return (
     <>
@@ -653,7 +650,6 @@ export default function UnityWebPage(props) {
     {<p className="text-xs font-robotomono">API FILE DATA: {apiFileData}</p>}
     {<p className="text-xs font-robotomono">KF INDICES: {keyFrameIndices.join(", ")}</p>}
 */}
-
     {/*
   <form onSubmit={handleSubmit}>
       <span>Test Input Component: </span>
@@ -665,13 +661,9 @@ export default function UnityWebPage(props) {
 
       <button onClick={() => {setSF("ok!!")}}>ok!!</button>
   </form>
-
-
-
   <hr />
   */}
         
-
 <div className="UPPER================================================================================================">
 
         <div className="flex-container-centered">
@@ -707,7 +699,7 @@ export default function UnityWebPage(props) {
                 resetPose();
               }}
             >
-              Reset Sliders
+              Home
             </button>
         </div>
 </div>
@@ -928,7 +920,6 @@ export default function UnityWebPage(props) {
             handleToggleKeyframe(); //LIV TODO
             console.log(">>> (a) arm[3] = " + robotArmManager.AnimationFrameReceive(3));
 
- 
           }}
         >
             <p>⯁</p>
@@ -938,17 +929,12 @@ export default function UnityWebPage(props) {
           className="flex-item bg-bots-blue hover:bg-bots-orange text-bots-gray font-bold py-2 px-4 rounded font-robotomono"
           onClick={handleSendAllAnglesToApi}
         >
-          <p className="text-xs">Send Current Animation To Cobot</p>
+          <p className="text-xs">Run Animation</p>
         </button>
       </div>
     </div>
-        
-  </div>
-              
+  </div>              
 </div>
-
-
-
 
 <div className="LOWER THIRD =================================================================================================">
 
