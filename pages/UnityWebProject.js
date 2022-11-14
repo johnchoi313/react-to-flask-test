@@ -79,8 +79,6 @@ export default function UnityWebPage(props) {
       codeUrl: "build/RobotArm_React_WebGL (10-3-2022).wasm",
     });
       
-  
-
   const [anglesApiData, setAnglesApiData] = useState("");
 
   const sendAnglesToApi = async (strMine) => {
@@ -116,7 +114,6 @@ export default function UnityWebPage(props) {
     }
   };
 
-
   const [theVal, setTheVal] = useState(0);
   function animationServoWhichToChange(index, myArmAnimationValue) {
     robotArmManager.AnimationUpdate(index, myArmAnimationValue);
@@ -146,8 +143,7 @@ export default function UnityWebPage(props) {
     },
     [isLoaded]
   );
-  // Event invoked when the user clicks the button, the unity container will be
-  // mounted or unmounted depending on the current mounting state.
+  // Event invoked when the user clicks the button, the unity container will be mounted or unmounted depending on the current mounting state.
   function handleOnClickUnMountUnity() {
     if (isLoaded === true) {
       setIsLoaded(false);
@@ -207,9 +203,7 @@ export default function UnityWebPage(props) {
   }
   function changeDefPlayAnimation() {
     let signal = robotArmManager.SendAnimationCommand();
-
     sendMessage("PeterGameController", "ReceiveAnimationFullUpdate", signal);
-
     setPlayAnimation(true);
   }
   function PlayAnimation() {
