@@ -59,8 +59,8 @@ def turn_off_motors():
     if request.method == "POST":
         print("received api request")
         try:
-            mc.release_all_servos()
             mc.set_color(255,255,255)
+            mc.release_all_servos()
             return jsonify({"response": "TURNED OFF MOTORS"})
         except:
             return jsonify({"response": "FAILED TO TURN OFF MOTORS"})
@@ -73,8 +73,8 @@ def turn_on_motors():  # NOTE THIS FUNCTION DOES NOT YET WORK
     if request.method == "POST":
         print("received api request")
         try:
-            mc.set_fresh_mode(0)
             mc.set_color(0,255,0)
+            mc.set_fresh_mode(0)
             return jsonify({"response": "TURNED ON MOTORS"})
         except Exception as e:
             print(e)
