@@ -1,6 +1,6 @@
-import "../styles/globals.css";
+import '../styles/globals.css';
 
-import UnityWebPage from "./UnityWebProject";
+import UnityWebPage from '../components/UnityWebProject';
 
 function MyApp({ Component, pageProps }) {
   // return <div><Component {...pageProps} />      <UnityWebPage />

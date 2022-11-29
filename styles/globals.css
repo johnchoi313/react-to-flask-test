@@ -23,12 +23,17 @@ a {
   box-sizing: border-box;
 }
 
+button {
+  border: 3px solid;
+  padding: 0px;
+}
+
 .canvas {
   width: 400px;
   height: 400px;
 }
 .red {
-  color: "red";
+  color: 'red';
 }
 
 button,
@@ -51,7 +56,7 @@ button {
 .speedInput {
   width: 1em;
 }
-.bb{
+.bb {
   border: 1px solid orange;
 }
 .mt-4 {
