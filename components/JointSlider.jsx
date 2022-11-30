@@ -7,7 +7,7 @@ import 'rc-slider/assets/index.css';
 export default function JointSlider(props) {
   return (
     <>
-      <p>
+      <p className="text-sm">
         <span>J{props.jointNumber}: </span>
         <span>{props.getJoint(props.jointNumber, props.currentFrame)}</span>
       </p>

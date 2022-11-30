@@ -1,7 +1,7 @@
 module.exports = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}"
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -12,17 +12,17 @@ module.exports = {
       },
     },
     colors: {
-      "bots-gray": "#454546",
-      "bots-light-gray": "#b5b5b5",
-      "bots-red": "#EE3C32",
-      "bots-yellow": "#F6DE37",
-      "bots-orange": "#F17E34",
-      "bots-blue": "#1FB6FF",
-      "bots-light-blue": "#6FD6FF",
-      "bots-white": "#FFFFFF",
-      "bots-subtle": "#F0FAFF"
+      'bots-gray': '#454546',
+      'bots-light-gray': '#b5b5b5',
+      'bots-red': '#EE3C32',
+      'bots-yellow': '#F6DE37',
+      'bots-orange': '#F17E34',
+      'bots-light-orange': '#FF9E54',
+      'bots-blue': '#1FB6FF',
+      'bots-light-blue': '#6FD6FF',
+      'bots-white': '#FFFFFF',
+      'bots-subtle': '#F0FAFF',
     },
   },
-  plugins: [
-  ]
+  plugins: [],
 };

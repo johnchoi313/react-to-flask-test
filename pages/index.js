@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
-
 import { Unity, useUnityContext } from 'react-unity-webgl';
-import UnityWebPage from '../components/UnityWebProject';
+
 import JointSlider from '../components/JointSlider';
 import BotsIQHeader from '../components/BotsIQHeader';
+import UnityWebPage from '../components/UnityWebProject';
 
 export default function Home() {
   const [signal, setSignal] = useState(''); /* why are we using a hook to store 
-                                            signal? */
+                                            signal? should we even have any 
+                                            concept of signal at this scope? I 
+                                            feel like it should only be set just
+                                            before it's sent, right? */
   // const [isUnityMounted, setIsUnityMounted] = useState(true);
   // const [arm3, setArm3] = useState([]);
   // const robotArmManager = new RobotArmManager();
@@ -44,6 +47,7 @@ export default function Home() {
 
   const [currentFrame, setCurrentFrame] = useState(0);
   const [keyframes, setKeyframes] = useState([1, 0, 0, 0, 1, 0]);
+  const [animationPlaying, setAnimationPlaying] = useState(false);
 
   /**
    * setFrame sets the current frame to a new value.
@@ -55,6 +59,22 @@ export default function Home() {
       // when decreasing maximum number of frames?"
       setCurrentFrame(frameIndex);
     }
+  }
+
+  // TODO: interpolate frames, start/stop animation, toggle keyframe
+
+  /**
+   * toggleKeyframe toggles given frame from tween to keyframe (and vice versa)
+   * @param {int} frameIndex the target frame
+   */
+  function toggleKeyframe(frameIndex) {
+    const newKeyframes = [...keyframes];
+    newKeyframes[frameIndex] = 1 - keyframes[frameIndex];
+    setKeyframes(newKeyframes);
+  }
+
+  function togglePlayAnimation() {
+    setAnimationPlaying(!animationPlaying);
   }
 
   /* ------------------------------------------------------------------------ */
@@ -127,6 +147,9 @@ export default function Home() {
   /* ------------------------------------------------------------------------ */
   /* HANDLE FORMATTING: */
 
+  /* Specify standard button format to keep html easier to read */
+  const stdButtonFormat = 'font-bold text-bots-gray rounded border-bots-blue';
+
   /**
    * getClassesForFrame gets the CSS classes we want to apply to a given frame
    * in the timeline. The current frame will be highlighted in orange, while the
@@ -139,15 +162,38 @@ export default function Home() {
     const isKeyframe = keyframes[frameIndex] == 1;
     const prefix = 'flex-item font-bold text-bots-gray rounded';
     if (isKeyframe && currentFrame == frameIndex) {
-      return `${prefix} bg-bots-orange border-bots-orange`;
+      return `${prefix} bg-bots-light-orange border-bots-orange`;
     }
     if (isKeyframe) {
-      return `${prefix} bg-bots-blue border-bots-blue`;
+      return `${prefix} bg-bots-light-blue border-bots-blue`;
     }
     if (currentFrame == frameIndex) {
       return `${prefix} border-bots-orange`;
     }
     return `${prefix} bg-bots-white border-bots-blue`;
+  }
+
+  /**
+   * getCurrenAndKeyframeText displays text below each frame on the timeline to
+   * let the user see which frame is the frame we're currenly on, and which
+   * frames on the timeline are currently keyframes. We show this with the UI,
+   * but it's safest to also explicitly say so, in case users are colorblind or
+   * the UI differences are insufficiently clear.
+   * @param {int} frameIndex
+   * @param {boolean} isKeyframe
+   * @returns
+   */
+  function getCurrentAndKeyframeText(frameIndex, isKeyframe) {
+    if (isKeyframe && frameIndex == currentFrame) {
+      return '[CURRENT & KEY]';
+    }
+    if (isKeyframe) {
+      return '[KEY]';
+    }
+    if (frameIndex == currentFrame) {
+      return '[CURRENT]';
+    }
+    return '';
   }
 
   /* ------------------------------------------------------------------------ */
@@ -160,16 +206,32 @@ export default function Home() {
         <UnityWebPage className="flex-item" UnityProvider={unityProvider} />
         <div className="flex-item">
           {joints.map((positionList, index) => (
-            <div>
-              <JointSlider
-                key={index}
-                jointNumber={joints.length - 1 - index}
-                currentFrame={currentFrame}
-                getJoint={getJoint}
-                setJoint={setJoint}
-              />
-            </div>
+            <JointSlider
+              key={index}
+              jointNumber={joints.length - 1 - index}
+              currentFrame={currentFrame}
+              getJoint={getJoint}
+              setJoint={setJoint}
+            />
           ))}
+          <div className="flex-container">
+            <button
+              className={`flex-item text-sm ${stdButtonFormat}`}
+              onClick={() => {
+                toggleKeyframe(currentFrame);
+              }}
+            >
+              Toggle Keyframe
+            </button>
+            <button
+              className={`flex-item text-sm ${stdButtonFormat}`}
+              onClick={() => {
+                togglePlayAnimation();
+              }}
+            >
+              {animationPlaying ? 'Stop' : 'Play'} Animation
+            </button>
+          </div>
         </div>
       </div>
       <div className="flex-container">
@@ -182,7 +244,9 @@ export default function Home() {
             }}
           >
             <p className="text-lg">{frameIndex}</p>
-            <p className="text-xs">{isKeyframe ? '[KEY]' : ''}</p>
+            <p className="text-xs">
+              {getCurrentAndKeyframeText(frameIndex, isKeyframe)}
+            </p>
           </button>
         ))}
       </div>
