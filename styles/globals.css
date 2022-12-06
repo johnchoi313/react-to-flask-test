@@ -138,3 +138,7 @@ input {
 .rc-slider {
   min-width: 50px;
 }
+
+.flex-basis-500 {
+  flex-basis: 500%;
+}

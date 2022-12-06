@@ -5,7 +5,20 @@ import JointSlider from '../components/JointSlider';
 import BotsIQHeader from '../components/BotsIQHeader';
 import UnityWebPage from '../components/UnityWebProject';
 
+/**
+ * TODO:
+ * [ ] Buttons: send current pose & get current pose
+ * [ ] Button: reset pose
+ * [x] Slider addons (inputs, plus/minus buttons)
+ * [ ] Max frames: add as variable? Either way, add input field
+ * [ ] Current frame: add input field
+ * [ ] Frame interpolation
+ *
+ * [ ] Joint indexing/naming (which one is the gripper? do we have too many joints?)
+ */
+
 export default function Home() {
+  const animationSpeed = 500;
   const [signal, setSignal] = useState(''); /* why are we using a hook to store 
                                             signal? should we even have any 
                                             concept of signal at this scope? I 
@@ -29,53 +42,6 @@ export default function Home() {
       frameworkUrl: 'build/RobotArm_React_WebGL (10-3-2022).framework.js',
       codeUrl: 'build/RobotArm_React_WebGL (10-3-2022).wasm',
     });
-
-  /* ------------------------------------------------------------------------ */
-  /* HANDLE TIMELINE DATA: */
-
-  /* We'll handle capitalization as if keyframe is one word, so only ever 
-  capitalizing keyframe to Keyframe and never KeyFrame.
-
-  For now, we'll just 0-index the frames and expose that on the front end. We 
-  can go back and change the display to 1-indexing if we like, later, or we 
-  could leave it to expose the users to the concept of 0-indexing. However, this
-  runs into inconsistency in that we are 1-indexing the joint ids. Another 
-  potential solution would be to use letters to refer to frames; however, this
-  is fairly non-standard and may be counterintuitive. Potentially best to just 
-  go back and translate to 1-indexing at the end. (Or, have frame 0 exist but 
-  always be hidden? */
-
-  const [currentFrame, setCurrentFrame] = useState(0);
-  const [keyframes, setKeyframes] = useState([1, 0, 0, 0, 1, 0]);
-  const [animationPlaying, setAnimationPlaying] = useState(false);
-
-  /**
-   * setFrame sets the current frame to a new value.
-   * @param {int} frameIndex - the frame we'd like to jump to
-   */
-  function setFrameByTimelineClick(frameIndex) {
-    if (frameIndex >= 0 && frameIndex < keyframes.length) {
-      // TODO: answer q about "do we use maxFrames or just delete frame data
-      // when decreasing maximum number of frames?"
-      setCurrentFrame(frameIndex);
-    }
-  }
-
-  // TODO: interpolate frames, start/stop animation, toggle keyframe
-
-  /**
-   * toggleKeyframe toggles given frame from tween to keyframe (and vice versa)
-   * @param {int} frameIndex the target frame
-   */
-  function toggleKeyframe(frameIndex) {
-    const newKeyframes = [...keyframes];
-    newKeyframes[frameIndex] = 1 - keyframes[frameIndex];
-    setKeyframes(newKeyframes);
-  }
-
-  function togglePlayAnimation() {
-    setAnimationPlaying(!animationPlaying);
-  }
 
   /* ------------------------------------------------------------------------ */
   /* HANDLE ROBOT DATA: */
@@ -126,6 +92,9 @@ export default function Home() {
     }
   }, [joints]);
 
+  /**
+   * @TODO
+   */
   function setJointAnimation() {
     const signal =
       `{"name":"${'name'}","speed":${1},` +
@@ -144,6 +113,72 @@ export default function Home() {
       currentFrame
     );
   }
+
+  /* ------------------------------------------------------------------------ */
+  /* HANDLE TIMELINE DATA: */
+
+  /* We'll handle capitalization as if keyframe is one word, so only ever 
+  capitalizing keyframe to Keyframe and never KeyFrame.
+
+  For now, we'll just 0-index the frames and expose that on the front end. We 
+  can go back and change the display to 1-indexing if we like, later, or we 
+  could leave it to expose the users to the concept of 0-indexing. However, this
+  runs into inconsistency in that we are 1-indexing the joint ids. Another 
+  potential solution would be to use letters to refer to frames; however, this
+  is fairly non-standard and may be counterintuitive. Potentially best to just 
+  go back and translate to 1-indexing at the end. (Or, have frame 0 exist but 
+  always be hidden? */
+
+  const [currentFrame, setCurrentFrame] = useState(0);
+  const [keyframes, setKeyframes] = useState([1, 0, 0, 0, 1, 0]);
+  const [animationPlaying, setAnimationPlaying] = useState(false);
+
+  /**
+   * setFrame sets the current frame to a new value.
+   * @param {int} frameIndex - the frame we'd like to jump to
+   */
+  function setFrameByTimelineClick(frameIndex) {
+    if (frameIndex >= 0 && frameIndex < keyframes.length) {
+      // TODO: answer q about "do we use maxFrames or just delete frame data
+      // when decreasing maximum number of frames?"
+      setCurrentFrame(frameIndex);
+    }
+  }
+
+  // TODO: interpolate frames, start/stop animation, toggle keyframe
+
+  /**
+   * toggleKeyframe toggles given frame from tween to keyframe (and vice versa)
+   * @param {int} frameIndex the target frame
+   */
+  function toggleKeyframe(frameIndex) {
+    const newKeyframes = [...keyframes];
+    newKeyframes[frameIndex] = 1 - keyframes[frameIndex];
+    setKeyframes(newKeyframes);
+  }
+
+  /**
+   * togglePlayAnimation toggles `animationPlaying` between true and false
+   */
+  function togglePlayAnimation() {
+    setAnimationPlaying(!animationPlaying);
+  }
+
+  /**
+   * This effect triggers our animation to proceed to the next frame every
+   * `animationSpeed` milliseconds
+   */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (animationPlaying === true) {
+        setCurrentFrame((currentFrame + 1) % keyframes.length);
+      }
+    }, animationSpeed);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [animationPlaying, currentFrame]);
+
   /* ------------------------------------------------------------------------ */
   /* HANDLE FORMATTING: */
 
@@ -212,6 +247,7 @@ export default function Home() {
               currentFrame={currentFrame}
               getJoint={getJoint}
               setJoint={setJoint}
+              stdButtonFormat={stdButtonFormat}
             />
           ))}
           <div className="flex-container">
