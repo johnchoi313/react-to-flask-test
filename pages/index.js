@@ -7,14 +7,21 @@ import UnityWebPage from '../components/UnityWebProject';
 
 /**
  * TODO:
- * [ ] Buttons: send current pose & get current pose
- * [ ] Button: reset pose
+ * [x] Buttons: send current pose & get current pose & toggle drag&teach mode
+ * [ ] Implement: toggle drag&teach; send pose; get pose
+ * [x] Button: reset pose
  * [x] Slider addons (inputs, plus/minus buttons)
- * [ ] Max frames: add as variable? Either way, add input field
- * [ ] Current frame: add input field
+ * [x] Max frames: UI
+ * [ ] Max frames: implement
+ * [x] Current frame: UI
+ * [ ] Current frame: implement
  * [ ] Frame interpolation
  *
+ * [ ] Buttons in own component?
+ * [ ] Maybe set timeline logic/representation aside into its own component?
+ *
  * [ ] Joint indexing/naming (which one is the gripper? do we have too many joints?)
+ * [ ] The TODO about set pose on mount
  */
 
 export default function Home() {
@@ -42,6 +49,8 @@ export default function Home() {
       frameworkUrl: 'build/RobotArm_React_WebGL (10-3-2022).framework.js',
       codeUrl: 'build/RobotArm_React_WebGL (10-3-2022).wasm',
     });
+
+  // TODO on mount set the pose to whatever the current frame's joint values are
 
   /* ------------------------------------------------------------------------ */
   /* HANDLE ROBOT DATA: */
@@ -77,7 +86,6 @@ export default function Home() {
    * @param {int} joint - the target joint
    * @param {int} frame - the given frame
    * @param {float} value - the value we're giving that joint
-   * @TODO do we want to add an optional arg for which frame?
    */
   function setJoint(joint, frame, value) {
     const newJoints = [...joints];
@@ -85,17 +93,23 @@ export default function Home() {
     setJoints(newJoints);
   }
 
-  /* Trigger animation updates after we update the joints' state */
+  /**
+   * This effect triggers animation updates in the Unity WebGL component every
+   * time something updates the joints' state.
+   * */
   useEffect(() => {
     if (isLoaded) {
-      setJointAnimation();
+      setJointsInWebGL();
     }
   }, [joints]);
 
   /**
-   * @TODO
+   * setJointsInWebGL sends a signal to the Unity WebGL component to display the
+   * 3D model at the given joint values. This function takes no arguments, as it
+   * should be called if and only if a change has been made to `joints` (which
+   * it then uses as the values to pass along to the WebGL component).
    */
-  function setJointAnimation() {
+  function setJointsInWebGL() {
     const signal =
       `{"name":"${'name'}","speed":${1},` +
       `"commandsArm1":[${joints[1]}],` +
@@ -105,13 +119,26 @@ export default function Home() {
       `"commandsArm5":[${joints[5]}],` +
       `"commandsArm6":[${joints[6]}],` +
       `"frame":${0},"kf":[0]}`;
-    changeMySignal(signal);
+    // changeMySignal(signal); we shouldn't need this as state, right?
     sendMessage('PeterGameController', 'ReceiveAnimationFullUpdate', signal);
     sendMessage(
       'PeterGameController',
       'ReceiveAnimationFrameToDisplay',
       currentFrame
     );
+  }
+
+  /**
+   * resetJointsForCurrentFrame resets the every joint value in the current
+   * frame to the default joint value.
+   */
+  function resetJointsForCurrentFrame() {
+    const newJoints = [...joints];
+    const defaultValue = 0;
+    for (let jointIndex = 0; jointIndex < joints.length; jointIndex++) {
+      newJoints[jointIndex][currentFrame] = defaultValue;
+    }
+    setJoints(newJoints);
   }
 
   /* ------------------------------------------------------------------------ */
@@ -183,7 +210,8 @@ export default function Home() {
   /* HANDLE FORMATTING: */
 
   /* Specify standard button format to keep html easier to read */
-  const stdButtonFormat = 'font-bold text-bots-gray rounded border-bots-blue';
+  const stdButtonFormat =
+    'font-bold text-bots-gray rounded border-bots-gray bg-bots-light-grayx';
 
   /**
    * getClassesForFrame gets the CSS classes we want to apply to a given frame
@@ -195,7 +223,7 @@ export default function Home() {
    */
   function getClassesForFrame(frameIndex) {
     const isKeyframe = keyframes[frameIndex] == 1;
-    const prefix = 'flex-item font-bold text-bots-gray rounded';
+    const prefix = 'flex-item h-72 font-bold text-bots-gray rounded';
     if (isKeyframe && currentFrame == frameIndex) {
       return `${prefix} bg-bots-light-orange border-bots-orange`;
     }
@@ -220,7 +248,7 @@ export default function Home() {
    */
   function getCurrentAndKeyframeText(frameIndex, isKeyframe) {
     if (isKeyframe && frameIndex == currentFrame) {
-      return '[CURRENT & KEY]';
+      return '[CURR & KEY]';
     }
     if (isKeyframe) {
       return '[KEY]';
@@ -240,6 +268,26 @@ export default function Home() {
       <div className="flex-container">
         <UnityWebPage className="flex-item" UnityProvider={unityProvider} />
         <div className="flex-item">
+          <div className="flex-container">
+            <button
+              className={`flex-item bg-bots-light-gray ${stdButtonFormat}`}
+              onClick={() => {
+                console.log('Implement drag & teach!');
+              }}
+            >
+              <p className="text-md">DRAG & TEACH MODE</p>
+              <p className="text-xs">[OFF]</p>
+            </button>
+            <button
+              className={`flex-item ${stdButtonFormat}`}
+              onClick={() => {
+                console.log('Implement get pose from Cobot!');
+              }}
+            >
+              <p className="text-md">GET POSE</p>
+              <p className="text-xs">FROM COBOT</p>
+            </button>
+          </div>
           {joints.map((positionList, index) => (
             <JointSlider
               key={index}
@@ -252,20 +300,22 @@ export default function Home() {
           ))}
           <div className="flex-container">
             <button
-              className={`flex-item text-sm ${stdButtonFormat}`}
+              className={`flex-item ${stdButtonFormat}`}
               onClick={() => {
-                toggleKeyframe(currentFrame);
+                resetJointsForCurrentFrame();
               }}
             >
-              Toggle Keyframe
+              <p className="text-md">RESET POSE</p>
+              <p className="text-xs">SLIDERS</p>
             </button>
             <button
-              className={`flex-item text-sm ${stdButtonFormat}`}
+              className={`flex-item ${stdButtonFormat}`}
               onClick={() => {
-                togglePlayAnimation();
+                console.log('Implement send pose to Cobot!');
               }}
             >
-              {animationPlaying ? 'Stop' : 'Play'} Animation
+              <p className="text-md">SEND POSE</p>
+              <p className="text-xs">TO COBOT</p>
             </button>
           </div>
         </div>
@@ -285,6 +335,26 @@ export default function Home() {
             </p>
           </button>
         ))}
+      </div>
+      <div className="flex-container">
+        <button
+          className="flex-item text-md font-bold text-bots-light-gray rounded border-bots-gray bg-bots-gray"
+          onClick={() => {
+            togglePlayAnimation();
+          }}
+        >
+          {animationPlaying ? 'STOP' : 'PLAY'}
+        </button>
+        <button
+          className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
+          onClick={() => {
+            toggleKeyframe(currentFrame);
+          }}
+        >
+          TOGGLE KEYFRAME{' '}
+        </button>
+        <input className="flex-item" value={currentFrame} />
+        <input className="flex-item" value={keyframes.length} />
       </div>
     </div>
   );
