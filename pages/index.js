@@ -8,17 +8,20 @@ import UnityWebPage from '../components/UnityWebProject';
 /**
  * TODO:
  * [x] Buttons: send current pose & get current pose & toggle drag&teach mode
- * [ ] Implement: toggle drag&teach; send pose; get pose
  * [x] Button: reset pose
  * [x] Slider addons (inputs, plus/minus buttons)
  * [x] Max frames: UI
- * [ ] Max frames: implement
+ * [x] Max frames: implement
  * [x] Current frame: UI
- * [ ] Current frame: implement
+ * [x] Current frame: implement
+ * [ ] Implement: toggle drag & teach; send pose; get pose
  * [ ] Frame interpolation
+ * [ ] Clean frames logic (probably can be combined with separating out to new component)
  *
+ * MAYBE
  * [ ] Buttons in own component?
  * [ ] Maybe set timeline logic/representation aside into its own component?
+ * [ ] Allow ENTER to trigger setMaxFrames and setCurrentFrame?
  *
  * [ ] Joint indexing/naming (which one is the gripper? do we have too many joints?)
  * [ ] The TODO about set pose on mount
@@ -156,9 +159,23 @@ export default function Home() {
   go back and translate to 1-indexing at the end. (Or, have frame 0 exist but 
   always be hidden? */
 
+  /**
+   * For maxFrames, we've decided to delete any frame data that would no longer
+   * be accessed on reducing maxFrames (so if we set maxFrames to 2, frames 3
+   * and onwards are erased. If we increase maxFrames again, we'd use fresh
+   * frames)
+   */
+
+  const [maxFramesToBe, setmaxFramesToBe] = useState(0);
+  const [currentFrameToBe, setCurrentFrameToBe] = useState(0);
+  const maxFramesUpperLimit = 30; // (TODO which val?) the UI'll get weird at high vals
   const [currentFrame, setCurrentFrame] = useState(0);
   const [keyframes, setKeyframes] = useState([1, 0, 0, 0, 1, 0]);
   const [animationPlaying, setAnimationPlaying] = useState(false);
+
+  useEffect(() => {
+    setmaxFramesToBe(keyframes.length);
+  }, []);
 
   /**
    * setFrame sets the current frame to a new value.
@@ -166,13 +183,11 @@ export default function Home() {
    */
   function setFrameByTimelineClick(frameIndex) {
     if (frameIndex >= 0 && frameIndex < keyframes.length) {
-      // TODO: answer q about "do we use maxFrames or just delete frame data
+      // TODO: answer q about "do we use maxFramesToBe or just delete frame data
       // when decreasing maximum number of frames?"
       setCurrentFrame(frameIndex);
     }
   }
-
-  // TODO: interpolate frames, start/stop animation, toggle keyframe
 
   /**
    * toggleKeyframe toggles given frame from tween to keyframe (and vice versa)
@@ -205,6 +220,30 @@ export default function Home() {
       clearInterval(interval);
     };
   }, [animationPlaying, currentFrame]);
+
+  /*
+    TODO: when it goes blank or we go from 16 -> 1 -> 18, etc we'll end up 
+    zeroing out the existing keyframes with the current behavior. I'm kinda a 
+    fan of adding a button to confirm the new maxFramesToBe number? also then we'll
+    be able to explain if they try to submit 0 or a really high number
+    Or, we could solve this by making the user hit ENTER, but I'm not sure if
+    that would be immediately intuitive on an iPad. Maybe it would?
+    */
+
+  function updateMaxFrames() {
+    if (maxFramesToBe > 0 && maxFramesToBe <= maxFramesUpperLimit) {
+      if (maxFramesToBe < keyframes.length) {
+        const newKeyframes = [...keyframes].slice(0, maxFramesToBe);
+        setKeyframes(newKeyframes);
+      } else {
+        const newKeyframes = [...keyframes].concat(
+          Array(maxFramesToBe - keyframes.length).fill(0)
+        );
+        setKeyframes(newKeyframes);
+      }
+    }
+  }
+  function updateCurrentFrame() {}
 
   /* ------------------------------------------------------------------------ */
   /* HANDLE FORMATTING: */
@@ -353,8 +392,32 @@ export default function Home() {
         >
           TOGGLE KEYFRAME{' '}
         </button>
-        <input className="flex-item" value={currentFrame} />
-        <input className="flex-item" value={keyframes.length} />
+        <input
+          className="flex-item"
+          value={currentFrameToBe}
+          onChange={event => {
+            setCurrentFrameToBe(event.target.value);
+          }}
+        />
+        <button
+          className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
+          onClick={() => setFrameByTimelineClick(currentFrameToBe)}
+        >
+          Set Current Frame
+        </button>
+        <input
+          className="flex-item"
+          value={maxFramesToBe}
+          onChange={event => {
+            setmaxFramesToBe(event.target.value);
+          }}
+        />
+        <button
+          className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
+          onClick={updateMaxFrames}
+        >
+          Set Max Frames
+        </button>
       </div>
     </div>
   );
