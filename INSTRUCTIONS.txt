@@ -2,6 +2,13 @@ Set Sleep to NEVER
 
 CD INTO DIRECTORY FIRST!!
 
+---PI SD BACKUPS:---
+
+How to create an IMG backup file of the RPi using Win32DiskImager.exe 
+https://howchoo.com/g/nmexndnlmdb/how-to-back-up-a-raspberry-pi-on-windows
+
+And then copy it to another SD using this tool:
+https://www.raspberrypi.com/software/
 
 ---NEVER SLEEP:---
   
