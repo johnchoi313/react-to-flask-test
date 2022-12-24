@@ -12,8 +12,8 @@ import Timeline from '../components/Timeline';
  * [ ] Implement: toggle drag & teach
  * [ ] Implement: send pose
  * [ ] Implement: get pose
- * [ ] UI: file save, file delete
- * [ ] Implement: File save, file delete
+ * [ ] UI: file save, load, delete
+ * [ ] Implement: file save, load, deletea
  * [ ] Address Logic: TODO about set pose on mount
  * [ ] Address Logic: TODOs at the top of Timeline component
  * [ ] Address Logic: Joint indexing/naming
@@ -23,6 +23,8 @@ import Timeline from '../components/Timeline';
  * [ ] Address Logic: should we put buttons in their own component?
  * [ ] Address Logic: does it makes sense to allow ENTER to trigger setMaxFrames
  *     and setCurrentFrame?
+ * [x] Address Logic: UnityWebPage may be redundant
+ * [ ] Clean up side effects (https://dmitripavlutin.com/react-hooks-mistakes-to-avoid/)
  *
  */
 
@@ -48,11 +50,25 @@ export default function Home() {
     [0, 0, 0, 0, 0, 0],
     [1, 0, 0, 0, 0, 0],
     [2, 0, 0, 0, 0, 0],
-    [30, 0, 0, 0, 0, 0],
+    [3, 0, 0, 0, 0, 0],
     [4, 0, 0, 0, 0, 0],
     [5, 0, 0, 0, 0, 0],
-    [6, 0, 0, 0, 0, 0],
+    [16, 0, 0, 0, 0, 0],
   ]);
+
+  function tempMakeRandom() {
+    const newArr = [
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+    ];
+    console.log(newArr[0]);
+    return newArr;
+  }
 
   /**
    * GetJoint gets the joint info for a target joint at the given frame. We
@@ -129,10 +145,11 @@ export default function Home() {
   }
 
   /* ------------------------------------------------------------------------ */
-  /* HANDLE TIMELINE DATA: */
+  /* HANDLE TIMELINE DATA: (mostly in the Timeline component) */
 
   const [currentFrame, setCurrentFrame] = useState(0);
   const [keyframes, setKeyframes] = useState([1, 0, 0, 0, 1, 0]);
+  const needToInterpolateFrames = true;
 
   /* ------------------------------------------------------------------------ */
   /* HANDLE FORMATTING: */
@@ -147,7 +164,7 @@ export default function Home() {
     <div>
       <BotsIQHeader />
       <div className="flex-container">
-        <UnityWebPage className="flex-item" UnityProvider={unityProvider} />
+        <Unity className="canvas" unityProvider={unityProvider} />
         <div className="flex-item">
           <div className="flex-container">
             <button
@@ -200,16 +217,77 @@ export default function Home() {
               <p className="text-md">SEND POSE</p>
               <p className="text-xs">TO COBOT</p>
             </button>
+            <button
+              className={`flex-item ${stdButtonFormat}`}
+              onClick={() => {
+                setJoints(tempMakeRandom());
+              }}
+            >
+              <p className="text-md">Random</p>
+            </button>
           </div>
         </div>
       </div>
 
       <Timeline
+        joints={joints}
+        setJoints={setJoints}
         keyframes={keyframes}
         setKeyframes={setKeyframes}
         currentFrame={currentFrame}
         setCurrentFrame={setCurrentFrame}
+        needToInterpolateFrames={needToInterpolateFrames}
+        tempMakeRandom={tempMakeRandom}
       />
+      <h1 className="font-mono">
+        K:{' '}
+        {keyframes
+          .map(x => Math.round(x).toString().padStart(4, '_'))
+          .join(' ')}
+      </h1>
+      <h1>.</h1>
+      <h1 className="font-mono">
+        0:{' '}
+        {joints[0]
+          .map(x => Math.round(x).toString().padStart(4, '_'))
+          .join(' ')}
+      </h1>
+      <h1 className="font-mono">
+        1:{' '}
+        {joints[1]
+          .map(x => Math.round(x).toString().padStart(4, '_'))
+          .join(' ')}
+      </h1>
+      <h1 className="font-mono">
+        2:{' '}
+        {joints[2]
+          .map(x => Math.round(x).toString().padStart(4, '_'))
+          .join(' ')}
+      </h1>
+      <h1 className="font-mono">
+        3:{' '}
+        {joints[3]
+          .map(x => Math.round(x).toString().padStart(4, '_'))
+          .join(' ')}
+      </h1>
+      <h1 className="font-mono">
+        4:{' '}
+        {joints[4]
+          .map(x => Math.round(x).toString().padStart(4, '_'))
+          .join(' ')}
+      </h1>
+      <h1 className="font-mono">
+        5:{' '}
+        {joints[5]
+          .map(x => Math.round(x).toString().padStart(4, '_'))
+          .join(' ')}
+      </h1>
+      <h1 className="font-mono">
+        6:{' '}
+        {joints[6]
+          .map(x => Math.round(x).toString().padStart(4, '_'))
+          .join(' ')}
+      </h1>
     </div>
   );
 }

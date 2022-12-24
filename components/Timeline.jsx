@@ -32,11 +32,16 @@ export default function Timeline(props) {
   const animationSpeed = 500;
 
   const [currentFrameToBe, setCurrentFrameToBe] = useState(0);
-  const [maxFramesToBe, setmaxFramesToBe] = useState(0);
+  const [maxFramesToBe, setMaxFramesToBe] = useState(0);
   const maxFramesUpperLimit = 30; // (TODO which val?) the UI'll get weird at high vals
 
   const [animationPlaying, setAnimationPlaying] = useState(false);
 
+  /**
+   * We want to call interpolateFrames at the very beginning, just in case the
+   * values we're loading aren't already interpolated
+   */
+  useEffect(() => interpolateFrames(), []);
   /**
    * This effect triggers our animation to proceed to the next frame every
    * `animationSpeed` milliseconds
@@ -55,12 +60,19 @@ export default function Timeline(props) {
   }, [animationPlaying, props.currentFrame]);
 
   /**
-   * When our component loads, lets set our current "working" maxFrames to be
-   * the current number of frames we have
+   * When our component loads, let's set our current "working" maxFrames to be
+   * the current number of frames we have.
    */
   useEffect(() => {
-    setmaxFramesToBe(props.keyframes.length);
+    setMaxFramesToBe(props.keyframes.length);
   }, []);
+  /**
+   * Let's keep our currentFrameToBe in sync with our currentFrame when we
+   * aren't in the middle of manually setting it
+   */
+  useEffect(() => {
+    setCurrentFrameToBe(props.currentFrame);
+  }, [props.currentFrame]);
 
   /**
    * setFrame sets the current frame to a new value.
@@ -140,18 +152,186 @@ export default function Timeline(props) {
   /**
    * TODO
    */
-  function updateMaxFrames() {
-    if (maxFramesToBe > 0 && maxFramesToBe <= maxFramesUpperLimit) {
-      if (maxFramesToBe < props.keyframes.length) {
-        const newKeyframes = [...props.keyframes].slice(0, maxFramesToBe);
+  function updateMaxFrames(newMaxFrames) {
+    console.log(`update max frames called: ${newMaxFrames}`);
+    if (
+      newMaxFrames > 0 &&
+      newMaxFrames <= maxFramesUpperLimit &&
+      newMaxFrames != props.keyframes.length
+    ) {
+      console.log('updating...');
+      if (newMaxFrames < props.keyframes.length) {
+        // Reduce frames
+        console.log('reduce frames');
+        const newKeyframes = [...props.keyframes].slice(0, newMaxFrames);
         props.setKeyframes(newKeyframes);
+        const newJoints = [
+          [...props.joints[0]].slice(0, newMaxFrames),
+          [...props.joints[1]].slice(0, newMaxFrames),
+          [...props.joints[2]].slice(0, newMaxFrames),
+          [...props.joints[3]].slice(0, newMaxFrames),
+          [...props.joints[4]].slice(0, newMaxFrames),
+          [...props.joints[5]].slice(0, newMaxFrames),
+          [...props.joints[6]].slice(0, newMaxFrames),
+        ];
+        props.setJoints(newJoints);
       } else {
-        const newKeyframes = [...props.keyframes].concat(
-          Array(maxFramesToBe - props.keyframes.length).fill(0)
-        );
-        props.setKeyframes(newKeyframes);
+        // Add more frames
+        console.log('increase frames');
+        const framesToAdd = Number(newMaxFrames - props.joints[0].length);
+        increaseMaxFrames(framesToAdd);
       }
+      interpolateFrames(); // so our new frames will be properly interpolated
     }
+  }
+  function increaseMaxFrames(framesToAdd) {
+    props.setKeyframes(extendList(props.keyframes, framesToAdd));
+    props.setJoints(oldJoints => [
+      [...oldJoints[0], ...Array(framesToAdd).fill(42)],
+      [...oldJoints[1], ...Array(framesToAdd).fill(42)],
+      [...oldJoints[2], ...Array(framesToAdd).fill(42)],
+      [...oldJoints[3], ...Array(framesToAdd).fill(42)],
+      [...oldJoints[4], ...Array(framesToAdd).fill(42)],
+      [...oldJoints[5], ...Array(framesToAdd).fill(42)],
+      [...oldJoints[6], ...Array(framesToAdd).fill(42)],
+    ]);
+  }
+  /**
+   * reduceList reduces a given list to the given length. A helper for
+   * updateMaxFrames.
+   * @param {T[]} targetList
+   * @param {int} newLength
+   * @returns {T[]}
+   */
+  function reduceList(targetList, newLength) {}
+  /**
+   * extendList extends a list with howManyToAdd 0's. A helper for
+   * updateMaxFrames.
+   * @param {T[]} targetList
+   * @param {int} howMuchToAdd
+   * @returns {T[]} extendedList
+   */
+  function extendList(targetList, howMuchToAdd) {
+    if (howMuchToAdd > 0) {
+      const res = [...targetList, ...Array(Number(howMuchToAdd)).fill(42)];
+      return res;
+    }
+    console.error(`Error adding # frames: ${howMuchToAdd.toString()}`);
+  }
+
+  /**
+   * `interpolateFrames` interpolates the joints' values between each keyframe.
+   *
+   * If tween frames exist before the first keyframe, they should copy that
+   * keyframe's values; if tween frames exist after the last keyframe, they
+   * should copy that keyframe's values.
+   *
+   * `interpolateFrames` should be called every time we navigate to a tween
+   * frame from a keyframe (by changing frame, by toggling a keyframe to a tween
+   * frame, or by changing the max frame count) and the
+   * `needToInterpolateFrames` flag is true. It should also be called just
+   * before sending an animation command to the robot.
+   *
+   * The `needToInterpolateFrames` flag should be set anytime we change a joint
+   * value on a keyframe, toggle a keyframe, or change the max frame count.
+   */
+  function interpolateFrames() {
+    console.log('Interpolate Frames called');
+    const data = [
+      [...props.joints[0]],
+      [...props.joints[1]],
+      [...props.joints[2]],
+      [...props.joints[3]],
+      [...props.joints[4]],
+      [...props.joints[5]],
+      [...props.joints[6]],
+    ];
+    let frame = 0;
+    let lastKeyframe = -1;
+    let nextKeyframe = -1;
+    while (frame < props.joints.length) {
+      nextKeyframe = props.keyframes.indexOf(1, frame);
+      if (nextKeyframe == -1 && lastKeyframe == -1) {
+        // There are no keyframes at all. No interpolation to do, break out.
+        // console.log("no keyframes");
+        break;
+      } else if (frame == nextKeyframe) {
+        // At a keyframe. Do no interpolation, but update pointer to last keyframe.
+        lastKeyframe = frame;
+        // console.log("at a keyframe");
+      } else if (lastKeyframe == -1) {
+        // In the beginning. Set value to upcoming keyframe.
+        // console.log("in the beginning");
+        setByOneKeyframe(data, frame, nextKeyframe);
+      } else if (nextKeyframe == -1) {
+        // At the end. Set value to last keyframe.
+        // console.log("at the end");
+        setByOneKeyframe(data, frame, lastKeyframe);
+      } else {
+        // In between two keyframes. Set value to an interpolation of the two.
+        // console.log("in between");
+        setByTwoKeyframes(data, frame, lastKeyframe, nextKeyframe);
+      }
+      frame++;
+    }
+    props.setJoints(data);
+  }
+  /**
+   * setByOneKeyframe duplicates the joint values in one frame to a different
+   * frame. A helper for interpolateFrames.
+   * @param {float[][]} data
+   * @param {int} frameToSet
+   * @param {int} frameToCopy
+   */
+  function setByOneKeyframe(data, frameToSet, frameToCopy) {
+    for (let joint = 0; joint < data.length; joint++) {
+      data[joint][frameToSet] = data[joint][frameToCopy];
+    }
+  }
+  /**
+   * setByTwoKeyframes sets one frame's joints to be an interpolation between
+   * the joints in two given frames. A helper for interpolateFrames.
+   * @param {float[][]} data
+   * @param {int} frameToSet
+   * @param {int} frameA
+   * @param {int} frameB
+   */
+  function setByTwoKeyframes(data, frameToSet, frameA, frameB) {
+    if (frameA == frameB) {
+      console.log('Error: interpolating between keyframe and itself');
+    }
+    const interval = frameB - frameA;
+    const leftInterval = frameToSet - frameA;
+    const rightInterval = frameB - frameToSet;
+    for (let arm = 0; arm < data.length; arm++) {
+      data[arm][frameToSet] =
+        data[arm][frameA] * ((1.0 * rightInterval) / interval) +
+        data[arm][frameB] * ((1.0 * leftInterval) / interval);
+    }
+  }
+  /**
+   * If the current frame changes, and the new current frame is a tween frame,
+   * we want to make sure our frames are interpolated.
+   */
+  useEffect(() => {
+    if (props.keyframes[props.currentFrame] == 0) interpolateFrames();
+  }, [props.currentFrame]);
+
+  function tempMakeRandomTWO() {
+    const newArr = [
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+      Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
+    ];
+    console.log(newArr[0]);
+    return newArr;
+  }
+  function tempSetJointsInFunction() {
+    props.setJoints(tempMakeRandomTWO());
   }
 
   return (
@@ -209,14 +389,34 @@ export default function Timeline(props) {
           className="flex-item rounded border-2 px-2 border-bots-gray text-bots-gray font-bold"
           value={maxFramesToBe}
           onChange={event => {
-            setmaxFramesToBe(event.target.value);
+            setMaxFramesToBe(event.target.value);
           }}
         />
         <button
           className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
-          onClick={updateMaxFrames}
+          onClick={() => {
+            setMaxFramesToBe(props.joints[0].length + 1);
+            updateMaxFrames(props.joints[0].length + 1);
+          }}
+        >
+          +
+        </button>
+        <button
+          className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
+          onClick={() => {
+            updateMaxFrames(maxFramesToBe);
+          }}
         >
           Set Max Frames
+        </button>
+
+        <button
+          className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
+          onClick={() => {
+            tempSetJointsInFunction();
+          }}
+        >
+          <p className="text-md">Random</p>
         </button>
       </div>
     </div>
