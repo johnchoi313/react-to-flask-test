@@ -187,13 +187,13 @@ export default function Timeline(props) {
   function increaseMaxFrames(framesToAdd) {
     props.setKeyframes(extendList(props.keyframes, framesToAdd));
     props.setJoints(oldJoints => [
-      [...oldJoints[0], ...Array(framesToAdd).fill(42)],
-      [...oldJoints[1], ...Array(framesToAdd).fill(42)],
-      [...oldJoints[2], ...Array(framesToAdd).fill(42)],
-      [...oldJoints[3], ...Array(framesToAdd).fill(42)],
-      [...oldJoints[4], ...Array(framesToAdd).fill(42)],
-      [...oldJoints[5], ...Array(framesToAdd).fill(42)],
-      [...oldJoints[6], ...Array(framesToAdd).fill(42)],
+      [...oldJoints[0], ...Array(framesToAdd).fill(0)],
+      [...oldJoints[1], ...Array(framesToAdd).fill(0)],
+      [...oldJoints[2], ...Array(framesToAdd).fill(0)],
+      [...oldJoints[3], ...Array(framesToAdd).fill(0)],
+      [...oldJoints[4], ...Array(framesToAdd).fill(0)],
+      [...oldJoints[5], ...Array(framesToAdd).fill(0)],
+      [...oldJoints[6], ...Array(framesToAdd).fill(0)],
     ]);
   }
   /**
@@ -213,7 +213,7 @@ export default function Timeline(props) {
    */
   function extendList(targetList, howMuchToAdd) {
     if (howMuchToAdd > 0) {
-      const res = [...targetList, ...Array(Number(howMuchToAdd)).fill(42)];
+      const res = [...targetList, ...Array(Number(howMuchToAdd)).fill(0)];
       return res;
     }
     console.error(`Error adding # frames: ${howMuchToAdd.toString()}`);
@@ -236,46 +236,48 @@ export default function Timeline(props) {
    * value on a keyframe, toggle a keyframe, or change the max frame count.
    */
   function interpolateFrames() {
-    console.log('Interpolate Frames called');
-    const data = [
-      [...props.joints[0]],
-      [...props.joints[1]],
-      [...props.joints[2]],
-      [...props.joints[3]],
-      [...props.joints[4]],
-      [...props.joints[5]],
-      [...props.joints[6]],
-    ];
-    let frame = 0;
-    let lastKeyframe = -1;
-    let nextKeyframe = -1;
-    while (frame < props.joints.length) {
-      nextKeyframe = props.keyframes.indexOf(1, frame);
-      if (nextKeyframe == -1 && lastKeyframe == -1) {
-        // There are no keyframes at all. No interpolation to do, break out.
-        // console.log("no keyframes");
-        break;
-      } else if (frame == nextKeyframe) {
-        // At a keyframe. Do no interpolation, but update pointer to last keyframe.
-        lastKeyframe = frame;
-        // console.log("at a keyframe");
-      } else if (lastKeyframe == -1) {
-        // In the beginning. Set value to upcoming keyframe.
-        // console.log("in the beginning");
-        setByOneKeyframe(data, frame, nextKeyframe);
-      } else if (nextKeyframe == -1) {
-        // At the end. Set value to last keyframe.
-        // console.log("at the end");
-        setByOneKeyframe(data, frame, lastKeyframe);
-      } else {
-        // In between two keyframes. Set value to an interpolation of the two.
-        // console.log("in between");
-        setByTwoKeyframes(data, frame, lastKeyframe, nextKeyframe);
+    props.setJoints(oldData => {
+      const data = [
+        [...oldData[0]],
+        [...oldData[1]],
+        [...oldData[2]],
+        [...oldData[3]],
+        [...oldData[4]],
+        [...oldData[5]],
+        [...oldData[6]],
+      ];
+      let frame = 0;
+      let lastKeyframe = -1;
+      let nextKeyframe = -1;
+      while (frame < data[0].length) {
+        nextKeyframe = props.keyframes.indexOf(1, frame);
+        if (nextKeyframe == -1 && lastKeyframe == -1) {
+          // There are no keyframes at all. No interpolation to do, break out.
+          // console.log("no keyframes");
+          break;
+        } else if (frame == nextKeyframe) {
+          // At a keyframe. Do no interpolation, but update pointer to last keyframe.
+          lastKeyframe = frame;
+          // console.log("at a keyframe");
+        } else if (lastKeyframe == -1) {
+          // In the beginning. Set value to upcoming keyframe.
+          // console.log("in the beginning");
+          setByOneKeyframe(data, frame, nextKeyframe);
+        } else if (nextKeyframe == -1) {
+          // At the end. Set value to last keyframe.
+          // console.log("at the end");
+          setByOneKeyframe(data, frame, lastKeyframe);
+        } else {
+          // In between two keyframes. Set value to an interpolation of the two.
+          // console.log("in between");
+          setByTwoKeyframes(data, frame, lastKeyframe, nextKeyframe);
+        }
+        frame++;
       }
-      frame++;
-    }
-    props.setJoints(data);
+      return data;
+    });
   }
+
   /**
    * setByOneKeyframe duplicates the joint values in one frame to a different
    * frame. A helper for interpolateFrames.
