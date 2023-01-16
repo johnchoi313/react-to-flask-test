@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Unity, useUnityContext } from 'react-unity-webgl';
+import Popup from 'reactjs-popup';
+import 'reactjs-popup/dist/index.css';
 
 import JointSlider from '../components/JointSlider';
 import BotsIQHeader from '../components/BotsIQHeader';
@@ -8,16 +10,22 @@ import Timeline from '../components/Timeline';
 
 /**
  * TODO:
- * [ ] Implement: frame interpolation
+ * [x] UI: file save, load, delete
+ * [ ] Finish implementing (w/ API): file save, load, delete
+ * [ ] Move each file modal into their own components
+ *
+ * [x] Implement: frame interpolation
  * [ ] Implement: toggle drag & teach
  * [ ] Implement: send pose
  * [ ] Implement: get pose
- * [ ] UI: file save, load, delete
- * [ ] Implement: file save, load, deletea
  * [ ] Address Logic: TODO about set pose on mount
  * [ ] Address Logic: TODOs at the top of Timeline component
  * [ ] Address Logic: Joint indexing/naming
  *     (which one is the gripper? do we have too many joints?)
+ * [ ] Check that save overwriting is default desired behavior
+ *
+ * END
+ * [ ] Styles!
  *
  * MAYBE
  * [ ] Address Logic: should we put buttons in their own component?
@@ -25,7 +33,7 @@ import Timeline from '../components/Timeline';
  *     and setCurrentFrame?
  * [x] Address Logic: UnityWebPage may be redundant
  * [ ] Clean up side effects (https://dmitripavlutin.com/react-hooks-mistakes-to-avoid/)
- *
+ * [ ] Can I better organize the Timeline component's logic?
  */
 
 export default function Home() {
@@ -41,6 +49,10 @@ export default function Home() {
     });
 
   // TODO on mount set the pose to whatever the current frame's joint values are
+  // or maybe make sure to send a message to the robot to have a zeroed pose?
+  // doesn't this already happen automatically? and does it actually even matter
+  // though - once the user sends something it'll be synced/as soon as they move
+  // the sliders it'll be unsynced again?
 
   /* ------------------------------------------------------------------------ */
   /* HANDLE ROBOT DATA: */
@@ -145,6 +157,49 @@ export default function Home() {
   }
 
   /* ------------------------------------------------------------------------ */
+  /* HANDLE FILE DATA: */
+  const [newFileName, setNewFileName] =
+    useState('newFile'); /* We'll automatically add '.txt' after it */
+  const [savedFiles, setSavedFiles] = useState([]);
+  function mockGetFiles() {
+    return ['fileOne', 'fileTwo', 'fileThree'];
+  }
+  useEffect(() => {
+    setSavedFiles(mockGetFiles());
+  }, []);
+
+  /**
+   * loadFile loads a file and all of its data from the robot
+   * @param {string} fileName - the name of the file we want to load
+   */
+  function loadFile(fileName) {
+    console.log(`Loading ${fileName}...`);
+    // TODO implement
+  }
+
+  /**
+   * deleteFile deletes a file and all of its data from the robot
+   * @param {string} fileName - the name of the file we want to delete
+   */
+  function deleteFile(fileName) {
+    console.log(`Deleting ${fileName}...`);
+    // TODO implement
+  }
+
+  /**
+   * saveFile saves a file and all of its data to the robot. For the moment, the
+   * default behavior is to allow file overwriting (TODO check that this is what
+   * we want!)
+   * @param {string} fileName - the name of the file we want to save
+   */
+  function saveFile(fileName) {
+    console.log(`Saving ${newFileName}...`);
+    // TODO implement
+    // TODO remember to add '.txt' after newFileName
+    setNewFileName('newFile');
+  }
+
+  /* ------------------------------------------------------------------------ */
   /* HANDLE TIMELINE DATA: (mostly in the Timeline component) */
 
   const [currentFrame, setCurrentFrame] = useState(0);
@@ -239,55 +294,152 @@ export default function Home() {
         needToInterpolateFrames={needToInterpolateFrames}
         tempMakeRandom={tempMakeRandom}
       />
-      <h1 className="font-mono">
+
+      <div className="flex-container">
+        <Popup
+          modal
+          closeOnDocumentClick
+          id="loadFileMenu"
+          trigger={<button className="flex-item">Load File</button>}
+        >
+          {close => (
+            <div className="modal">
+              <button className="close" onClick={close}>
+                &times;
+              </button>
+              <div className="header">Load File:</div>
+              <br />
+              <div className="flex-container-vertical">
+                {savedFiles.map(fileName => (
+                  <button
+                    key={fileName}
+                    onClick={() => {
+                      loadFile(fileName);
+                      close();
+                    }}
+                  >
+                    {fileName}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </Popup>
+
+        <Popup
+          modal
+          closeOnDocumentClick
+          id="saveFileMenu"
+          trigger={<button className="flex-item">Save File</button>}
+        >
+          {close => (
+            <div className="modal">
+              <button className="close" onClick={close}>
+                &times;
+              </button>
+              <div className="header">Save File:</div>
+              <br />
+              <div>
+                <input
+                  value={newFileName}
+                  onChange={event => {
+                    setNewFileName(event.target.value);
+                  }}
+                />
+                <span>.txt</span>
+                <button
+                  onClick={() => {
+                    saveFile();
+                    close();
+                  }}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          )}
+        </Popup>
+        <Popup
+          modal
+          closeOnDocumentClick
+          id="deleteFileMenu"
+          trigger={<button className="flex-item">Delete File</button>}
+        >
+          {close => (
+            <div className="modal">
+              <button className="close" onClick={close}>
+                &times;
+              </button>
+              <div className="header">Delete File:</div>
+              <br />
+              <div className="flex-container-vertical">
+                {savedFiles.map(fileName => (
+                  <button
+                    key={fileName}
+                    onClick={() => {
+                      deleteFile(fileName);
+                      close();
+                    }}
+                  >
+                    {fileName}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </Popup>
+      </div>
+      {/*
+      <h3 className="font-mono">
         K:{' '}
         {keyframes
           .map(x => Math.round(x).toString().padStart(4, '_'))
           .join(' ')}
-      </h1>
-      <h1>.</h1>
-      <h1 className="font-mono">
+      </h3>
+      <h3>.</h3>
+      <h3 className="font-mono">
         0:{' '}
         {joints[0]
           .map(x => Math.round(x).toString().padStart(4, '_'))
           .join(' ')}
-      </h1>
-      <h1 className="font-mono">
+      </h3>
+      <h3 className="font-mono">
         1:{' '}
         {joints[1]
           .map(x => Math.round(x).toString().padStart(4, '_'))
           .join(' ')}
-      </h1>
-      <h1 className="font-mono">
+      </h3>
+      <h3 className="font-mono">
         2:{' '}
         {joints[2]
           .map(x => Math.round(x).toString().padStart(4, '_'))
           .join(' ')}
-      </h1>
-      <h1 className="font-mono">
+      </h3>
+      <h3 className="font-mono">
         3:{' '}
         {joints[3]
           .map(x => Math.round(x).toString().padStart(4, '_'))
           .join(' ')}
-      </h1>
-      <h1 className="font-mono">
+      </h3>
+      <h3 className="font-mono">
         4:{' '}
         {joints[4]
           .map(x => Math.round(x).toString().padStart(4, '_'))
           .join(' ')}
-      </h1>
-      <h1 className="font-mono">
+      </h3>
+      <h3 className="font-mono">
         5:{' '}
         {joints[5]
           .map(x => Math.round(x).toString().padStart(4, '_'))
           .join(' ')}
-      </h1>
-      <h1 className="font-mono">
+      </h3>
+      <h3 className="font-mono">
         6:{' '}
         {joints[6]
           .map(x => Math.round(x).toString().padStart(4, '_'))
           .join(' ')}
-      </h1>
+      </h3>
+        */}
     </div>
   );
 }

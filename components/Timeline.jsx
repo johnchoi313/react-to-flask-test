@@ -386,7 +386,18 @@ export default function Timeline(props) {
         >
           Set Current Frame
         </button>
+      </div>
 
+      <div className="flex-container">
+        <button
+          className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
+          onClick={() => {
+            setMaxFramesToBe(props.joints[0].length - 1);
+            updateMaxFrames(props.joints[0].length - 1);
+          }}
+        >
+          -
+        </button>
         <input
           className="flex-item rounded border-2 px-2 border-bots-gray text-bots-gray font-bold"
           value={maxFramesToBe}
@@ -397,28 +408,19 @@ export default function Timeline(props) {
         <button
           className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
           onClick={() => {
-            setMaxFramesToBe(props.joints[0].length + 1);
-            updateMaxFrames(props.joints[0].length + 1);
-          }}
-        >
-          +
-        </button>
-        <button
-          className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
-          onClick={() => {
             updateMaxFrames(maxFramesToBe);
           }}
         >
           Set Max Frames
         </button>
-
         <button
           className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
           onClick={() => {
-            tempSetJointsInFunction();
+            setMaxFramesToBe(props.joints[0].length + 1);
+            updateMaxFrames(props.joints[0].length + 1);
           }}
         >
-          <p className="text-md">Random</p>
+          +
         </button>
       </div>
     </div>
