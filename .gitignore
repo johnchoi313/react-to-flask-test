@@ -19,9 +19,6 @@ package-lock.json
 # production
 /build
 
-# misc
-.DS_Store
-*.pem
 
 # debug
 npm-debug.log*
@@ -37,7 +34,15 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# misc
+*.pem
 *.orig
+.DS_Store
+.eslintrc.json
+.prettierrc.json
+package-lock.json
+.vscode/settings.json
 pages/UnityWebProject_BACKUP_1067.js
 pages/UnityWebProject_BACKUP_1152.js
 pages/UnityWebProject_BASE_1067.js

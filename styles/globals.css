@@ -23,12 +23,17 @@ a {
   box-sizing: border-box;
 }
 
+button {
+  border: 3px solid;
+  padding: 0px;
+}
+
 .canvas {
   width: 400px;
   height: 400px;
 }
 .red {
-  color: "red";
+  color: 'red';
 }
 
 button,
@@ -51,7 +56,7 @@ button {
 .speedInput {
   width: 1em;
 }
-.bb{
+.bb {
   border: 1px solid orange;
 }
 .mt-4 {
@@ -132,4 +137,38 @@ input {
 
 .rc-slider {
   min-width: 50px;
+}
+
+.flex-basis-500 {
+  flex-basis: 500%;
+}
+
+.flex-container-vertical {
+  display: flex;
+  flex-direction: column;
+}
+
+.modal {
+  font-size: 12px;
+}
+
+.modal > .header {
+  width: 100%;
+  border-bottom: 1px solid gray;
+  font-size: 18px;
+  text-align: center;
+  padding: 5px;
+}
+.modal > .close {
+  cursor: pointer;
+  position: absolute;
+  display: block;
+  padding: 0px 4px 4px 6px;
+  line-height: 24px;
+  right: -10px;
+  top: -10px;
+  font-size: 24px;
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid #cfcece;
 }
