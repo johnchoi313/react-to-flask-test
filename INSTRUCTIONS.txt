@@ -107,6 +107,9 @@ https://github.com/johnchoi313/react-to-flask-test
 
 ---SETTING UP AUTOSTART:---
 
+  (if stupid "/bin/bash^M: bad interpreter: No such file or directory" error:)
+  sed -i -e 's/\r$//' scriptname.sh
+
   (use init.d method! ACTUALLY, INITD methodd SUCKS.)
   (use systemd method, BECAUSE IT ACTUALLY F*CKING WORKS (actually, no it doesn't:): https://tecadmin.net/run-shell-script-as-systemd-service/)
 
