@@ -2,6 +2,10 @@ Set Sleep to NEVER
 
 CD INTO DIRECTORY FIRST!!
 
+---ELEPHANT ROBOT PI PASSWORD:---
+
+This password should be set by the customer ownself. 
+If not ok, please try "aibot1234" or "Elephant"
 
 ---NEVER SLEEP:---
   
