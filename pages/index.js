@@ -1,8 +1,10 @@
+/* eslint-disable react/button-has-type */
+/* eslint-disable react/jsx-filename-extension */
 import React, { useEffect, useState } from 'react';
 import { Unity, useUnityContext } from 'react-unity-webgl';
-import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 
+import Popup from 'reactjs-popup';
 import JointSlider from '../components/JointSlider';
 import BotsIQHeader from '../components/BotsIQHeader';
 import UnityWebPage from '../components/UnityWebProject';
@@ -15,14 +17,16 @@ import Timeline from '../components/Timeline';
  * [ ] Move each file modal into their own components
  *
  * [x] Implement: frame interpolation
- * [ ] Implement: toggle drag & teach
- * [ ] Implement: send pose
- * [ ] Implement: get pose
+ * [x] Implement: toggle drag & teach
+ * [x] Implement: send pose
+ * [ ] Implement: send animation
+ * [x] Implement: get pose
  * [ ] Address Logic: TODO about set pose on mount
  * [ ] Address Logic: TODOs at the top of Timeline component
  * [ ] Address Logic: Joint indexing/naming
  *     (which one is the gripper? do we have too many joints?)
  * [ ] Check that save overwriting is default desired behavior
+ * [ ] Phase out (or at least clean uses) of temp make random
  *
  * END
  * [ ] Styles!
@@ -57,7 +61,10 @@ export default function Home() {
   /* ------------------------------------------------------------------------ */
   /* HANDLE ROBOT DATA: */
 
-  /* We initially have only 1 frame per joint here */
+  /* Turn the motors off to use drag & teach mode */
+  const [motorsOn, setMotorsOn] = useState(true);
+
+  /* We initially have only a few frames per joint here */
   const [joints, setJoints] = useState([
     [0, 0, 0, 0, 0, 0],
     [1, 0, 0, 0, 0, 0],
@@ -213,6 +220,63 @@ export default function Home() {
   const stdButtonFormat = 'font-bold text-bots-gray rounded border-bots-gray';
 
   /* ------------------------------------------------------------------------ */
+  /* HANDLE API: */
+
+  const urlPrefix = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000`;
+
+  // TODO add in docstrings!!
+
+  const handleSendPose = async () => {
+    const signal = joints.map(joint => joint[currentFrame]);
+    signal.splice(0, 1); // TODO this relates to the total # of joints question
+    // - I think there really might only be 6 including the gripper
+    const url = `${urlPrefix}/send-pose?angles=${signal}`;
+    const apiDataResponse = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    const apiDataJson = await apiDataResponse.json();
+    console.log(apiDataJson.response);
+  };
+
+  const handleTurnMotorsOff = async () => {
+    const url = `${urlPrefix}/turn-off-motors`;
+    const apiDataResponse = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    const apiDataJson = await apiDataResponse.json();
+    console.log(apiDataJson.response);
+  };
+
+  const getPose = async () => {
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-pose`;
+    console.log(url);
+    const anglesApiDataResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    const anglesApiDataJson = await anglesApiDataResponse.json();
+    console.log(anglesApiDataJson.response.map(val => Math.round(val)));
+    // TODO update animation
+
+    const newJoints = [...joints];
+    for (let i = 0; i < anglesApiDataJson.response.length; i++) {
+      newJoints[i][currentFrame] = anglesApiDataJson.response[i];
+    }
+    setJoints(newJoints);
+  };
+
+  /* ------------------------------------------------------------------------ */
   /* RENDER PAGE: */
 
   return (
@@ -225,16 +289,17 @@ export default function Home() {
             <button
               className={`flex-item bg-bots-light-gray ${stdButtonFormat}`}
               onClick={() => {
-                console.log('Implement drag & teach!');
+                handleTurnMotorsOff();
               }}
             >
-              <p className="text-md">DRAG & TEACH MODE</p>
-              <p className="text-xs">[OFF]</p>
+              <p className="text-md">TURN MOTORS OFF</p>
+              <p className="text-xs">[DRAG & TEACH MODE]</p>
             </button>
             <button
               className={`flex-item ${stdButtonFormat}`}
               onClick={() => {
                 console.log('Implement get pose from Cobot!');
+                getPose();
               }}
             >
               <p className="text-md">GET POSE</p>
@@ -266,7 +331,7 @@ export default function Home() {
             <button
               className={`flex-item ${stdButtonFormat}`}
               onClick={() => {
-                console.log('Implement send pose to Cobot!');
+                handleSendPose();
               }}
             >
               <p className="text-md">SEND POSE</p>
@@ -296,36 +361,6 @@ export default function Home() {
       />
 
       <div className="flex-container">
-        <Popup
-          modal
-          closeOnDocumentClick
-          id="loadFileMenu"
-          trigger={<button className="flex-item">Load File</button>}
-        >
-          {close => (
-            <div className="modal">
-              <button className="close" onClick={close}>
-                &times;
-              </button>
-              <div className="header">Load File:</div>
-              <br />
-              <div className="flex-container-vertical">
-                {savedFiles.map(fileName => (
-                  <button
-                    key={fileName}
-                    onClick={() => {
-                      loadFile(fileName);
-                      close();
-                    }}
-                  >
-                    {fileName}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </Popup>
-
         <Popup
           modal
           closeOnDocumentClick
