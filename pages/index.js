@@ -312,7 +312,7 @@ export default function Home() {
         <div className="flex-item">
           <div className="flex-container">
             <button
-              className={`flex-item bg-bots-light-gray ${stdButtonFormat}`}
+              className={`flex-item ${stdButtonFormat}`}
               onClick={() => {
                 handleTurnMotorsOff();
               }}
@@ -461,57 +461,6 @@ export default function Home() {
           )}
         </Popup>
       </div>
-      {/*
-      <h3 className="font-mono">
-        K:{' '}
-        {keyframes
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3>.</h3>
-      <h3 className="font-mono">
-        0:{' '}
-        {joints[0]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3 className="font-mono">
-        1:{' '}
-        {joints[1]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3 className="font-mono">
-        2:{' '}
-        {joints[2]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3 className="font-mono">
-        3:{' '}
-        {joints[3]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3 className="font-mono">
-        4:{' '}
-        {joints[4]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3 className="font-mono">
-        5:{' '}
-        {joints[5]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3 className="font-mono">
-        6:{' '}
-        {joints[6]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-        */}
     </div>
   );
 }

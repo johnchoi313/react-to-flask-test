@@ -370,7 +370,8 @@ export default function Timeline(props) {
             toggleKeyframe(props.currentFrame);
           }}
         >
-          TOGGLE KEYFRAME{' '}
+          <p className="text-md">KEYFRAME</p>
+          <p className="text-xs">TOGGLE</p>
         </button>
 
         <input
@@ -384,20 +385,10 @@ export default function Timeline(props) {
           className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
           onClick={() => setFrameByTimelineClick(currentFrameToBe)}
         >
-          Set Current Frame
+          <p className="text-md">SET</p>
+          <p className="text-xs">CURR. FRAME</p>
         </button>
-      </div>
 
-      <div className="flex-container">
-        <button
-          className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
-          onClick={() => {
-            setMaxFramesToBe(props.joints[0].length - 1);
-            updateMaxFrames(props.joints[0].length - 1);
-          }}
-        >
-          -
-        </button>
         <input
           className="flex-item rounded border-2 px-2 border-bots-gray text-bots-gray font-bold"
           value={maxFramesToBe}
@@ -411,7 +402,19 @@ export default function Timeline(props) {
             updateMaxFrames(maxFramesToBe);
           }}
         >
-          Set Max Frames
+          <p className="text-md">SET</p>
+          <p className="text-xs">MAX FRAMES</p>
+        </button>
+
+        <button
+          className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
+          onClick={() => {
+            setMaxFramesToBe(props.joints[0].length - 1);
+            updateMaxFrames(props.joints[0].length - 1);
+          }}
+        >
+          <p className="text-md">-</p>
+          <p className="text-xs">MAX FRAMES</p>
         </button>
         <button
           className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
@@ -420,7 +423,8 @@ export default function Timeline(props) {
             updateMaxFrames(props.joints[0].length + 1);
           }}
         >
-          +
+          <p className="text-md">+</p>
+          <p className="text-xs">MAX FRAMES</p>
         </button>
       </div>
     </div>
