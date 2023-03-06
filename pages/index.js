@@ -19,7 +19,7 @@ import Timeline from '../components/Timeline';
  * [x] Implement: frame interpolation
  * [x] Implement: toggle drag & teach
  * [x] Implement: send pose
- * [ ] Implement: send animation
+ * [x] Implement: send animation
  * [x] Implement: get pose
  * [ ] Address Logic: TODO about set pose on mount
  * [ ] Address Logic: TODOs at the top of Timeline component
@@ -276,6 +276,31 @@ export default function Home() {
     setJoints(newJoints);
   };
 
+  const handleSendAnimation = async () => {
+    const signal = `{
+      "name":"animationName",
+      "speed":1,
+      "commandsArm1":[${joints[1]}],
+      "commandsArm2":[${joints[2]}],
+      "commandsArm3":[${joints[3]}],
+      "commandsArm4":[${joints[4]}],
+      "commandsArm5":[${joints[5]}],
+      "commandsArm6":[${joints[6]}],
+      "frame":${currentFrame},
+      "kf":[0]}`;
+
+    const url = `${urlPrefix}/send-angles-sequence?angles_sequence=${signal}`;
+    const apiDataResponse = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    const apiDataJson = await apiDataResponse.json();
+    console.log(apiDataJson.response);
+  };
+
   /* ------------------------------------------------------------------------ */
   /* RENDER PAGE: */
 
@@ -293,17 +318,26 @@ export default function Home() {
               }}
             >
               <p className="text-md">TURN MOTORS OFF</p>
-              <p className="text-xs">[DRAG & TEACH MODE]</p>
             </button>
+
             <button
               className={`flex-item ${stdButtonFormat}`}
               onClick={() => {
-                console.log('Implement get pose from Cobot!');
                 getPose();
               }}
             >
               <p className="text-md">GET POSE</p>
               <p className="text-xs">FROM COBOT</p>
+            </button>
+
+            <button
+              className={`flex-item ${stdButtonFormat}`}
+              onClick={() => {
+                setJoints(tempMakeRandom());
+              }}
+            >
+              <p className="text-md">RANDOMIZE</p>
+              <p className="text-xs">SLIDERS</p>
             </button>
           </div>
 
@@ -328,6 +362,7 @@ export default function Home() {
               <p className="text-md">RESET POSE</p>
               <p className="text-xs">SLIDERS</p>
             </button>
+
             <button
               className={`flex-item ${stdButtonFormat}`}
               onClick={() => {
@@ -337,13 +372,15 @@ export default function Home() {
               <p className="text-md">SEND POSE</p>
               <p className="text-xs">TO COBOT</p>
             </button>
+
             <button
               className={`flex-item ${stdButtonFormat}`}
               onClick={() => {
-                setJoints(tempMakeRandom());
+                handleSendAnimation();
               }}
             >
-              <p className="text-md">Random</p>
+              <p className="text-md">SEND ANIMATION</p>
+              <p className="text-xs">TO COBOT</p>
             </button>
           </div>
         </div>
