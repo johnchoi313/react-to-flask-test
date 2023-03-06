@@ -1,15 +1,15 @@
 import React from 'react';
 import Popup from 'reactjs-popup';
 
-export default function LoadFileMenu(props) {
+export default function DeleteFileMenu(props) {
   return (
     <Popup
       modal
       closeOnDocumentClick
-      id="loadFileMenu"
+      id="deleteFileMenu"
       trigger={
         <button className="flex-item font-bold text-bots-gray rounded border-bots-gray">
-          <p className="text-md">LOAD</p>
+          <p className="text-md">DELETE</p>
           <p className="text-xs">FILE</p>
         </button>
       }
@@ -19,14 +19,14 @@ export default function LoadFileMenu(props) {
           <button className="close" onClick={close}>
             &times;
           </button>
-          <div className="header">Load File:</div>
+          <div className="header">Delete File:</div>
           <br />
           <div className="flex-container-vertical">
             {props.savedFiles.map(fileName => (
               <button
                 key={fileName}
                 onClick={() => {
-                  props.loadFile(fileName);
+                  props.deleteFile(fileName);
                   close();
                 }}
               >

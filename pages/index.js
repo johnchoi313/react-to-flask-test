@@ -7,6 +7,9 @@ import 'reactjs-popup/dist/index.css';
 import Popup from 'reactjs-popup';
 import JointSlider from '../components/JointSlider';
 import BotsIQHeader from '../components/BotsIQHeader';
+import LoadFileMenu from '../components/LoadFileMenu';
+import SaveFileMenu from '../components/SaveFileMenu';
+import DeleteFileMenu from '../components/DeleteFileMenu';
 import UnityWebPage from '../components/UnityWebProject';
 import Timeline from '../components/Timeline';
 
@@ -239,7 +242,7 @@ export default function Home() {
       },
     });
     const apiDataJson = await apiDataResponse.json();
-    console.log(apiDataJson.response);
+    // console.log(apiDataJson.response);
   };
 
   const handleTurnMotorsOff = async () => {
@@ -257,7 +260,6 @@ export default function Home() {
 
   const getPose = async () => {
     const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-pose`;
-    console.log(url);
     const anglesApiDataResponse = await fetch(url, {
       method: 'GET',
       headers: {
@@ -266,9 +268,7 @@ export default function Home() {
       },
     });
     const anglesApiDataJson = await anglesApiDataResponse.json();
-    console.log(anglesApiDataJson.response.map(val => Math.round(val)));
-    // TODO update animation
-
+    // console.log(anglesApiDataJson.response.map(val => Math.round(val)));
     const newJoints = [...joints];
     for (let i = 0; i < anglesApiDataJson.response.length; i++) {
       newJoints[i][currentFrame] = anglesApiDataJson.response[i];
@@ -398,68 +398,12 @@ export default function Home() {
       />
 
       <div className="flex-container">
-        <Popup
-          modal
-          closeOnDocumentClick
-          id="saveFileMenu"
-          trigger={<button className="flex-item">Save File</button>}
-        >
-          {close => (
-            <div className="modal">
-              <button className="close" onClick={close}>
-                &times;
-              </button>
-              <div className="header">Save File:</div>
-              <br />
-              <div>
-                <input
-                  value={newFileName}
-                  onChange={event => {
-                    setNewFileName(event.target.value);
-                  }}
-                />
-                <span>.txt</span>
-                <button
-                  onClick={() => {
-                    saveFile();
-                    close();
-                  }}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          )}
-        </Popup>
-        <Popup
-          modal
-          closeOnDocumentClick
-          id="deleteFileMenu"
-          trigger={<button className="flex-item">Delete File</button>}
-        >
-          {close => (
-            <div className="modal">
-              <button className="close" onClick={close}>
-                &times;
-              </button>
-              <div className="header">Delete File:</div>
-              <br />
-              <div className="flex-container-vertical">
-                {savedFiles.map(fileName => (
-                  <button
-                    key={fileName}
-                    onClick={() => {
-                      deleteFile(fileName);
-                      close();
-                    }}
-                  >
-                    {fileName}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </Popup>
+        <LoadFileMenu savedFiles={savedFiles} loadFile={loadFile} />
+        <SaveFileMenu
+          newFileName={newFileName}
+          setNewFileName={setNewFileName}
+        />
+        <DeleteFileMenu savedFiles={savedFiles} deleteFile={deleteFile} />
       </div>
     </div>
   );

@@ -361,7 +361,8 @@ export default function Timeline(props) {
             togglePlayAnimation();
           }}
         >
-          {animationPlaying ? 'STOP' : 'PLAY'}
+          <p className="text-md">{animationPlaying ? 'STOP' : 'PLAY'}</p>
+          <p className="text-xs">ANIMATION</p>
         </button>
 
         <button
