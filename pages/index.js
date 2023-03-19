@@ -1,39 +1,50 @@
+/* eslint-disable react/button-has-type */
+/* eslint-disable react/jsx-filename-extension */
 import React, { useEffect, useState } from 'react';
 import { Unity, useUnityContext } from 'react-unity-webgl';
-import Popup from 'reactjs-popup';
 import 'reactjs-popup/dist/index.css';
 
+import { getPageFiles } from 'next/dist/server/get-page-files';
+import { Button } from '@material-ui/core';
 import JointSlider from '../components/JointSlider';
 import BotsIQHeader from '../components/BotsIQHeader';
+import LoadFileMenu from '../components/LoadFileMenu';
+import SaveFileMenu from '../components/SaveFileMenu';
+import DeleteFileMenu from '../components/DeleteFileMenu';
 import UnityWebPage from '../components/UnityWebProject';
 import Timeline from '../components/Timeline';
 
 /**
  * TODO:
- * [x] UI: file save, load, delete
- * [ ] Finish implementing (w/ API): file save, load, delete
- * [ ] Move each file modal into their own components
+ * [~] Figure out joint indices !! -> Doubled in load file at least, needs cleaned
+ *    so it looks like the issue here is there is no actual API control over the
+ *    gripper yet, so we've kind of grandfathered in a blank joint. It's confusing
+ *    because it doesn't do anything yet, and the api is 1-indexed, which means
+ *    it's more intuitive if we let the indices match up and leave joints[0] as
+ *    the blank, gripper-to-be joint. However, the joint right next to the gripper
+ *    is "commands arm 6", aka joint[6] when we line them up, which means we have
+ *    an unintuitive jump from joint 5 to joint 6 to joint 0, travelling up the arm.
+ *    So -> do I want to remove the blank joint entry for now, and wait till the
+ *    API catches up (and make sure this is used consistently the same way throughout?
+ *    Or re-do the indexing and let them all be off by one, removing the blank joint
+ *    and letting us add it later at the end of the joints array?
+ * [ ] We get an error message right away (ig right after loading) from failing
+ *    to fetch the files, if we don't have a good connection established. Maybe
+ *    this is desired behavior? Maybe not? Food for thought
  *
- * [x] Implement: frame interpolation
- * [ ] Implement: toggle drag & teach
- * [ ] Implement: send pose
- * [ ] Implement: get pose
+ * [ ] File names -> allow user to specify, then stop parsing them from save file response
  * [ ] Address Logic: TODO about set pose on mount
  * [ ] Address Logic: TODOs at the top of Timeline component
- * [ ] Address Logic: Joint indexing/naming
- *     (which one is the gripper? do we have too many joints?)
  * [ ] Check that save overwriting is default desired behavior
- *
- * END
- * [ ] Styles!
+ * [ ] Phase out (or at least clean up uses) of temp make random
  *
  * MAYBE
  * [ ] Address Logic: should we put buttons in their own component?
  * [ ] Address Logic: does it makes sense to allow ENTER to trigger setMaxFrames
  *     and setCurrentFrame?
- * [x] Address Logic: UnityWebPage may be redundant
  * [ ] Clean up side effects (https://dmitripavlutin.com/react-hooks-mistakes-to-avoid/)
  * [ ] Can I better organize the Timeline component's logic?
+ *
  */
 
 export default function Home() {
@@ -57,7 +68,10 @@ export default function Home() {
   /* ------------------------------------------------------------------------ */
   /* HANDLE ROBOT DATA: */
 
-  /* We initially have only 1 frame per joint here */
+  /* Turn the motors off to use drag & teach mode */
+  const [motorsOn, setMotorsOn] = useState(true);
+
+  /* We initially have only a few frames per joint here */
   const [joints, setJoints] = useState([
     [0, 0, 0, 0, 0, 0],
     [1, 0, 0, 0, 0, 0],
@@ -157,52 +171,10 @@ export default function Home() {
   }
 
   /* ------------------------------------------------------------------------ */
-  /* HANDLE FILE DATA: */
-  const [newFileName, setNewFileName] =
-    useState('newFile'); /* We'll automatically add '.txt' after it */
-  const [savedFiles, setSavedFiles] = useState([]);
-  function mockGetFiles() {
-    return ['fileOne', 'fileTwo', 'fileThree'];
-  }
-  useEffect(() => {
-    setSavedFiles(mockGetFiles());
-  }, []);
-
-  /**
-   * loadFile loads a file and all of its data from the robot
-   * @param {string} fileName - the name of the file we want to load
-   */
-  function loadFile(fileName) {
-    console.log(`Loading ${fileName}...`);
-    // TODO implement
-  }
-
-  /**
-   * deleteFile deletes a file and all of its data from the robot
-   * @param {string} fileName - the name of the file we want to delete
-   */
-  function deleteFile(fileName) {
-    console.log(`Deleting ${fileName}...`);
-    // TODO implement
-  }
-
-  /**
-   * saveFile saves a file and all of its data to the robot. For the moment, the
-   * default behavior is to allow file overwriting (TODO check that this is what
-   * we want!)
-   * @param {string} fileName - the name of the file we want to save
-   */
-  function saveFile(fileName) {
-    console.log(`Saving ${newFileName}...`);
-    // TODO implement
-    // TODO remember to add '.txt' after newFileName
-    setNewFileName('newFile');
-  }
-
-  /* ------------------------------------------------------------------------ */
   /* HANDLE TIMELINE DATA: (mostly in the Timeline component) */
 
   const [currentFrame, setCurrentFrame] = useState(0);
+  const [maxFramesToBe, setMaxFramesToBe] = useState(0);
   const [keyframes, setKeyframes] = useState([1, 0, 0, 0, 1, 0]);
   const needToInterpolateFrames = true;
 
@@ -211,6 +183,161 @@ export default function Home() {
 
   /* Specify standard button format to keep html easier to read */
   const stdButtonFormat = 'font-bold text-bots-gray rounded border-bots-gray';
+
+  /* ------------------------------------------------------------------------ */
+  /* HANDLE API (NON-FILES): */
+
+  const urlPrefix = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000`;
+
+  // TODO add in docstrings!!
+
+  const handleSendPose = async () => {
+    const signal = joints.map(joint => joint[currentFrame]);
+    signal.splice(0, 1); // TODO this relates to the total # of joints question
+    // - I think there really might only be 6 including the gripper
+    const url = `${urlPrefix}/send-pose?angles=${signal}`;
+    const apiDataResponse = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    const apiDataJson = await apiDataResponse.json();
+    // console.log(apiDataJson.response);
+  };
+
+  const handleTurnMotorsOff = async () => {
+    const url = `${urlPrefix}/turn-off-motors`;
+    const apiDataResponse = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    const apiDataJson = await apiDataResponse.json();
+    console.log(apiDataJson.response);
+  };
+
+  const getPose = async () => {
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-pose`;
+    const anglesApiDataResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    const anglesApiDataJson = await anglesApiDataResponse.json();
+    // console.log(anglesApiDataJson.response.map(val => Math.round(val)));
+    const newJoints = [...joints];
+    for (let i = 0; i < anglesApiDataJson.response.length; i++) {
+      newJoints[i][currentFrame] = anglesApiDataJson.response[i];
+    }
+    setJoints(newJoints);
+  };
+
+  const handleSendAnimation = async () => {
+    const signal = `{
+      "name":"animationName",
+      "speed":1,
+      "commandsArm1":[${joints[1]}],
+      "commandsArm2":[${joints[2]}],
+      "commandsArm3":[${joints[3]}],
+      "commandsArm4":[${joints[4]}],
+      "commandsArm5":[${joints[5]}],
+      "commandsArm6":[${joints[6]}],
+      "frame":${currentFrame},
+      "kf":[0]}`;
+
+    const url = `${urlPrefix}/send-angles-sequence?angles_sequence=${signal}`;
+    const apiDataResponse = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    const apiDataJson = await apiDataResponse.json();
+  };
+
+  /* ------------------------------------------------------------------------ */
+  /* HANDLE FILE DATA: */
+
+  const [savedFiles, setSavedFiles] = useState(['none']);
+
+  const getFiles = async () => {
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-all-animation-files`;
+    const apiFileDataResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    const apiFileDataJson = await apiFileDataResponse.json();
+    setSavedFiles(apiFileDataJson.response.sort());
+    return true;
+  };
+
+  /**
+   * Get the list of files that are saved on the robot
+   * Only call this once, at the beginning (we modify this list over time to
+   * do the "soft" file deletion). Not ideal but until we have a "delete file"
+   * API function it will have to do.
+   */
+  useEffect(() => {
+    if (isLoaded) {
+      console.log('Loading files...');
+      getFiles();
+    }
+  }, [isLoaded]);
+
+  /**
+   * loadFile loads a file and all of its data from the robot
+   * @param {string} fileName - the name of the file we want to load
+   */
+  const loadFile = async fileName => {
+    console.log(`Loading ${fileName}...`);
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-single-file?file=${fileName}`;
+    const apiSingleFileDataResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    const apiSingleFileDataJson = await apiSingleFileDataResponse.json();
+    console.log(apiSingleFileDataJson);
+    const jsonString = apiSingleFileDataJson.response.replace(/'/g, '"'); // need to turn ' to " to be parsable
+    const jsonData = JSON.parse(jsonString);
+    console.log(jsonData);
+    const loadedMaxFrames = jsonData.keyFrameIndices.length;
+    setMaxFramesToBe(loadedMaxFrames);
+    setKeyframes(jsonData.keyFrameIndices);
+    setJoints([
+      [...jsonData.commandsArm1.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsArm1.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsArm2.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsArm3.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsArm4.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsArm5.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsArm6.slice(0, loadedMaxFrames)],
+    ]); // TODO we're just repeating a joint data for now
+  };
+
+  /**
+   * deleteFile ~should~ delete a file and all of its data from the robot
+   * NOTE: this is currently just a "soft" delete - we hide its existence from
+   * the user, but the file will still exist on the robot. iirc this is because
+   * we don't have a "delete file" api command to use yet.
+   * @param {string} fileName - the name of the file we want to delete
+   */
+  function deleteFile(fileName) {
+    console.log(`Deleting ${fileName}...`);
+    setSavedFiles(savedFiles.filter(item => item !== fileName));
+  }
 
   /* ------------------------------------------------------------------------ */
   /* RENDER PAGE: */
@@ -223,22 +350,32 @@ export default function Home() {
         <div className="flex-item">
           <div className="flex-container">
             <button
-              className={`flex-item bg-bots-light-gray ${stdButtonFormat}`}
+              className={`flex-item ${stdButtonFormat}`}
               onClick={() => {
-                console.log('Implement drag & teach!');
+                handleTurnMotorsOff();
               }}
             >
-              <p className="text-md">DRAG & TEACH MODE</p>
-              <p className="text-xs">[OFF]</p>
+              <p className="text-md">TURN MOTORS OFF</p>
             </button>
+
             <button
               className={`flex-item ${stdButtonFormat}`}
               onClick={() => {
-                console.log('Implement get pose from Cobot!');
+                getPose();
               }}
             >
               <p className="text-md">GET POSE</p>
               <p className="text-xs">FROM COBOT</p>
+            </button>
+
+            <button
+              className={`flex-item ${stdButtonFormat}`}
+              onClick={() => {
+                setJoints(tempMakeRandom());
+              }}
+            >
+              <p className="text-md">RANDOMIZE</p>
+              <p className="text-xs">SLIDERS</p>
             </button>
           </div>
 
@@ -263,22 +400,25 @@ export default function Home() {
               <p className="text-md">RESET POSE</p>
               <p className="text-xs">SLIDERS</p>
             </button>
+
             <button
               className={`flex-item ${stdButtonFormat}`}
               onClick={() => {
-                console.log('Implement send pose to Cobot!');
+                handleSendPose();
               }}
             >
               <p className="text-md">SEND POSE</p>
               <p className="text-xs">TO COBOT</p>
             </button>
+
             <button
               className={`flex-item ${stdButtonFormat}`}
               onClick={() => {
-                setJoints(tempMakeRandom());
+                handleSendAnimation();
               }}
             >
-              <p className="text-md">Random</p>
+              <p className="text-md">SEND ANIMATION</p>
+              <p className="text-xs">TO COBOT</p>
             </button>
           </div>
         </div>
@@ -289,6 +429,8 @@ export default function Home() {
         setJoints={setJoints}
         keyframes={keyframes}
         setKeyframes={setKeyframes}
+        maxFramesToBe={maxFramesToBe}
+        setMaxFramesToBe={setMaxFramesToBe}
         currentFrame={currentFrame}
         setCurrentFrame={setCurrentFrame}
         needToInterpolateFrames={needToInterpolateFrames}
@@ -296,150 +438,26 @@ export default function Home() {
       />
 
       <div className="flex-container">
-        <Popup
-          modal
-          closeOnDocumentClick
-          id="loadFileMenu"
-          trigger={<button className="flex-item">Load File</button>}
-        >
-          {close => (
-            <div className="modal">
-              <button className="close" onClick={close}>
-                &times;
-              </button>
-              <div className="header">Load File:</div>
-              <br />
-              <div className="flex-container-vertical">
-                {savedFiles.map(fileName => (
-                  <button
-                    key={fileName}
-                    onClick={() => {
-                      loadFile(fileName);
-                      close();
-                    }}
-                  >
-                    {fileName}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </Popup>
-
-        <Popup
-          modal
-          closeOnDocumentClick
-          id="saveFileMenu"
-          trigger={<button className="flex-item">Save File</button>}
-        >
-          {close => (
-            <div className="modal">
-              <button className="close" onClick={close}>
-                &times;
-              </button>
-              <div className="header">Save File:</div>
-              <br />
-              <div>
-                <input
-                  value={newFileName}
-                  onChange={event => {
-                    setNewFileName(event.target.value);
-                  }}
-                />
-                <span>.txt</span>
-                <button
-                  onClick={() => {
-                    saveFile();
-                    close();
-                  }}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          )}
-        </Popup>
-        <Popup
-          modal
-          closeOnDocumentClick
-          id="deleteFileMenu"
-          trigger={<button className="flex-item">Delete File</button>}
-        >
-          {close => (
-            <div className="modal">
-              <button className="close" onClick={close}>
-                &times;
-              </button>
-              <div className="header">Delete File:</div>
-              <br />
-              <div className="flex-container-vertical">
-                {savedFiles.map(fileName => (
-                  <button
-                    key={fileName}
-                    onClick={() => {
-                      deleteFile(fileName);
-                      close();
-                    }}
-                  >
-                    {fileName}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </Popup>
+        <Button className="border-bots-gray" onClick={getFiles}>
+          Get Files
+        </Button>
+        <LoadFileMenu
+          savedFiles={savedFiles}
+          getFiles={getFiles}
+          loadFile={loadFile}
+        />
+        <SaveFileMenu
+          joints={joints}
+          keyframes={keyframes}
+          savedFiles={savedFiles}
+          setSavedFiles={setSavedFiles}
+        />
+        <DeleteFileMenu
+          savedFiles={savedFiles}
+          getFiles={getFiles}
+          deleteFile={deleteFile}
+        />
       </div>
-      {/*
-      <h3 className="font-mono">
-        K:{' '}
-        {keyframes
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3>.</h3>
-      <h3 className="font-mono">
-        0:{' '}
-        {joints[0]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3 className="font-mono">
-        1:{' '}
-        {joints[1]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3 className="font-mono">
-        2:{' '}
-        {joints[2]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3 className="font-mono">
-        3:{' '}
-        {joints[3]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3 className="font-mono">
-        4:{' '}
-        {joints[4]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3 className="font-mono">
-        5:{' '}
-        {joints[5]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-      <h3 className="font-mono">
-        6:{' '}
-        {joints[6]
-          .map(x => Math.round(x).toString().padStart(4, '_'))
-          .join(' ')}
-      </h3>
-        */}
     </div>
   );
 }

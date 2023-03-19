@@ -58,7 +58,7 @@ export default function JointSlider(props) {
           +
         </button>
         <input
-          className="flex-item"
+          className="flex-item rounded border-2 px-2 border-bots-light-blue text-bots-gray font-bold"
           value={props.getJoint(props.jointNumber, props.currentFrame)}
           onChange={event => {
             // TODO set min and max values (actually maybe this is best to set in setJoint?)
