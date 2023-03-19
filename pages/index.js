@@ -16,29 +16,27 @@ import Timeline from '../components/Timeline';
 
 /**
  * TODO:
- * [ ] Load file should adjust frame count
- * [ ] Figure out joint indices !! Doubled in load file
+ * [~] Figure out joint indices !! -> Doubled in load file at least, needs cleaned
+ *    so it looks like the issue here is there is no actual API control over the
+ *    gripper yet, so we've kind of grandfathered in a blank joint. It's confusing
+ *    because it doesn't do anything yet, and the api is 1-indexed, which means
+ *    it's more intuitive if we let the indices match up and leave joints[0] as
+ *    the blank, gripper-to-be joint. However, the joint right next to the gripper
+ *    is "commands arm 6", aka joint[6] when we line them up, which means we have
+ *    an unintuitive jump from joint 5 to joint 6 to joint 0, travelling up the arm.
+ *    So -> do I want to remove the blank joint entry for now, and wait till the
+ *    API catches up (and make sure this is used consistently the same way throughout?
+ *    Or re-do the indexing and let them all be off by one, removing the blank joint
+ *    and letting us add it later at the end of the joints array?
+ * [ ] We get an error message right away (ig right after loading) from failing
+ *    to fetch the files, if we don't have a good connection established. Maybe
+ *    this is desired behavior? Maybe not? Food for thought
  *
  * [ ] File names -> allow user to specify, then stop parsing them from save file response
  * [ ] Address Logic: TODO about set pose on mount
  * [ ] Address Logic: TODOs at the top of Timeline component
- * [ ] Address Logic: Joint indexing/naming
- *     (which one is the gripper? do we have too many joints?)
  * [ ] Check that save overwriting is default desired behavior
- * [ ] Phase out (or at least clean uses) of temp make random
- *
- * [x] Finish implementing (w/ API): file save, load, delete
- * [x] Move save/load/etc file functions into own components
- * [x] UI: file save, load, delete
- * [x] Move each file modal into their own components
- * [x] Implement: frame interpolation
- * [x] Implement: toggle drag & teach
- * [x] Implement: send pose
- * [x] Implement: send animation
- * [x] Implement: get pose
- *
- * END
- * [ ] Styles!
+ * [ ] Phase out (or at least clean up uses) of temp make random
  *
  * MAYBE
  * [ ] Address Logic: should we put buttons in their own component?
@@ -46,7 +44,7 @@ import Timeline from '../components/Timeline';
  *     and setCurrentFrame?
  * [ ] Clean up side effects (https://dmitripavlutin.com/react-hooks-mistakes-to-avoid/)
  * [ ] Can I better organize the Timeline component's logic?
- * [x] Address Logic: UnityWebPage may be redundant
+ *
  */
 
 export default function Home() {
@@ -262,7 +260,6 @@ export default function Home() {
       },
     });
     const apiDataJson = await apiDataResponse.json();
-    console.log(apiDataJson.response);
   };
 
   /* ------------------------------------------------------------------------ */
@@ -313,7 +310,6 @@ export default function Home() {
     });
     const apiSingleFileDataJson = await apiSingleFileDataResponse.json();
     console.log(apiSingleFileDataJson);
-    /*
     const jsonString = apiSingleFileDataJson.response.replace(/'/g, '"'); // need to turn ' to " to be parsable
     const jsonData = JSON.parse(jsonString);
     console.log(jsonData);
@@ -329,7 +325,6 @@ export default function Home() {
       [...jsonData.commandsArm5.slice(0, loadedMaxFrames)],
       [...jsonData.commandsArm6.slice(0, loadedMaxFrames)],
     ]); // TODO we're just repeating a joint data for now
-    */
   };
 
   /**
