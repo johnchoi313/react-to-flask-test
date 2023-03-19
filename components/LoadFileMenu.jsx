@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Popup from 'reactjs-popup';
 
 export default function LoadFileMenu(props) {
@@ -8,7 +8,10 @@ export default function LoadFileMenu(props) {
       closeOnDocumentClick
       id="loadFileMenu"
       trigger={
-        <button className="flex-item font-bold text-bots-gray rounded border-bots-gray">
+        <button
+          type="button"
+          className="flex-item font-bold text-bots-gray rounded border-bots-gray"
+        >
           <p className="text-md">LOAD</p>
           <p className="text-xs">FILE</p>
         </button>
@@ -16,7 +19,7 @@ export default function LoadFileMenu(props) {
     >
       {close => (
         <div className="modal">
-          <button className="close" onClick={close}>
+          <button type="button" className="close" onClick={close}>
             &times;
           </button>
           <div className="header">Load File:</div>
@@ -24,6 +27,7 @@ export default function LoadFileMenu(props) {
           <div className="flex-container-vertical">
             {props.savedFiles.map(fileName => (
               <button
+                type="button"
                 key={fileName}
                 onClick={() => {
                   props.loadFile(fileName);

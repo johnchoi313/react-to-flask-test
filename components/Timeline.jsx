@@ -32,7 +32,6 @@ export default function Timeline(props) {
   const animationSpeed = 500;
 
   const [currentFrameToBe, setCurrentFrameToBe] = useState(0);
-  const [maxFramesToBe, setMaxFramesToBe] = useState(0);
   const maxFramesUpperLimit = 30; // (TODO which val?) the UI'll get weird at high vals
 
   const [animationPlaying, setAnimationPlaying] = useState(false);
@@ -64,7 +63,7 @@ export default function Timeline(props) {
    * the current number of frames we have.
    */
   useEffect(() => {
-    setMaxFramesToBe(props.keyframes.length);
+    props.setMaxFramesToBe(props.keyframes.length);
   }, []);
   /**
    * Let's keep our currentFrameToBe in sync with our currentFrame when we
@@ -341,6 +340,7 @@ export default function Timeline(props) {
       <div className="flex-container">
         {props.keyframes.map((isKeyframe, frameIndex) => (
           <button
+            type="button"
             key={frameIndex}
             className={getClassesForFrame(frameIndex)}
             onClick={() => {
@@ -356,6 +356,7 @@ export default function Timeline(props) {
       </div>
       <div className="flex-container">
         <button
+          type="button"
           className="flex-item text-md font-bold text-bots-light-gray rounded border-bots-gray bg-bots-gray"
           onClick={() => {
             togglePlayAnimation();
@@ -366,6 +367,7 @@ export default function Timeline(props) {
         </button>
 
         <button
+          type="button"
           className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
           onClick={() => {
             toggleKeyframe(props.currentFrame);
@@ -383,6 +385,7 @@ export default function Timeline(props) {
           }}
         />
         <button
+          type="button"
           className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
           onClick={() => setFrameByTimelineClick(currentFrameToBe)}
         >
@@ -392,15 +395,16 @@ export default function Timeline(props) {
 
         <input
           className="flex-item rounded border-2 px-2 border-bots-gray text-bots-gray font-bold"
-          value={maxFramesToBe}
+          value={props.maxFramesToBe}
           onChange={event => {
             setMaxFramesToBe(event.target.value);
           }}
         />
         <button
+          type="button"
           className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
           onClick={() => {
-            updateMaxFrames(maxFramesToBe);
+            updateMaxFrames(props.maxFramesToBe);
           }}
         >
           <p className="text-md">SET</p>
@@ -408,9 +412,10 @@ export default function Timeline(props) {
         </button>
 
         <button
+          type="button"
           className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
           onClick={() => {
-            setMaxFramesToBe(props.joints[0].length - 1);
+            props.setMaxFramesToBe(props.joints[0].length - 1);
             updateMaxFrames(props.joints[0].length - 1);
           }}
         >
@@ -418,9 +423,10 @@ export default function Timeline(props) {
           <p className="text-xs">MAX FRAMES</p>
         </button>
         <button
+          type="button"
           className="flex-item text-md font-bold text-bots-gray rounded border-bots-gray bg-bots-light-gray"
           onClick={() => {
-            setMaxFramesToBe(props.joints[0].length + 1);
+            props.setMaxFramesToBe(props.joints[0].length + 1);
             updateMaxFrames(props.joints[0].length + 1);
           }}
         >

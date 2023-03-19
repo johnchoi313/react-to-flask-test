@@ -16,7 +16,7 @@ export default function DeleteFileMenu(props) {
     >
       {close => (
         <div className="modal">
-          <button className="close" onClick={close}>
+          <button type="button" className="close" onClick={close}>
             &times;
           </button>
           <div className="header">Delete File:</div>
@@ -24,6 +24,7 @@ export default function DeleteFileMenu(props) {
           <div className="flex-container-vertical">
             {props.savedFiles.map(fileName => (
               <button
+                type="button"
                 key={fileName}
                 onClick={() => {
                   props.deleteFile(fileName);

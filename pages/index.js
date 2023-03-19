@@ -4,7 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { Unity, useUnityContext } from 'react-unity-webgl';
 import 'reactjs-popup/dist/index.css';
 
-import Popup from 'reactjs-popup';
+import { getPageFiles } from 'next/dist/server/get-page-files';
+import { Button } from '@material-ui/core';
 import JointSlider from '../components/JointSlider';
 import BotsIQHeader from '../components/BotsIQHeader';
 import LoadFileMenu from '../components/LoadFileMenu';
@@ -15,21 +16,26 @@ import Timeline from '../components/Timeline';
 
 /**
  * TODO:
- * [x] UI: file save, load, delete
- * [ ] Finish implementing (w/ API): file save, load, delete
- * [ ] Move each file modal into their own components
+ * [ ] Load file should adjust frame count
+ * [ ] Figure out joint indices !! Doubled in load file
  *
- * [x] Implement: frame interpolation
- * [x] Implement: toggle drag & teach
- * [x] Implement: send pose
- * [x] Implement: send animation
- * [x] Implement: get pose
+ * [ ] File names -> allow user to specify, then stop parsing them from save file response
  * [ ] Address Logic: TODO about set pose on mount
  * [ ] Address Logic: TODOs at the top of Timeline component
  * [ ] Address Logic: Joint indexing/naming
  *     (which one is the gripper? do we have too many joints?)
  * [ ] Check that save overwriting is default desired behavior
  * [ ] Phase out (or at least clean uses) of temp make random
+ *
+ * [x] Finish implementing (w/ API): file save, load, delete
+ * [x] Move save/load/etc file functions into own components
+ * [x] UI: file save, load, delete
+ * [x] Move each file modal into their own components
+ * [x] Implement: frame interpolation
+ * [x] Implement: toggle drag & teach
+ * [x] Implement: send pose
+ * [x] Implement: send animation
+ * [x] Implement: get pose
  *
  * END
  * [ ] Styles!
@@ -38,9 +44,9 @@ import Timeline from '../components/Timeline';
  * [ ] Address Logic: should we put buttons in their own component?
  * [ ] Address Logic: does it makes sense to allow ENTER to trigger setMaxFrames
  *     and setCurrentFrame?
- * [x] Address Logic: UnityWebPage may be redundant
  * [ ] Clean up side effects (https://dmitripavlutin.com/react-hooks-mistakes-to-avoid/)
  * [ ] Can I better organize the Timeline component's logic?
+ * [x] Address Logic: UnityWebPage may be redundant
  */
 
 export default function Home() {
@@ -167,52 +173,10 @@ export default function Home() {
   }
 
   /* ------------------------------------------------------------------------ */
-  /* HANDLE FILE DATA: */
-  const [newFileName, setNewFileName] =
-    useState('newFile'); /* We'll automatically add '.txt' after it */
-  const [savedFiles, setSavedFiles] = useState([]);
-  function mockGetFiles() {
-    return ['fileOne', 'fileTwo', 'fileThree'];
-  }
-  useEffect(() => {
-    setSavedFiles(mockGetFiles());
-  }, []);
-
-  /**
-   * loadFile loads a file and all of its data from the robot
-   * @param {string} fileName - the name of the file we want to load
-   */
-  function loadFile(fileName) {
-    console.log(`Loading ${fileName}...`);
-    // TODO implement
-  }
-
-  /**
-   * deleteFile deletes a file and all of its data from the robot
-   * @param {string} fileName - the name of the file we want to delete
-   */
-  function deleteFile(fileName) {
-    console.log(`Deleting ${fileName}...`);
-    // TODO implement
-  }
-
-  /**
-   * saveFile saves a file and all of its data to the robot. For the moment, the
-   * default behavior is to allow file overwriting (TODO check that this is what
-   * we want!)
-   * @param {string} fileName - the name of the file we want to save
-   */
-  function saveFile(fileName) {
-    console.log(`Saving ${newFileName}...`);
-    // TODO implement
-    // TODO remember to add '.txt' after newFileName
-    setNewFileName('newFile');
-  }
-
-  /* ------------------------------------------------------------------------ */
   /* HANDLE TIMELINE DATA: (mostly in the Timeline component) */
 
   const [currentFrame, setCurrentFrame] = useState(0);
+  const [maxFramesToBe, setMaxFramesToBe] = useState(0);
   const [keyframes, setKeyframes] = useState([1, 0, 0, 0, 1, 0]);
   const needToInterpolateFrames = true;
 
@@ -223,7 +187,7 @@ export default function Home() {
   const stdButtonFormat = 'font-bold text-bots-gray rounded border-bots-gray';
 
   /* ------------------------------------------------------------------------ */
-  /* HANDLE API: */
+  /* HANDLE API (NON-FILES): */
 
   const urlPrefix = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000`;
 
@@ -300,6 +264,85 @@ export default function Home() {
     const apiDataJson = await apiDataResponse.json();
     console.log(apiDataJson.response);
   };
+
+  /* ------------------------------------------------------------------------ */
+  /* HANDLE FILE DATA: */
+
+  const [savedFiles, setSavedFiles] = useState(['none']);
+
+  const getFiles = async () => {
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-all-animation-files`;
+    const apiFileDataResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    const apiFileDataJson = await apiFileDataResponse.json();
+    setSavedFiles(apiFileDataJson.response.sort());
+    return true;
+  };
+
+  /**
+   * Get the list of files that are saved on the robot
+   * Only call this once, at the beginning (we modify this list over time to
+   * do the "soft" file deletion). Not ideal but until we have a "delete file"
+   * API function it will have to do.
+   */
+  useEffect(() => {
+    if (isLoaded) {
+      console.log('Loading files...');
+      getFiles();
+    }
+  }, [isLoaded]);
+
+  /**
+   * loadFile loads a file and all of its data from the robot
+   * @param {string} fileName - the name of the file we want to load
+   */
+  const loadFile = async fileName => {
+    console.log(`Loading ${fileName}...`);
+    const url = `http://${process.env.NEXT_PUBLIC_PUBLIC_IP_ADDRESS}:5000/get-single-file?file=${fileName}`;
+    const apiSingleFileDataResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    const apiSingleFileDataJson = await apiSingleFileDataResponse.json();
+    console.log(apiSingleFileDataJson);
+    /*
+    const jsonString = apiSingleFileDataJson.response.replace(/'/g, '"'); // need to turn ' to " to be parsable
+    const jsonData = JSON.parse(jsonString);
+    console.log(jsonData);
+    const loadedMaxFrames = jsonData.keyFrameIndices.length;
+    setMaxFramesToBe(loadedMaxFrames);
+    setKeyframes(jsonData.keyFrameIndices);
+    setJoints([
+      [...jsonData.commandsArm1.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsArm1.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsArm2.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsArm3.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsArm4.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsArm5.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsArm6.slice(0, loadedMaxFrames)],
+    ]); // TODO we're just repeating a joint data for now
+    */
+  };
+
+  /**
+   * deleteFile ~should~ delete a file and all of its data from the robot
+   * NOTE: this is currently just a "soft" delete - we hide its existence from
+   * the user, but the file will still exist on the robot. iirc this is because
+   * we don't have a "delete file" api command to use yet.
+   * @param {string} fileName - the name of the file we want to delete
+   */
+  function deleteFile(fileName) {
+    console.log(`Deleting ${fileName}...`);
+    setSavedFiles(savedFiles.filter(item => item !== fileName));
+  }
 
   /* ------------------------------------------------------------------------ */
   /* RENDER PAGE: */
@@ -391,6 +434,8 @@ export default function Home() {
         setJoints={setJoints}
         keyframes={keyframes}
         setKeyframes={setKeyframes}
+        maxFramesToBe={maxFramesToBe}
+        setMaxFramesToBe={setMaxFramesToBe}
         currentFrame={currentFrame}
         setCurrentFrame={setCurrentFrame}
         needToInterpolateFrames={needToInterpolateFrames}
@@ -398,12 +443,25 @@ export default function Home() {
       />
 
       <div className="flex-container">
-        <LoadFileMenu savedFiles={savedFiles} loadFile={loadFile} />
-        <SaveFileMenu
-          newFileName={newFileName}
-          setNewFileName={setNewFileName}
+        <Button className="border-bots-gray" onClick={getFiles}>
+          Get Files
+        </Button>
+        <LoadFileMenu
+          savedFiles={savedFiles}
+          getFiles={getFiles}
+          loadFile={loadFile}
         />
-        <DeleteFileMenu savedFiles={savedFiles} deleteFile={deleteFile} />
+        <SaveFileMenu
+          joints={joints}
+          keyframes={keyframes}
+          savedFiles={savedFiles}
+          setSavedFiles={setSavedFiles}
+        />
+        <DeleteFileMenu
+          savedFiles={savedFiles}
+          getFiles={getFiles}
+          deleteFile={deleteFile}
+        />
       </div>
     </div>
   );
