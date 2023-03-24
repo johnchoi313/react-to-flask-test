@@ -26,8 +26,8 @@ export default function JointSlider(props) {
         </button>
         <Slider
           className="flex-item flex-basis-500"
-          min={-30}
-          max={30}
+          min={-105}
+          max={105}
           id={`slider_${props.jointNumber}`}
           trackStyle={{ backgroundColor: '#F17E34', height: 14 }}
           handleStyle={{
