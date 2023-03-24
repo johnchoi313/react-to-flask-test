@@ -82,7 +82,7 @@ export default function Home() {
     [16, 0, 0, 0, 0, 0],
   ]);
 
-  const [jointNames] = useState(["J6","J5","J4","J3","J2","J1","GR"])
+  const [jointNames] = useState(["J6","J5","J4","J3","J2","J1","G0"])
 
   function tempMakeRandom() {
     const newArr = [
