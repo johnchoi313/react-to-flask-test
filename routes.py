@@ -148,24 +148,26 @@ def send_angles_sequence():
         angles_4 = sequence_json["commandsArm4"]
         angles_5 = sequence_json["commandsArm5"]
         angles_6 = sequence_json["commandsArm6"]
-        sp = 80
-
+        
         mc.set_color(0,0,255)
 
         for angle_gripper, angle_1, angle_2, angle_3, angle_4, angle_5, angle_6 in zip(angles_gripper, angles_1, angles_2, angles_3, angles_4, angles_5, angles_6):
 
             angles_list = [angle_1, angle_2, angle_3, angle_4, angle_5, angle_6]
-            mc.send_angles(angles_list, sp)
+            mc.send_angles(angles_list, 60)
+
             #print(f"Sending angles: {angles_list}")
             
+            #smooth transition gripper non responsive...
             newGripperValue = int(translate(angle_gripper, -105, 105, 0, 255))
-            mc.set_gripper_value(newGripperValue, 70)
+            mc.set_gripper_value(newGripperValue, 60)
             print(f"Sending gripper value: " + str(newGripperValue) + " from input: " + str(angle_gripper))
             
-            #if(angle_gripper >= 0):
-            #    mc.set_gripper_state(1, 70)
-            #else:
-            #    mc.set_gripper_state(0, 70)
+            # so use boolean gripper values!
+            if(angle_gripper >= 0):
+                mc.set_gripper_state(1, 60)
+            else:
+                mc.set_gripper_state(0, 60)
             
             time.sleep(1)
 
