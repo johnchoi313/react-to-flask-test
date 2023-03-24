@@ -66,7 +66,7 @@ def click():
 @cross_origin()
 def turn_off_motors():
     if request.method == "POST":
-        print("received api request")
+        print("received api request: turn_off_motors")
         try:
             mc.set_color(255,255,255)
             mc.release_all_servos()
@@ -80,7 +80,7 @@ def turn_off_motors():
 @cross_origin()
 def turn_on_motors():  # NOTE THIS FUNCTION DOES NOT YET WORK
     if request.method == "POST":
-        print("received api request")
+        print("received api request: turn_on_motors")
         try:
             mc.set_color(0,255,0)
             mc.set_fresh_mode(0)
@@ -97,11 +97,11 @@ def send_pose():
     
     if request.method == "POST":
         
-        print("received api request")
+        print("received api request: send_pose")
         angles = request.args.get("angles")
         angles_list = [float(i) for i in angles.split(",")]
 
-        print(angles)
+        #print(angles)
 
         newGripperValue = translate(angles_list[0], -105, 105, 0, 256)
         mc.set_gripper_value(newGripperValue, 70)
@@ -117,7 +117,7 @@ def send_pose():
 @cross_origin()
 def get_pose():
     if request.method == "GET":
-        print("received api request")
+        print("received api request: get_pose")
         angles_list = mc.get_angles()
         return jsonify({"response": angles_list})
 
@@ -129,10 +129,10 @@ def get_pose():
 def send_angles_sequence():
 
     if request.method == "POST":
-        print("received api request")
+        print("received api request: send_angles_sequence")
         angles_sequence = request.args.get("angles_sequence")
         
-        print(angles_sequence)
+        #print(angles_sequence)
         sequence_json = json.loads(angles_sequence)
 
         angles_gripper = sequence_json["commandsGripper"]
