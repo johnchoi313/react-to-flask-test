@@ -289,7 +289,7 @@ def get_single_file():
 
 if __name__ == "__main__":
 
-    mc.send_angles([0,0,0,0,0,0], 50)
+    mc.send_angles([0,0,0,0,0,0], 30)
     mc.set_color(0,255,0)
 
     # app.run(debug = True, host='0.0.0.0')
