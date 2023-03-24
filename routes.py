@@ -107,7 +107,7 @@ def send_pose():
         mc.set_gripper_value(newGripperValue, 70)
 
         mc.set_color(0,255,0)
-        mc.send_angles(angles_list[:-1] , 80)
+        mc.send_angles(angles_list[1:] , 80)
 
         return jsonify({"response": str(angles)})
 

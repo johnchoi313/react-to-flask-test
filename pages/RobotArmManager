@@ -73,6 +73,7 @@ export default class RobotArmManager {
       commandsArm[3].push(0);
       commandsArm[4].push(0);
       commandsArm[5].push(0);
+      commandsArm[6].push(0);
     }
     this._commandsGripper = commandsArm[0];
     this._commandsArm1 = commandsArm[1];
@@ -86,7 +87,11 @@ export default class RobotArmManager {
   //updates for you the particular entry of a clip
   AnimationUpdate(particularArm, newEntry) {
     //console.log(this.commandsArm1);
-    this["commandsArm" + particularArm][this._frame] = newEntry;
+    if (particularArm == 0) {  
+      this["commandsGripper"][this._frame] = newEntry;
+    } else {
+      this["commandsArm" + particularArm][this._frame] = newEntry;
+    }
   }
 
   DoInterpolation(keyframes) {
