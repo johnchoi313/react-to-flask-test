@@ -66,8 +66,8 @@ https://www.raspberrypi.com/software/
   3. sudo python3.8 -m pip install --upgrade setuptools
   4. sudo python3.8 -m pip install unroll
   5. sudo python3.8 -m pip install pymycobot
-  6. sudo python3.8 -m pip install flask
-  6.a apt-get install python3-flask (if fail)
+  6. sudo python3.8 -m pip install Flask
+  6.a sudo apt-get install python3-flask (if fail)
   6.b sudo apt install python-flask (if fail)
 
   7. sudo apt-get remove python3-virtualenv
@@ -82,6 +82,10 @@ https://www.raspberrypi.com/software/
   13. sudo apt install npm
   14. npm install
   15. npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
+  16. sudo npm install text-encoding
+
+  17. curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+  18. source ~/.bashrc
 
 ---EDITING IP ADDRESS:---
 
@@ -103,16 +107,16 @@ https://www.raspberrypi.com/software/
 ---SETTING UP AUTOSTART:---
 
   (use init.d method! ACTUALLY, INITD methodd SUCKS.)
-  (use systemd method, BECAUSE IT ACTUALLY F*CKING WORKS (actually, no it doesn't:): https://tecadmin.net/run-shell-script-as-systemd-service/)
+  (use systemd method, BECAUSE IT ACTUALLY WORKS (actually, no it doesn't:): https://tecadmin.net/run-shell-script-as-systemd-service/)
 
-  (JUST USE FUCKING RC.LOCAL: https://www.simplified.guide/linux/automatically-run-program-on-startup#automatically-run-program-on-linux-startup-via-rclocal)
+  (USE RC.LOCAL?: https://www.simplified.guide/linux/automatically-run-program-on-startup#automatically-run-program-on-linux-startup-via-rclocal)
   sudo nano /etc/rc.local
   sudo chmod a+x /etc/rc.local
   sudo chmod +x autostart_all.sh
   sudo chmod +x autostart_npm.sh
   sudo chmod +x autostart_python.sh
 
-  (JUST USE THE FUCKING STARTUP APPLICATIONS)
+  (JUST USE THE STARTUP APPLICATIONS PLZ)
 
   also: sudo update-rc.d autostart_initd.sh defaults
 
