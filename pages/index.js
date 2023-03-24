@@ -292,7 +292,7 @@ export default function Home() {
   useEffect(() => {
     if (isLoaded) {
       console.log('Loading files...');
-      //getFiles();
+      getFiles();
     }
   }, [isLoaded]);
 
