@@ -10,7 +10,7 @@ export default function JointSlider(props) {
     <>
       <p className="text-sm" />
       <div className="flex-container">
-        <p className="flex-item text-lg text-center">J{props.jointNumber}</p>
+        <p className="flex-item text-lg text-center">{props.jointName}</p>
         <button
           className={`flex-item basis-1/4 h-10 ${miniButtonFormat}`}
           onClick={() => {
@@ -26,8 +26,8 @@ export default function JointSlider(props) {
         </button>
         <Slider
           className="flex-item flex-basis-500"
-          min={-30}
-          max={30}
+          min={-105}
+          max={105}
           id={`slider_${props.jointNumber}`}
           trackStyle={{ backgroundColor: '#F17E34', height: 14 }}
           handleStyle={{

@@ -53,10 +53,10 @@ export default function Home() {
 
   const { unityProvider, sendMessage, isLoaded, loadingProgression } =
     useUnityContext({
-      loaderUrl: 'build/RobotArm_React_WebGL (10-3-2022).loader.js',
-      dataUrl: 'build/RobotArm_React_WebGL (10-3-2022).data',
-      frameworkUrl: 'build/RobotArm_React_WebGL (10-3-2022).framework.js',
-      codeUrl: 'build/RobotArm_React_WebGL (10-3-2022).wasm',
+      loaderUrl:    'build/RobotArm_React_WebGL (3-23-2023).loader.js',
+      dataUrl:      'build/RobotArm_React_WebGL (3-23-2023).data',
+      frameworkUrl: 'build/RobotArm_React_WebGL (3-23-2023).framework.js',
+      codeUrl:      'build/RobotArm_React_WebGL (3-23-2023).wasm',
     });
 
   // TODO on mount set the pose to whatever the current frame's joint values are
@@ -81,6 +81,8 @@ export default function Home() {
     [5, 0, 0, 0, 0, 0],
     [16, 0, 0, 0, 0, 0],
   ]);
+
+  const [jointNames] = useState(["J6","J5","J4","J3","J2","J1","G0"])
 
   function tempMakeRandom() {
     const newArr = [
@@ -142,6 +144,7 @@ export default function Home() {
   function setJointsInWebGL() {
     const signal =
       `{"name":"${'name'}","speed":${1},` +
+      `"commandsGripper":[${joints[0]}],` +
       `"commandsArm1":[${joints[1]}],` +
       `"commandsArm2":[${joints[2]}],` +
       `"commandsArm3":[${joints[3]}],` +
@@ -175,7 +178,7 @@ export default function Home() {
 
   const [currentFrame, setCurrentFrame] = useState(0);
   const [maxFramesToBe, setMaxFramesToBe] = useState(0);
-  const [keyframes, setKeyframes] = useState([1, 0, 0, 0, 1, 0]);
+  const [keyframes, setKeyframes] = useState([1, 0, 0, 0, 0, 1]);
   const needToInterpolateFrames = true;
 
   /* ------------------------------------------------------------------------ */
@@ -192,10 +195,27 @@ export default function Home() {
   // TODO add in docstrings!!
 
   const handleSendPose = async () => {
-    const signal = joints.map(joint => joint[currentFrame]);
-    signal.splice(0, 1); // TODO this relates to the total # of joints question
+    //const signal1 = joints.map(joint => joint[currentFrame]);
+    //signal.splice(0, 1); // TODO this relates to the total # of joints question    
     // - I think there really might only be 6 including the gripper
-    const url = `${urlPrefix}/send-pose?angles=${signal}`;
+    //  const url = `${urlPrefix}/send-pose?angles=${signal}`;
+    const signal = `{
+      "name":"animationName",
+      "speed":1,
+
+      "commandsGripper":[${joints[0][currentFrame]}],
+
+      "commandsArm1":[${joints[1][currentFrame]}],
+      "commandsArm2":[${joints[2][currentFrame]}],
+      "commandsArm3":[${joints[3][currentFrame]}],
+      "commandsArm4":[${joints[4][currentFrame]}],
+      "commandsArm5":[${joints[5][currentFrame]}],
+      "commandsArm6":[${joints[6][currentFrame]}],
+
+      "frame":${currentFrame},
+      "kf":[0]}`;
+
+    const url = `${urlPrefix}/send-angles-sequence?angles_sequence=${signal}`;
     const apiDataResponse = await fetch(url, {
       method: 'POST',
       headers: {
@@ -233,7 +253,7 @@ export default function Home() {
     // console.log(anglesApiDataJson.response.map(val => Math.round(val)));
     const newJoints = [...joints];
     for (let i = 0; i < anglesApiDataJson.response.length; i++) {
-      newJoints[i][currentFrame] = anglesApiDataJson.response[i];
+      newJoints[i+1][currentFrame] = anglesApiDataJson.response[i];
     }
     setJoints(newJoints);
   };
@@ -242,12 +262,16 @@ export default function Home() {
     const signal = `{
       "name":"animationName",
       "speed":1,
+
+      "commandsGripper":[${joints[0]}],
+
       "commandsArm1":[${joints[1]}],
       "commandsArm2":[${joints[2]}],
       "commandsArm3":[${joints[3]}],
       "commandsArm4":[${joints[4]}],
       "commandsArm5":[${joints[5]}],
       "commandsArm6":[${joints[6]}],
+
       "frame":${currentFrame},
       "kf":[0]}`;
 
@@ -317,7 +341,7 @@ export default function Home() {
     setMaxFramesToBe(loadedMaxFrames);
     setKeyframes(jsonData.keyFrameIndices);
     setJoints([
-      [...jsonData.commandsArm1.slice(0, loadedMaxFrames)],
+      [...jsonData.commandsGripper.slice(0, loadedMaxFrames)],
       [...jsonData.commandsArm1.slice(0, loadedMaxFrames)],
       [...jsonData.commandsArm2.slice(0, loadedMaxFrames)],
       [...jsonData.commandsArm3.slice(0, loadedMaxFrames)],
@@ -355,7 +379,8 @@ export default function Home() {
                 handleTurnMotorsOff();
               }}
             >
-              <p className="text-md">TURN MOTORS OFF</p>
+              <p className="text-md">ENABLE DRAG</p>
+              <p className="text-xs">AND TEACH MODE</p>
             </button>
 
             <button
@@ -382,6 +407,7 @@ export default function Home() {
           {joints.map((positionList, index) => (
             <JointSlider
               key={index}
+              jointName={jointNames[index]}
               jointNumber={joints.length - 1 - index}
               currentFrame={currentFrame}
               getJoint={getJoint}
