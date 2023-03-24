@@ -178,7 +178,7 @@ export default function Home() {
 
   const [currentFrame, setCurrentFrame] = useState(0);
   const [maxFramesToBe, setMaxFramesToBe] = useState(0);
-  const [keyframes, setKeyframes] = useState([1, 0, 0, 0, 1, 0]);
+  const [keyframes, setKeyframes] = useState([1, 0, 0, 0, 0, 1]);
   const needToInterpolateFrames = true;
 
   /* ------------------------------------------------------------------------ */
