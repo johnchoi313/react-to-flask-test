@@ -169,7 +169,7 @@ def send_angles_sequence():
             else:
                 mc.set_gripper_state(0, 60)
             
-            time.sleep(1)
+            time.sleep(2)
 
         mc.set_color(0,255,0)
 
