@@ -233,7 +233,7 @@ export default function Home() {
     // console.log(anglesApiDataJson.response.map(val => Math.round(val)));
     const newJoints = [...joints];
     for (let i = 0; i < anglesApiDataJson.response.length; i++) {
-      newJoints[i][currentFrame] = anglesApiDataJson.response[i];
+      newJoints[i+1][currentFrame] = anglesApiDataJson.response[i];
     }
     setJoints(newJoints);
   };
