@@ -156,7 +156,7 @@ def send_angles_sequence():
 
             angles_list = [angle_1, angle_2, angle_3, angle_4, angle_5, angle_6]
             mc.send_angles(angles_list, sp)
-            print(f"Sending angles: {angles_list}")
+            #print(f"Sending angles: {angles_list}")
             
             #newGripperValue = int(translate(angle_gripper, -105, 105, 0, 255))
             #mc.set_gripper_value(newGripperValue, 70)
@@ -166,7 +166,6 @@ def send_angles_sequence():
                 mc.set_gripper_state(1, 70)
             else:
                 mc.set_gripper_state(0, 70)
-            
             
             time.sleep(1)
 
