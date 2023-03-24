@@ -2,15 +2,17 @@ export default class RobotArmManager {
   constructor() {
     this._name = "Nameless";
     this._speed = 1;
-    
-    this._commandsArm1 = [ 0, 0, 10, 0, -1, 0 ];
-    this._commandsArm2 = [ 0, 0, 10, 0, -1, 0 ];
-    this._commandsArm3 = [ 0, 0, 10, 0, -1, 0 ];
-    this._commandsArm4 = [ 0, 0, 10, 0, -1, 0 ];
-    this._commandsArm5 = [ 0, 0, 10, 0, -1, 0 ];
-    this._commandsArm6 = [ 0, 0, 10, 0, -1, 0 ];
-    /*
 
+    this._commandsGripper = [ 0, 0, 10, 0, -1, 0 ];
+
+    this._commandsArm1   = [ 0, 0, 10, 0, -1, 0 ];
+    this._commandsArm2   = [ 0, 0, 10, 0, -1, 0 ];
+    this._commandsArm3   = [ 0, 0, 10, 0, -1, 0 ];
+    this._commandsArm4   = [ 0, 0, 10, 0, -1, 0 ];
+    this._commandsArm5   = [ 0, 0, 10, 0, -1, 0 ];
+    this._commandsArm6   = [ 0, 0, 10, 0, -1, 0 ];
+
+    /*
     this._commandsArm1 = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ];
     this._commandsArm2 = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ];
     this._commandsArm3 = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ];
@@ -18,31 +20,39 @@ export default class RobotArmManager {
     this._commandsArm5 = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ];
     this._commandsArm6 = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     ];
-
     */
+
     this._frame = 0;
     // this._yearOffset = 0;
   }
-  get name() { return this._name; }
+  get name()    { return this._name; }
   set name(val) { this._name = val; }
   
-  get speed() { return this._speed; }
+  get speed()    { return this._speed; }
   set speed(val) { this._speed = val; }
 
-  get frame() { return this._frame; }
+  get frame()    { return this._frame; }
   set frame(val) { this._frame = val; }
   
-  get commandsArm1() { return this._commandsArm1; }
+  get commandsGripper()    { return this._commandsGripper; }
+  set commandsGripper(val) { this._commandsGripper = val; }
+  
+  get commandsArm1()    { return this._commandsArm1; }
   set commandsArm1(val) { this._commandsArm1 = val; }
-  get commandsArm2() { return this._commandsArm2; }
+
+  get commandsArm2()    { return this._commandsArm2; }
   set commandsArm2(val) { this._commandsArm2 = val; }
-  get commandsArm3() { return this._commandsArm3; }
+
+  get commandsArm3()    { return this._commandsArm3; }
   set commandsArm3(val) { this._commandsArm3 = val; }
-  get commandsArm4() { return this._commandsArm4; }
+
+  get commandsArm4()    { return this._commandsArm4; }
   set commandsArm4(val) { this._commandsArm4 = val; }
-  get commandsArm5() { return this._commandsArm5; }
+
+  get commandsArm5()    { return this._commandsArm5; }
   set commandsArm5(val) { this._commandsArm5 = val; }
-  get commandsArm6() { return this._commandsArm6; }
+
+  get commandsArm6()    { return this._commandsArm6; }
   set commandsArm6(val) { this._commandsArm6 = val; }
   
   SendAnimationCommand() {
@@ -55,7 +65,7 @@ export default class RobotArmManager {
     return `{"name":"${this.name}","speed":${this.speed},"commandsArm1":[${this.commandsArm1}],"commandsArm2":[${this.commandsArm2}],"commandsArm3":[${this.commandsArm3}],"commandsArm4":[${this.commandsArm4}],"commandsArm5":[${this.commandsArm5}],"commandsArm6":[${this.commandsArm6}],"frame":${this.frame},"keyFrameIndices":[${keyFrameIndicesToSave}]}`;
   }
   createAnimationFiles() {
-    let commandsArm = [[], [], [], [], [], []];
+    let commandsArm = [[], [], [], [], [], [], []];
     for (var i = 0; i < 20; i++) {
       commandsArm[0].push(0);
       commandsArm[1].push(0);
@@ -64,12 +74,13 @@ export default class RobotArmManager {
       commandsArm[4].push(0);
       commandsArm[5].push(0);
     }
-    this._commandsArm1 = commandsArm[0];
-    this._commandsArm2 = commandsArm[1];
-    this._commandsArm3 = commandsArm[2];
-    this._commandsArm4 = commandsArm[3];
-    this._commandsArm5 = commandsArm[4];
-    this._commandsArm6 = commandsArm[5];
+    this._commandsGripper = commandsArm[0];
+    this._commandsArm1 = commandsArm[1];
+    this._commandsArm2 = commandsArm[2];
+    this._commandsArm3 = commandsArm[3];
+    this._commandsArm4 = commandsArm[4];
+    this._commandsArm5 = commandsArm[5];
+    this._commandsArm6 = commandsArm[6];
     console.log(this._commandsArm1);
   }
   //updates for you the particular entry of a clip
@@ -79,6 +90,7 @@ export default class RobotArmManager {
   }
 
   DoInterpolation(keyframes) {
+    console.log("[0] " + this._commandsGripper.join(", "));
     console.log("[1] " + this._commandsArm1.join(", "));
     console.log("[2] " + this._commandsArm2.join(", "));
     console.log("[3] " + this._commandsArm3.join(", "));
@@ -88,15 +100,17 @@ export default class RobotArmManager {
   }
 
   SetPoseForFrame(poseValues, frameNumber) { // TODO LIV maybe not
-    this._commandsArm1[frameNumber] = poseValues[1];
-    this._commandsArm2[frameNumber] = poseValues[2];
-    this._commandsArm3[frameNumber] = poseValues[3];
-    this._commandsArm4[frameNumber] = poseValues[4];
-    this._commandsArm5[frameNumber] = poseValues[5];
-    this._commandsArm6[frameNumber] = poseValues[6];
+    this._commandsGripper[frameNumber] = poseValues[0];
+    this._commandsArm1[frameNumber]    = poseValues[1];
+    this._commandsArm2[frameNumber]    = poseValues[2];
+    this._commandsArm3[frameNumber]    = poseValues[3];
+    this._commandsArm4[frameNumber]    = poseValues[4];
+    this._commandsArm5[frameNumber]    = poseValues[5];
+    this._commandsArm6[frameNumber]    = poseValues[6];
   }
   GetPoseForFrame(frameNumber) { // TODO LIV maybe not
     return [
+      this["commandsGripper"][frameNumber],
       this["commandsArm" + 1][frameNumber],
       this["commandsArm" + 2][frameNumber],
       this["commandsArm" + 3][frameNumber],
@@ -109,7 +123,16 @@ export default class RobotArmManager {
   //updates for you the particular entry of a clip
   AnimationFrameReceive(particularArm) {
     let myReturn = 0;
+
     console.log(particularArm);
+
+    //if response is gripper, then return gripper
+    if (this["commandsGripper"] !== undefined) {
+      myReturn = this["commandsGripper"][this._frame];
+      return myReturn;
+    }
+    
+    //otherwise return arm
     if (this["commandsArm" + particularArm] !== undefined) {
       myReturn = this["commandsArm" + particularArm][this._frame];
       //console.log(myReturn);
@@ -117,5 +140,6 @@ export default class RobotArmManager {
     } else {
       return 0;
     }
+
   }
 }

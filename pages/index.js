@@ -144,6 +144,7 @@ export default function Home() {
   function setJointsInWebGL() {
     const signal =
       `{"name":"${'name'}","speed":${1},` +
+      `"commandsGripper":[${joints[0]}],` +
       `"commandsArm1":[${joints[1]}],` +
       `"commandsArm2":[${joints[2]}],` +
       `"commandsArm3":[${joints[3]}],` +
@@ -244,12 +245,16 @@ export default function Home() {
     const signal = `{
       "name":"animationName",
       "speed":1,
+
+      "commandsGripper":[${joints[0]}],
+
       "commandsArm1":[${joints[1]}],
       "commandsArm2":[${joints[2]}],
       "commandsArm3":[${joints[3]}],
       "commandsArm4":[${joints[4]}],
       "commandsArm5":[${joints[5]}],
       "commandsArm6":[${joints[6]}],
+
       "frame":${currentFrame},
       "kf":[0]}`;
 
@@ -319,6 +324,7 @@ export default function Home() {
     setMaxFramesToBe(loadedMaxFrames);
     setKeyframes(jsonData.keyFrameIndices);
     setJoints([
+      [...jsonData.commandsGripper.slice(0, loadedMaxFrames)],
       [...jsonData.commandsArm1.slice(0, loadedMaxFrames)],
       [...jsonData.commandsArm1.slice(0, loadedMaxFrames)],
       [...jsonData.commandsArm2.slice(0, loadedMaxFrames)],

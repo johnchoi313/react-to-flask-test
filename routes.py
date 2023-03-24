@@ -33,7 +33,16 @@ mc = MyCobot(port = "/dev/ttyAMA0", baudrate = 1000000, debug = True)
 #------MISCELLANEOUS HELPER FUNCTIONS------#
 #------------------------------------------#
 
+def translate(value, leftMin, leftMax, rightMin, rightMax):
+    # Figure out how 'wide' each range is
+    leftSpan = leftMax - leftMin
+    rightSpan = rightMax - rightMin
 
+    # Convert the left range into a 0-1 range (float)
+    valueScaled = float(value - leftMin) / float(leftSpan)
+
+    # Convert the 0-1 range into a value in the right range.
+    return rightMin + (valueScaled * rightSpan)
 
 
 #------------------------------------------#
@@ -87,14 +96,19 @@ def turn_on_motors():  # NOTE THIS FUNCTION DOES NOT YET WORK
 def send_pose():
     
     if request.method == "POST":
+        
         print("received api request")
         angles = request.args.get("angles")
         angles_list = [float(i) for i in angles.split(",")]
-        sp = 80
+
         print(angles)
 
+        newGripperValue = translate(angles_list[0], -105, 105, 0, 256)
+        mc.set_gripper_value(newGripperValue, 70)
+
         mc.set_color(0,255,0)
-        mc.send_angles(angles_list, sp)
+        mc.send_angles(angles_list[1:] , 80)
+
         return jsonify({"response": str(angles)})
 
 #[DESCRIPTION] Pings the robot to get a list of angles of its current position and sends that data in a response.
@@ -121,6 +135,8 @@ def send_angles_sequence():
         print(angles_sequence)
         sequence_json = json.loads(angles_sequence)
 
+        angles_gripper = sequence_json["commandsGripper"]
+
         angles_1 = sequence_json["commandsArm1"]
         angles_2 = sequence_json["commandsArm2"]
         angles_3 = sequence_json["commandsArm3"]
@@ -131,10 +147,16 @@ def send_angles_sequence():
 
         mc.set_color(0,0,255)
 
-        for angle_1, angle_2, angle_3, angle_4, angle_5, angle_6 in zip(angles_1, angles_2, angles_3, angles_4, angles_5, angles_6):
-            angles_list = [angle_1, angle_2, angle_3, angle_4, angle_5, angle_6]
+        for angle_gripper, angle_1, angle_2, angle_3, angle_4, angle_5, angle_6 in zip(angles_gripper, angles_1, angles_2, angles_3, angles_4, angles_5, angles_6):
+
             print(f"Sending angles: {angles_list}")
+            angles_list = [angle_1, angle_2, angle_3, angle_4, angle_5, angle_6]
             mc.send_angles(angles_list, sp)
+
+            print(f"Sending gripper value: " + str(newGripperValue) + " from input: " + str(angle_gripper))
+            newGripperValue = translate(angle_gripper, -105, 105, 0, 256)
+            mc.set_gripper_value(newGripperValue, 70)
+
             time.sleep(1)
 
         mc.set_color(0,255,0)
