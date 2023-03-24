@@ -103,11 +103,11 @@ def send_pose():
 
         #print(angles)
 
-        newGripperValue = int(translate(angles_list[0], -105, 105, 0, 256))
+        newGripperValue = int(translate(angles_list[-1], -105, 105, 0, 256))
         mc.set_gripper_value(newGripperValue, 70)
 
         mc.set_color(0,255,0)
-        mc.send_angles(angles_list[1:] , 80)
+        mc.send_angles(angles_list[:-1] , 80)
 
         return jsonify({"response": str(angles)})
 
@@ -149,14 +149,14 @@ def send_angles_sequence():
 
         for angle_gripper, angle_1, angle_2, angle_3, angle_4, angle_5, angle_6 in zip(angles_gripper, angles_1, angles_2, angles_3, angles_4, angles_5, angles_6):
 
-            print(f"Sending angles: {angles_list}")
             angles_list = [angle_1, angle_2, angle_3, angle_4, angle_5, angle_6]
             mc.send_angles(angles_list, sp)
-
-            print(f"Sending gripper value: " + str(newGripperValue) + " from input: " + str(angle_gripper))
+            print(f"Sending angles: {angles_list}")
+            
             newGripperValue = int(translate(angle_gripper, -105, 105, 0, 256))
             mc.set_gripper_value(newGripperValue, 70)
-
+            print(f"Sending gripper value: " + str(newGripperValue) + " from input: " + str(angle_gripper))
+            
             time.sleep(1)
 
         mc.set_color(0,255,0)
