@@ -195,10 +195,33 @@ export default function Home() {
   // TODO add in docstrings!!
 
   const handleSendPose = async () => {
-    const signal = joints.map(joint => joint[currentFrame]);
-    signal.splice(0, 1); // TODO this relates to the total # of joints question
+    
+    
+    const signal1 = joints.map(joint => joint[currentFrame]);
+    //signal.splice(0, 1); // TODO this relates to the total # of joints question
+    
     // - I think there really might only be 6 including the gripper
-    const url = `${urlPrefix}/send-pose?angles=${signal}`;
+    //  const url = `${urlPrefix}/send-pose?angles=${signal}`;
+
+
+    const signal = `{
+      "name":"animationName",
+      "speed":1,
+
+      "commandsGripper":[${joints[0][currentFrame]}],
+
+      "commandsArm1":[${joints[1][currentFrame]}],
+      "commandsArm2":[${joints[2][currentFrame]}],
+      "commandsArm3":[${joints[3][currentFrame]}],
+      "commandsArm4":[${joints[4][currentFrame]}],
+      "commandsArm5":[${joints[5][currentFrame]}],
+      "commandsArm6":[${joints[6][currentFrame]}],
+
+      "frame":${currentFrame},
+      "kf":[0]}`;
+
+
+    const url = `${urlPrefix}/send-angles-sequence?angles_sequence=${signal}`;
     const apiDataResponse = await fetch(url, {
       method: 'POST',
       headers: {
@@ -208,6 +231,10 @@ export default function Home() {
     });
     const apiDataJson = await apiDataResponse.json();
     // console.log(apiDataJson.response);
+
+    
+
+
   };
 
   const handleTurnMotorsOff = async () => {
