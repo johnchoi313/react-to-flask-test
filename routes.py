@@ -103,7 +103,7 @@ def send_pose():
 
         #print(angles)
 
-        newGripperValue = translate(angles_list[0], -105, 105, 0, 256)
+        newGripperValue = int(translate(angles_list[0], -105, 105, 0, 256))
         mc.set_gripper_value(newGripperValue, 70)
 
         mc.set_color(0,255,0)
@@ -154,7 +154,7 @@ def send_angles_sequence():
             mc.send_angles(angles_list, sp)
 
             print(f"Sending gripper value: " + str(newGripperValue) + " from input: " + str(angle_gripper))
-            newGripperValue = translate(angle_gripper, -105, 105, 0, 256)
+            newGripperValue = int(translate(angle_gripper, -105, 105, 0, 256))
             mc.set_gripper_value(newGripperValue, 70)
 
             time.sleep(1)
