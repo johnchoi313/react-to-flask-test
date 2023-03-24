@@ -109,6 +109,8 @@ https://www.raspberrypi.com/software/
   sudo nano /etc/rc.local
   sudo chmod a+x /etc/rc.local
   sudo chmod +x autostart_all.sh
+  sudo chmod +x autostart_npm.sh
+  sudo chmod +x autostart_python.sh
 
   (JUST USE THE FUCKING STARTUP APPLICATIONS)
 
