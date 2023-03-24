@@ -10,7 +10,7 @@ export default function JointSlider(props) {
     <>
       <p className="text-sm" />
       <div className="flex-container">
-        <p className="flex-item text-lg text-center">J{props.jointNumber}</p>
+        <p className="flex-item text-lg text-center">{props.jointName}</p>
         <button
           className={`flex-item basis-1/4 h-10 ${miniButtonFormat}`}
           onClick={() => {

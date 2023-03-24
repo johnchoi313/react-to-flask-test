@@ -82,6 +82,8 @@ export default function Home() {
     [16, 0, 0, 0, 0, 0],
   ]);
 
+  const [jointNames] = useState(["J6","J5","J4","J3","J2","J1","GR"])
+
   function tempMakeRandom() {
     const newArr = [
       Array.from({ length: 6 }, () => Math.floor(Math.random() * 10)),
@@ -355,7 +357,8 @@ export default function Home() {
                 handleTurnMotorsOff();
               }}
             >
-              <p className="text-md">TURN MOTORS OFF</p>
+              <p className="text-md">ENABLE DRAG</p>
+              <p className="text-xs">AND TEACH MODE</p>
             </button>
 
             <button
@@ -382,6 +385,7 @@ export default function Home() {
           {joints.map((positionList, index) => (
             <JointSlider
               key={index}
+              jointName={jointNames[index]}
               jointNumber={joints.length - 1 - index}
               currentFrame={currentFrame}
               getJoint={getJoint}

@@ -120,6 +120,7 @@ def send_angles_sequence():
         
         print(angles_sequence)
         sequence_json = json.loads(angles_sequence)
+
         angles_1 = sequence_json["commandsArm1"]
         angles_2 = sequence_json["commandsArm2"]
         angles_3 = sequence_json["commandsArm3"]
