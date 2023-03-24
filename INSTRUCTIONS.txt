@@ -53,7 +53,7 @@ https://www.raspberrypi.com/software/
 0. cd Desktop
 1. git clone "https://github.com/johnchoi313/react-to-flask-test"
 2. cd "react-to-flask-test"
-3. git switch "3-24-2023-Blitz"
+3. git checkout "3-24-2023-Blitz"
 4. git pull 
 
 ---INSTALLING CORRECT PYTHON---
@@ -83,6 +83,8 @@ https://www.raspberrypi.com/software/
   14. npm install
   15. npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
   16. sudo npm install text-encoding
+
+---(TROUBLESHOOT OPTIONAL) IF NPM RUN DEV FAILS DUE TO TEXTENCODER NOT FOUND:---
 
   17. curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
   18. source ~/.bashrc
