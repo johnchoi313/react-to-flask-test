@@ -158,8 +158,14 @@ def send_angles_sequence():
             mc.send_angles(angles_list, sp)
             print(f"Sending angles: {angles_list}")
             
-            newGripperValue = int(translate(angle_gripper, -105, 105, 0, 255))
-            mc.set_gripper_value(newGripperValue, 70)
+            #newGripperValue = int(translate(angle_gripper, -105, 105, 0, 255))
+            #mc.set_gripper_value(newGripperValue, 70)
+            
+            if(angle_gripper >= 0):
+                mc.set_gripper_state(1, 70)
+            else:
+                mc.set_gripper_state(0, 70)
+            
             print(f"Sending gripper value: " + str(newGripperValue) + " from input: " + str(angle_gripper))
             
             time.sleep(1)
