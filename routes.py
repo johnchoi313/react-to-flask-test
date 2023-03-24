@@ -91,6 +91,10 @@ def turn_on_motors():  # NOTE THIS FUNCTION DOES NOT YET WORK
 
 #[DESCRIPTION] This endpoint allows the front end to send a single string of angles also known as a pose. The robot will be given the command to immediately jump to that position.
 #[OUTPUT]      json: A string of the list of angles that the robot moved to.
+
+#DEPRECATED! Now, to send single pose, just send animation with one frame.
+
+'''
 @app.route("/send-pose", methods=["POST"])
 @cross_origin()
 def send_pose():
@@ -110,6 +114,7 @@ def send_pose():
         mc.send_angles(angles_list[1:] , 80)
 
         return jsonify({"response": str(angles)})
+'''
 
 #[DESCRIPTION] Pings the robot to get a list of angles of its current position and sends that data in a response.
 #[OUTPUT] json: A list of the robot's current angles
@@ -153,7 +158,7 @@ def send_angles_sequence():
             mc.send_angles(angles_list, sp)
             print(f"Sending angles: {angles_list}")
             
-            newGripperValue = int(translate(angle_gripper, -105, 105, 0, 256))
+            newGripperValue = int(translate(angle_gripper, -105, 105, 0, 255))
             mc.set_gripper_value(newGripperValue, 70)
             print(f"Sending gripper value: " + str(newGripperValue) + " from input: " + str(angle_gripper))
             
