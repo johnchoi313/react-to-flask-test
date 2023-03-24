@@ -343,7 +343,6 @@ export default function Home() {
     setJoints([
       [...jsonData.commandsGripper.slice(0, loadedMaxFrames)],
       [...jsonData.commandsArm1.slice(0, loadedMaxFrames)],
-      [...jsonData.commandsArm1.slice(0, loadedMaxFrames)],
       [...jsonData.commandsArm2.slice(0, loadedMaxFrames)],
       [...jsonData.commandsArm3.slice(0, loadedMaxFrames)],
       [...jsonData.commandsArm4.slice(0, loadedMaxFrames)],
