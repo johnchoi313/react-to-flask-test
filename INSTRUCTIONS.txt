@@ -47,6 +47,15 @@ https://www.raspberrypi.com/software/
     hdmi_drive=2
 	config_hdmi_boost=7
 
+
+---github clone---
+
+0. cd Desktop
+1. git clone "https://github.com/johnchoi313/react-to-flask-test"
+2. cd "react-to-flask-test"
+3. git switch "3-24-2023-Blitz"
+4. git pull 
+
 ---INSTALLING CORRECT PYTHON---
 
   0. sudo apt-get update
@@ -70,8 +79,9 @@ https://www.raspberrypi.com/software/
 ---INSTALLING NODE:---
 
   12. sudo apt install nodejs
-  13. npm install
-  14. npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
+  13. sudo apt install npm
+  14. npm install
+  15. npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
 
 ---EDITING IP ADDRESS:---
 
@@ -84,10 +94,6 @@ https://www.raspberrypi.com/software/
 
   0. virtualenv flask
   1. source flask/bin/activate
-
----INSTALLING ROBOT SERVER AND SIMULATOR:---
-
-https://github.com/johnchoi313/react-to-flask-test
 
 ---RUNNING SERVER(robotand webpage)---
 
