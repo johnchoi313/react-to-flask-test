@@ -89,8 +89,8 @@ https://download-elephantrobotics.oss-cn-shenzhen.aliyuncs.com/Product_software/
   15. sudo npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
   16. sudo npm install text-encoding
 
-  17. sudo npm i -g npx
-  18. npx browserslist@latest --update-db
+  16. sudo npm --depth 20 update --save caniuse-lite browserslist 
+  17. sudo npm audit fix
 
 ---(TROUBLESHOOT OPTIONAL) IF NPM RUN DEV FAILS DUE TO TEXTENCODER NOT FOUND:---
 
@@ -98,7 +98,7 @@ https://download-elephantrobotics.oss-cn-shenzhen.aliyuncs.com/Product_software/
   18. source ~/.bashrc
   19. nvm install 12.0.0
 
-  20. sudo npm i -g npx
+  20. sudo npm i -g npx --force
   21. sudo npx browserslist@latest --update-db
 
 ---EDITING IP ADDRESS:---
