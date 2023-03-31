@@ -85,8 +85,8 @@ https://download-elephantrobotics.oss-cn-shenzhen.aliyuncs.com/Product_software/
 
   12. sudo apt install nodejs
   13. sudo apt install npm
-  14. npm install
-  15. npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
+  14. sudo npm install
+  15. sudo npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
   16. sudo npm install text-encoding
 
 ---(TROUBLESHOOT OPTIONAL) IF NPM RUN DEV FAILS DUE TO TEXTENCODER NOT FOUND:---
@@ -126,6 +126,10 @@ https://download-elephantrobotics.oss-cn-shenzhen.aliyuncs.com/Product_software/
   sudo chmod +x autostart_all.sh
   sudo chmod +x autostart_npm.sh
   sudo chmod +x autostart_python.sh
+
+  (if "Bash script – "/bin/bash^M: bad interpreter: No such file or directory" [duplicate]")
+  sed -i -e 's/\r$//' autostart_all.sh
+  ./autotart_all.sh
 
   (JUST USE THE STARTUP APPLICATIONS PLZ)
 
