@@ -89,6 +89,9 @@ https://download-elephantrobotics.oss-cn-shenzhen.aliyuncs.com/Product_software/
   15. sudo npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
   16. sudo npm install text-encoding
 
+  17. sudo npm i -g npx
+  18. npx browserslist@latest --update-db
+
 ---(TROUBLESHOOT OPTIONAL) IF NPM RUN DEV FAILS DUE TO TEXTENCODER NOT FOUND:---
 
   17. curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
