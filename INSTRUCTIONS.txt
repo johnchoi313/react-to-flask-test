@@ -99,7 +99,7 @@ git config --system --unset https.proxy
   15. sudo npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
   16. sudo npm install text-encoding
 
-  16. sudo npm --depth 20 update --save caniuse-lite browserslist 
+  16. sudo npm --depth 2 update --save caniuse-lite browserslist
   17. sudo npm audit fix
 
 ---(TROUBLESHOOT OPTIONAL) IF NPM RUN DEV FAILS DUE TO TEXTENCODER NOT FOUND:---
