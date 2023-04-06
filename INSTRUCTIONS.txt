@@ -98,6 +98,7 @@ git config --system --unset https.proxy
   14. sudo npm install
   15. sudo npm install -D tailwindcss@latest postcss@latest autoprefixer@latest
   16. sudo npm install text-encoding
+  17. sudo npm install reactjs-popup --save
 
   16. sudo npm --depth 2 update --save caniuse-lite browserslist
   17. sudo npm audit fix
