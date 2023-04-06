@@ -56,10 +56,20 @@ https://download-elephantrobotics.oss-cn-shenzhen.aliyuncs.com/Product_software/
 ---github clone---
 
 0. cd Desktop
-1. git clone "https://github.com/johnchoi313/react-to-flask-test"
+1. git clone "https://www.github.com/johnchoi313/react-to-flask-test.git"
 2. cd "react-to-flask-test"
 3. git checkout "3-24-2023-Blitz"
 4. git pull 
+
+---if git clone fails because of stupid proxy issue:---
+
+git config --unset http.proxy
+git config --global --unset http.proxy
+git config --system --unset http.proxy
+
+git config --unset https.proxy
+git config --global --unset https.proxy
+git config --system --unset https.proxy
 
 ---INSTALLING CORRECT PYTHON---
 
